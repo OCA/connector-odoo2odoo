@@ -8,10 +8,10 @@ from ..backend import ic_odoo
 _logger = logging.getLogger(__name__)
 
 
-class IntercompanyAdapterGeneric(CRUDAdapter):
+class OdooAdapterGeneric(CRUDAdapter):
 
     def __init__(self, connector_env):
-        super(IntercompanyAdapterGeneric, self).__init__(connector_env)
+        super(OdooAdapterGeneric, self).__init__(connector_env)
         # TODO(MJ): Change log level to debug after load test
         _logger.info('Backend adapter initialised')
 
@@ -35,7 +35,7 @@ class IntercompanyAdapterGeneric(CRUDAdapter):
 
     def _call(self, method, data,
               object_id=None, model_name=None, fields=None, context=None):
-        """ Call a intercompany backend method
+        """ Call a external Odoo method
 
         :param method: name of the method to be called
         :param data: data to be used for the method call
@@ -94,13 +94,13 @@ class IntercompanyAdapterGeneric(CRUDAdapter):
 
 
 @ic_odoo
-class IntercompanyAdapter(IntercompanyAdapterGeneric):
+class OdooAdapter(OdooAdapterGeneric):
 
-    _model_name = ['intercompany.res.partner',
-                   'intercompany.product.product',
-                   'intercompany.product.uom',
-                   'intercompany.product.supplierinfo',
-                   'intercompany.purchase.order',
+    _model_name = ['odooconnector.res.partner',
+                   'odooconnector.product.product',
+                   'odooconnector.product.uom',
+                   'odooconnector.product.supplierinfo',
+                   'odooconnector.purchase.order',
                    'pricelist.partnerinfo',
                    'product.uom'
                    ]
@@ -135,7 +135,7 @@ class IntercompanyAdapter(IntercompanyAdapterGeneric):
         model_name = kwargs.get('model_name', None)
         result = self._call('search', filters, model_name=model_name,
                             context=context)
-        _logger.debug("Intercompany search found this ids: {}".format(result))
+        _logger.debug("External search found this ids: {}".format(result))
 
         return result
 

@@ -5,22 +5,22 @@ import logging
 from openerp import models, fields
 from openerp.addons.connector.unit.mapper import mapping
 from openerp.addons.connector.unit.mapper import ImportMapper, ExportMapper
-from ..unit.import_synchronizer import (IntercompanyImporter,
+from ..unit.import_synchronizer import (OdooImporter,
                                         DirectBatchImporter)
-from ..unit.mapper import (IntercompanyImportMapChild,
-                           IntercompanyExportMapChild)
-from ..unit.backend_adapter import IntercompanyAdapter
-from ..backend import ic_odoo
+from ..unit.mapper import (OdooImportMapChild,
+                           OdooExportMapChild)
+from ..unit.backend_adapter import OdooAdapter
+from ..backend import oc_odoo
 
 
 _logger = logging.getLogger(__name__)
 
 
-class IntercompanyProductSupplierInfo(models.Model):
-    _name = 'intercompany.product.supplierinfo'
-    _inherit = 'intercompany.binding'
+class OdooConnectorProductSupplierInfo(models.Model):
+    _name = 'odooconnector.product.supplierinfo'
+    _inherit = 'odooconnector.binding'
     _inherits = {'product.supplierinfo': 'openerp_id'}
-    _description = 'Intercompany Product Supplierinfo'
+    _description = 'Odoo Connector Product Supplierinfo'
 
     openerp_id = fields.Many2one(
         comodel_name='product.supplierinfo',
@@ -33,10 +33,10 @@ class IntercompanyProductSupplierInfo(models.Model):
 class ProductSupplierInfo(models.Model):
     _inherit = 'product.supplierinfo'
 
-    ic_bind_ids = fields.One2many(
-        comodel_name='intercompany.product.supplierinfo',
+    oc_bind_ids = fields.One2many(
+        comodel_name='odooconnector.product.supplierinfo',
         inverse_name='openerp_id',
-        string='Intercompany Binding'
+        string='Odoo Binding'
     )
 
 
@@ -45,21 +45,21 @@ I M P O R T
 """
 
 
-@ic_odoo
+@oc_odoo
 class ProductSupplierInfoBatchImporter(DirectBatchImporter):
-    _model_name = ['intercompany.product.supplierinfo']
+    _model_name = ['odooconnector.product.supplierinfo']
 
 
-@ic_odoo
-class ProductSupplierInfoImporter(IntercompanyImporter):
-    _model_name = ['intercompany.product.supplierinfo']
+@oc_odoo
+class ProductSupplierInfoImporter(OdooImporter):
+    _model_name = ['odooconnector.product.supplierinfo']
 
 
-@ic_odoo
+@oc_odoo
 class ProductSupplierInfoImportMapper(ImportMapper):
-    _model_name = ['intercompany.product.supplierinfo']
+    _model_name = ['odooconnector.product.supplierinfo']
 
-    _map_child_class = IntercompanyImportMapChild
+    _map_child_class = OdooImportMapChild
 
     direct = [('sequence', 'sequence'), ('product_name', 'product_name'),
               ('product_code', 'product_code'), ('min_qty', 'min_qty'),
@@ -76,7 +76,7 @@ class ProductSupplierInfoImportMapper(ImportMapper):
         detail_records = []
         _logger.debug('Loop over supplierinfo children ...')
 
-        adapter = self.unit_for(IntercompanyAdapter, model_name)
+        adapter = self.unit_for(OdooAdapter, model_name)
 
         detail_records = adapter.read(child_records,
                                       model_name='pricelist.partnerinfo')
@@ -93,7 +93,7 @@ class ProductSupplierInfoImportMapper(ImportMapper):
 
     @mapping
     def name(self, record):
-        binder = self.binder_for('intercompany.res.partner')
+        binder = self.binder_for('odooconnector.res.partner')
         partner_id = binder.to_openerp(record['name'][0], unwrap=True)
         assert partner_id is not None, (
             "PartnerID should have been imported!"
@@ -105,11 +105,11 @@ class ProductSupplierInfoImportMapper(ImportMapper):
         return {'backend_id': self.backend_record.id}
 
     @mapping
-    def intercompany_id(self, record):
-        return {'intercompany_id': record['id']}
+    def external_id(self, record):
+        return {'external_id': record['id']}
 
 
-@ic_odoo
+@oc_odoo
 class PricelistPartnerInfoImportMapper(ImportMapper):
     _model_name = ['pricelist.partnerinfo']
 
@@ -121,10 +121,10 @@ E X P O R T
 """
 
 
-@ic_odoo
+@oc_odoo
 class ProductSupplierinfoExportMapper(ExportMapper):
-    _model_name = ['intercompany.product.supplierinfo']
-    _map_child_class = IntercompanyExportMapChild
+    _model_name = ['odooconnector.product.supplierinfo']
+    _map_child_class = OdooExportMapChild
 
     direct = [('sequence', 'sequence'), ('product_name', 'product_name'),
               ('product_code', 'product_code'), ('min_qty', 'min_qty'),
@@ -136,12 +136,12 @@ class ProductSupplierinfoExportMapper(ExportMapper):
 
     @mapping
     def name(self, record):
-        binder = self.binder_for('intercompany.res.partner')
+        binder = self.binder_for('odooconnector.res.partner')
         partner_id = binder.to_backend(record.name.id, wrap=True)
         return {'name': partner_id}
 
 
-@ic_odoo
+@oc_odoo
 class PricelistPartnerinfoExportMapper(ExportMapper):
     _model_name = ['pricelist.partnerinfo']
 

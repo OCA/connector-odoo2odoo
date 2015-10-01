@@ -4,20 +4,20 @@
 import logging
 from openerp import models, fields
 from openerp.addons.connector.unit.mapper import (mapping, ImportMapper)
-from ..unit.import_synchronizer import (IntercompanyImporter,
+from ..unit.import_synchronizer import (OdooImporter,
                                         DirectBatchImporter,
                                         TranslationImporter)
-from ..backend import ic_odoo
+from ..backend import oc_odoo
 
 
 _logger = logging.getLogger(__name__)
 
 
-class IntercompanyProductUom(models.Model):
-    _name = 'intercompany.product.uom'
-    _inherit = 'intercompany.binding'
+class OdooConnectorProductUom(models.Model):
+    _name = 'odooconnector.product.uom'
+    _inherit = 'odooconnector.binding'
     _inherits = {'product.uom': 'openerp_id'}
-    _description = 'Intercompany Product UoM'
+    _description = 'Odoo Connector Product UoM'
 
     openerp_id = fields.Many2one(
         comodel_name='product.uom',
@@ -30,28 +30,28 @@ class IntercompanyProductUom(models.Model):
 class ProductUom(models.Model):
     _inherit = 'product.uom'
 
-    ic_bind_ids = fields.One2many(
-        comodel_name='intercompany.product.uom',
+    oc_bind_ids = fields.One2many(
+        comodel_name='odooconnector.product.uom',
         inverse_name='openerp_id',
-        string='Intercompany Bindings'
+        string='Odoo Bindings'
     )
 
 
-@ic_odoo
+@oc_odoo
 class ProductUomBatchImporter(DirectBatchImporter):
-    _model_name = ['intercompany.product.uom']
+    _model_name = ['odooconnector.product.uom']
     _ic_model_name = 'product.uom'
 
 
-@ic_odoo
+@oc_odoo
 class ProductUomTranslationImporter(TranslationImporter):
-    _model_name = ['intercompany.product.uom']
+    _model_name = ['odooconnector.product.uom']
     _ic_model_name = 'product.uom'
 
 
-@ic_odoo
+@oc_odoo
 class ProductUomImportMapper(ImportMapper):
-    _model_name = ['intercompany.product.uom']
+    _model_name = ['odooconnector.product.uom']
 
     direct = [('name', 'name'), ('active', 'active'),
               ('uom_type', 'uom_type'), ('factor', 'factor'),
@@ -62,7 +62,6 @@ class ProductUomImportMapper(ImportMapper):
         if not record.get('category_id'):
             return
 
-        print record.get('category_id')
         uom_categ = self.env['product.uom.categ']
         search = [('name', '=', record['category_id'][1])]
         for l in ['de_DE', 'en_US']:  # TODO: Better fix that!
@@ -75,9 +74,9 @@ class ProductUomImportMapper(ImportMapper):
         return {'backend_id': self.backend_record.id}
 
 
-@ic_odoo
+@oc_odoo
 class ProductUomSimpleImportMapper(ImportMapper):
-    _model_name = ['intercompany.product.uom']
+    _model_name = ['odooconnector.product.uom']
 
     direct = [('name', 'name')]
 
@@ -86,9 +85,9 @@ class ProductUomSimpleImportMapper(ImportMapper):
         return {'backend_id': self.backend_record.id}
 
 
-@ic_odoo
-class ProductUomImporter(IntercompanyImporter):
-    _model_name = ['intercompany.product.uom']
+@oc_odoo
+class ProductUomImporter(OdooImporter):
+    _model_name = ['odooconnector.product.uom']
     _ic_model_name = 'product.uom'
     _base_mapper = ProductUomImportMapper
 
@@ -108,7 +107,7 @@ class ProductUomImporter(IntercompanyImporter):
         _logger.debug('Product UoM Importer: _after_import called')
         translation_importer = self.unit_for(TranslationImporter)
         translation_importer.run(
-            self.intercompany_id,
+            self.external_id,
             binding.id,
             mapper_class=ProductUomSimpleImportMapper
         )

@@ -6,24 +6,24 @@ from openerp.addons.connector.session import ConnectorSession
 from ..unit.import_synchronizer import import_batch
 
 
-class IntercompanyBinding(models.AbstractModel):
+class OdooBinding(models.AbstractModel):
     """ Abstract Model for the Bindings.
 
     All the models used as bindings between Odoo and OdooIC should inherit it.
     """
-    _name = 'intercompany.binding'
+    _name = 'odooconnector.binding'
     _inherit = 'external.binding'
-    _description = 'Intercompany Binding (abstract)'
+    _description = 'Odoo Binding (abstract)'
 
     backend_id = fields.Many2one(
-        comodel_name='intercompany.backend',
-        string='Intercompany Backend',
+        comodel_name='odooconnector.backend',
+        string='Odoo Backend',
         required=False,
         ondelete='restrict',
     )
 
-    intercompany_id = fields.Integer(
-        string='ID in OdooIC System'
+    external_id = fields.Integer(
+        string='ID in external Odoo system'
     )
 
     exported_record = fields.Boolean(
@@ -33,15 +33,15 @@ class IntercompanyBinding(models.AbstractModel):
     )
 
     _sql_constraints = [
-        ('odooic_uniq', 'unique(backend_id, intercompany_id)',
-         'A binding already exists with the same IC ID.'),
+        ('external_uniq', 'unique(backend_id, external_id)',
+         'A binding already exists with the same external ID.'),
     ]
 
 
-class IntercompanyBackend(models.Model):
+class OdooBackend(models.Model):
     """ Model for Odoo Intercompany Backends """
-    _name = 'intercompany.backend'
-    _description = 'Intercompany Backend'
+    _name = 'odooconnector.backend'
+    _description = 'Odoo Backend'
     _inherit = 'connector.backend'
 
     _backend_type = 'odoo'
@@ -62,7 +62,7 @@ class IntercompanyBackend(models.Model):
     username = fields.Char(
         string='Username',
         required=True,
-        help='Username in the Odoo Intercompany Backend'
+        help='Username in the external Odoo Backend'
     )
     password = fields.Char(
         string='Password',
@@ -88,14 +88,14 @@ class IntercompanyBackend(models.Model):
 
     export_backend_id = fields.Integer(
         string='Export: Id of the backend in the IC system',
-        help="""The backend id that represents this system in the intercompany
+        help="""The backend id that represents this system in the external
                 system """
     )
 
     export_partner_id = fields.Integer(
         string='Export: Our Partner ID in the Intercompany System',
         help="""The partner id that represents this company in the
-                intercompany system"""
+                external system"""
     )
 
     export_purchase_order_default_location_id = fields.Integer(
@@ -106,26 +106,13 @@ class IntercompanyBackend(models.Model):
         string='Export: Default pricelist ID for POs'
     )
 
-    po2so_intercompany_partner = fields.Many2one(
-        comodel_name='res.partner',
-        string='PO2SO: Intercompany Partner',
-        help='If set, the partner in the purchase order will be replaced\
-              with this partner.',
-        domain=[('supplier', '=', 'True')]
-    )
-
     default_lang_id = fields.Many2one(
         comodel_name='res.lang',
         string='Default Language'
     )
 
-    default_po2so_backend = fields.Boolean(
-        string='Default PO2SO export backend',
-        help='Use this backend as default for the PO2SO process.'
-    )
-
     default_export_backend = fields.Boolean(
-        string='Default Export Intercompany Backend',
+        string='Default Export Backend',
         help='Use this backend as an automatic export targed'
     )
 
@@ -149,21 +136,21 @@ class IntercompanyBackend(models.Model):
 
     @api.multi
     def import_partners(self):
-        """ Import partners from Intercompany System """
+        """ Import partners from external system """
         session = ConnectorSession(self.env.cr, self.env.uid,
                                    context=self.env.context)
         for backend in self:
             filters = {
                 'domain': self.import_partner_domain_filter,
             }
-            import_batch(session, 'intercompany.res.partner', backend.id,
+            import_batch(session, 'odooconnector.res.partner', backend.id,
                          filters)
 
         return True
 
     @api.multi
     def import_products(self):
-        """ Import products from Intercompany System """
+        """ Import products from external system """
         session = ConnectorSession(self.env.cr, self.env.uid,
                                    context=self.env.context)
 
@@ -171,17 +158,17 @@ class IntercompanyBackend(models.Model):
             filters = {
                 'domain': self.import_product_domain_filter,
             }
-            import_batch(session, 'intercompany.product.product',
+            import_batch(session, 'odooconnector.product.product',
                          backend.id, filters)
 
         return True
 
     @api.multi
     def import_product_uom(self):
-        """Import Product UoM from Intercompany System"""
+        """Import Product UoM from external System"""
         session = ConnectorSession(self.env.cr, self.env.uid,
                                    context=self.env.context)
 
         for backend in self:
-            import_batch(session, 'intercompany.product.uom', backend.id)
+            import_batch(session, 'odooconnector.product.uom', backend.id)
         return True

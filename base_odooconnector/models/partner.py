@@ -5,17 +5,17 @@ from openerp import models, fields
 from openerp.addons.connector.unit.mapper import (mapping,
                                                   ImportMapper,
                                                   ExportMapper)
-from ..unit.import_synchronizer import (IntercompanyImporter,
+from ..unit.import_synchronizer import (OdooImporter,
                                         DirectBatchImporter)
-from ..unit.export_synchronizer import (IntercompanyExporter)
-from ..backend import ic_odoo
+from ..unit.export_synchronizer import (OdooExporter)
+from ..backend import oc_odoo
 
 
-class IntercompanyPartner(models.Model):
-    _name = 'intercompany.res.partner'
-    _inherit = 'intercompany.binding'
+class OdooConnectorPartner(models.Model):
+    _name = 'odooconnector.res.partner'
+    _inherit = 'odooconnector.binding'
     _inherits = {'res.partner': 'openerp_id'}
-    _description = 'Intercompany Partner'
+    _description = 'Odoo Connector Partner'
 
     openerp_id = fields.Many2one(
         comodel_name='res.partner',
@@ -28,26 +28,26 @@ class IntercompanyPartner(models.Model):
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    ic_bind_ids = fields.One2many(
-        comodel_name='intercompany.res.partner',
+    oc_bind_ids = fields.One2many(
+        comodel_name='odooconnector.res.partner',
         inverse_name='openerp_id',
-        string='Intercompany Binding'
+        string='Odoo Connector Binding'
     )
 
 
-@ic_odoo
+@oc_odoo
 class PartnerBatchImporter(DirectBatchImporter):
-    _model_name = ['intercompany.res.partner']
+    _model_name = ['odooconnector.res.partner']
 
 
-@ic_odoo
-class PartnerImporter(IntercompanyImporter):
-    _model_name = ['intercompany.res.partner']
+@oc_odoo
+class PartnerImporter(OdooImporter):
+    _model_name = ['odooconnector.res.partner']
 
 
-@ic_odoo
+@oc_odoo
 class PartnerImportMapper(ImportMapper):
-    _model_name = 'intercompany.res.partner'
+    _model_name = 'odooconnector.res.partner'
 
     direct = [('name', 'name'), ('is_company', 'is_company'),
               ('street', 'street'), ('street2', 'street2'), ('city', 'city'),
@@ -78,9 +78,9 @@ E X P O R T
 """
 
 
-@ic_odoo
-class PartnerExporter(IntercompanyExporter):
-    _model_name = ['intercompany.res.partner']
+@oc_odoo
+class PartnerExporter(OdooExporter):
+    _model_name = ['odooconnector.res.partner']
 
     def _get_remote_model(self):
         return 'res.partner'
@@ -98,20 +98,20 @@ class PartnerExporter(IntercompanyExporter):
             record_id = self.binder.unwrap_binding(self.binding_id)
             data = {
                 'backend_id': self.backend_record.export_backend_id,
-                'openerp_id': self.intercompany_id,
-                'intercompany_id': record_id,
+                'openerp_id': self.external_id,
+                'external_id': record_id,
                 'exported_record': False
             }
             self.backend_adapter.create(
                 data,
-                model_name='intercompany.res.partner',
+                model_name='odooconnector.res.partner',
                 context={'connector_no_export': True}
             )
 
 
-@ic_odoo
+@oc_odoo
 class PartnerExportMapper(ExportMapper):
-    _model_name = 'intercompany.res.partner'
+    _model_name = 'odooconnector.res.partner'
 
     direct = [('name', 'name'), ('is_company', 'is_company'),
               ('street', 'street'), ('street2', 'street2'), ('city', 'city'),

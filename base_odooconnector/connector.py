@@ -39,7 +39,7 @@ def get_odoo_api(hostname, port, database, protocol, username, password):
 
 def get_environment(session, model_name, backend_id, api=None):
     """ Create a custom environment to work with """
-    backend_record = session.env['intercompany.backend'].browse(backend_id)
+    backend_record = session.env['odooconnector.backend'].browse(backend_id)
 
     if not api:
         api = get_odoo_api(backend_record.hostname, backend_record.port,

@@ -8,10 +8,10 @@ from openerp.addons.connector.unit.mapper import (ExportMapChild,
 _logger = logging.getLogger(__name__)
 
 
-class IntercompanyExportMapChild(ExportMapChild):
+class OdooExportMapChild(ExportMapChild):
 
     def format_items(self, item_values):
-        items = super(IntercompanyExportMapChild, self).format_items(
+        items = super(OdooExportMapChild, self).format_items(
             item_values
         )
         # The (0, 0, data) creates a new line, linked to the parent order
@@ -21,10 +21,10 @@ class IntercompanyExportMapChild(ExportMapChild):
         return [(5, 0)] + [(0, 0, data) for data in items]
 
 
-class IntercompanyImportMapChild(ImportMapChild):
+class OdooImportMapChild(ImportMapChild):
 
     def format_items(self, item_values):
-        items = super(IntercompanyImportMapChild, self).format_items(
+        items = super(OdooImportMapChild, self).format_items(
             item_values
         )
         return [(5, 0)] + items

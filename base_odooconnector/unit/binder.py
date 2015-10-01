@@ -10,13 +10,13 @@ _logger = logging.getLogger(__name__)
 
 
 @ic_odoo
-class IntercompanyModelBinder(Binder):
+class OdooModelBinder(Binder):
     _model_name = [
-        'intercompany.res.partner',
-        'intercompany.product.product',
-        'intercompany.product.supplierinfo',
-        'intercompany.product.uom',
-        'intercompany.purchase.order',
+        'odooconnector.res.partner',
+        'odooconnector.product.product',
+        'odooconnector.product.supplierinfo',
+        'odooconnector.product.uom',
+        'odooconnector.purchase.order',
     ]
 
     def to_openerp(self, external_id, unwrap=False, browse=False):
@@ -30,7 +30,7 @@ class IntercompanyModelBinder(Binder):
         """
         _logger.debug('Binder: to_openerp')
         bindings = self.model.with_context(active_test=False).search(
-            [('intercompany_id', '=', external_id),
+            [('external_id', '=', external_id),
              ('backend_id', '=', self.backend_record.id)]
         )
 
@@ -62,13 +62,13 @@ class IntercompanyModelBinder(Binder):
             )
             if binding:
                 binding.ensure_one()
-                return binding.intercompany_id
+                return binding.external_id
             else:
                 return None
 
         record = self.model.browse(binding_id)
         assert record
-        return record.intercompany_id
+        return record.external_id
 
     def bind(self, external_id, binding_id, exported=False):
         """ Create the link between an external ID and an OpenERP ID
@@ -81,7 +81,7 @@ class IntercompanyModelBinder(Binder):
         if not isinstance(binding_id, models.BaseModel):
             binding_id = self.model.browse(binding_id)
 
-        data = {'intercompany_id': external_id,
+        data = {'external_id': external_id,
                 'sync_date': now_fmt}
 
         if exported:

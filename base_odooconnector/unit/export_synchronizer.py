@@ -14,10 +14,10 @@ from ..connector import get_environment
 _logger = logging.getLogger(__name__)
 
 
-class IntercompanyExporter(Exporter):
+class OdooExporter(Exporter):
 
     def __init__(self, connector_env):
-        super(IntercompanyExporter, self).__init__(connector_env)
+        super(OdooExporter, self).__init__(connector_env)
         self.binding_id = None
 
     def _pre_export_check(self, record):
@@ -65,15 +65,15 @@ class IntercompanyExporter(Exporter):
         mapped_record = self.mapper.map_record(record)
 
         remote_model = self._get_remote_model()
-        intercompany_id = self.binder.to_backend(self.binding_id)
+        external_id = self.binder.to_backend(self.binding_id)
         record_created = False
 
         # Create a new record or update the existing record
-        if intercompany_id:
-            _logger.debug('Found binding %s', intercompany_id)
+        if external_id:
+            _logger.debug('Found binding %s', external_id)
             data = mapped_record.values()
             result = self.backend_adapter.write(
-                intercompany_id, data, model_name=remote_model
+                external_id, data, model_name=remote_model
             )
             if not result:
                 # Note: When using @on_record_create / _write events, raising
@@ -86,23 +86,23 @@ class IntercompanyExporter(Exporter):
         else:
             _logger.debug('No binding found, creating a new record')
             data = mapped_record.values(for_create=True)
-            intercompany_id = self.backend_adapter.create(
+            external_id = self.backend_adapter.create(
                 data, model_name=remote_model
             )
 
-            if not intercompany_id:
+            if not external_id:
                 raise InvalidDataError("Something went wrong while creating.")
 
             record_created = True
 
-        self.binder.bind(intercompany_id, self.binding_id, exported=True)
-        self.intercompany_id = intercompany_id
+        self.binder.bind(external_id, self.binding_id, exported=True)
+        self.external_id = external_id
         self.session.commit()
         self._after_export(record_created=record_created)
 
         time_end = time.time()
         _logger.warning("Finished exporting record (%s, %s)[%s]",
-                        binding_id, intercompany_id, time_end - time_start)
+                        binding_id, external_id, time_end - time_start)
 
 
 class TranslationExporter(Exporter):
@@ -124,9 +124,9 @@ class TranslationExporter(Exporter):
         _logger.debug('Translatable fields: %s', trans_fields)
         return trans_fields
 
-    def run(self, intercompany_id, binding_id, mapper_class=None):
+    def run(self, external_id, binding_id, mapper_class=None):
         _logger.debug('Running translation exporter...')
-        self.intercompany_id = intercompany_id
+        self.external_id = external_id
         self.binding_id = binding_id
 
         if mapper_class:
@@ -157,7 +157,7 @@ class TranslationExporter(Exporter):
 
             _logger.debug('Record values: %s', record_values)
             self.backend_adapter.write(
-                intercompany_id, data, context={'lang': language}
+                external_id, data, context={'lang': language}
             )
 
 

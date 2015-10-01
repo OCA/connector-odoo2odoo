@@ -2,7 +2,7 @@
 # © 2015 Malte Jacobi (maljac @ github)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 {
-    'name': 'Connector - Odoo2Odoo',
+    'name': 'Odoo Connector - Base',
     'summary': 'Base connector for Odoo2Odoo scenarios',
     'version': '0.0.1',
     'category': 'Connector',

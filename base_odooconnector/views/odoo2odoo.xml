@@ -2,11 +2,11 @@
 <openerp>
     <data>
 
-        <record id="view_intercompany_backend_form" model="ir.ui.view">
-            <field name="name">intercompany.backend.form</field>
-            <field name="model">intercompany.backend</field>
+        <record id="view_odoo2odoo_backend_form" model="ir.ui.view">
+            <field name="name">odoo2odoo.backend.form</field>
+            <field name="model">odoo2odoo.backend</field>
             <field name="arch" type="xml">
-                <form string="Intercompany Backend">
+                <form string="Odoo Backend">
                     <header>
                         <button name="import_partners"
                                 type="object"
@@ -60,17 +60,17 @@
             </field>
         </record>
 
-        <record id="action_intercompany_backend" model="ir.actions.act_window">
-            <field name="name">Intercompany Backends</field>
-            <field name="res_model">intercompany.backend</field>
+        <record id="action_odoo2odoo_backend" model="ir.actions.act_window">
+            <field name="name">Odoo Backends</field>
+            <field name="res_model">odoo2odoo.backend</field>
             <field name="view_mode">tree,form</field>
         </record>
 
-        <menuitem id="menu_intercompany_root" name="Intercompany"
+        <menuitem id="menu_odoo2odoo_root" name="Odoo"
                   parent="connector.menu_connector_root" sequence="10"/>
 
-        <menuitem id="menu_intercompany_backends" name="Backends"
-                  parent="menu_intercompany_root" action="action_intercompany_backend" />
+        <menuitem id="menu_odoo2odoo_backends" name="Backends"
+                  parent="menu_odoo2odoo_root" action="action_odoo2odoo_backend" />
 
     </data>
 </openerp>

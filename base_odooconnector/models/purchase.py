@@ -5,8 +5,9 @@ import logging
 from openerp import models, fields
 from openerp.addons.connector.unit.mapper import (ExportMapper, mapping)
 from openerp.addons.connector.exception import MappingError
-from ..unit.mapper import IntercompanyExportMapChild
-from ..backend import ic_odoo
+from ..unit.mapper import OdooExportMapChild
+from ..unit.export_synchronizer import OdooExporter
+from ..backend import oc_odoo
 
 _logger = logging.getLogger(__name__)
 
@@ -22,11 +23,11 @@ of purchase order objects.
 """
 
 
-class IntercompanyPurchaseOrder(models.Model):
-    _name = 'intercompany.purchase.order'
-    _inherit = 'intercompany.binding'
+class OdooConnectorPurchaseOrder(models.Model):
+    _name = 'odooconnector.purchase.order'
+    _inherit = 'odooconnector.binding'
     _inherits = {'purchase.order': 'openerp_id'}
-    _description = 'Intercompany Purchase Order'
+    _description = 'Odoo Connector Purchase Order'
 
     openerp_id = fields.Many2one(
         comodel_name='purchase.order',
@@ -39,18 +40,18 @@ class IntercompanyPurchaseOrder(models.Model):
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
 
-    ic_bind_ids = fields.One2many(
-        comodel_name='intercompany.purchase.order',
+    oc_bind_ids = fields.One2many(
+        comodel_name='odooconnector.purchase.order',
         inverse_name='openerp_id',
-        string='Intercompany Binding'
+        string='Odoo Binding'
     )
 
 
-class IntercompanyPurchaseOrderLine(models.Model):
-    _name = 'intercompany.purchase.order.line'
-    _inherit = 'intercompany.binding'
+class OdooConnectorPurchaseOrderLine(models.Model):
+    _name = 'odooconnector.purchase.order.line'
+    _inherit = 'odooconnector.binding'
     _inherits = {'purchase.order.line': 'openerp_id'}
-    _description = 'Intercompany Purchase Order Line'
+    _description = 'Odoo Connector Purchase Order Line'
 
     openerp_id = fields.Many2one(
         comodel_name='purchase.order.line',
@@ -63,10 +64,10 @@ class IntercompanyPurchaseOrderLine(models.Model):
 class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
-    ic_bind_ids = fields.One2many(
-        comodel_name='intercompany.purchase.order.line',
+    oc_bind_ids = fields.One2many(
+        comodel_name='odooconnector.purchase.order.line',
         inverse_name='openerp_id',
-        string='Intercompany Binding'
+        string='Odoo Binding'
     )
 
 
@@ -75,9 +76,9 @@ E X P O R T
 """
 
 
-@ic_odoo
-class PurchaseOrder2SaleOrderExporter(IntercompanyExporter):
-    _model_name = ['intercompany.purchase.order']
+@oc_odoo
+class PurchaseOrder2SaleOrderExporter(OdooExporter):
+    _model_name = ['odooconnector.purchase.order']
 
     def _get_remote_model(self):
         return 'sale.order'
@@ -110,16 +111,16 @@ class PurchaseOrder2SaleOrderExporter(IntercompanyExporter):
             purchase_order.write(data)
 
 
-@ic_odoo
+@oc_odoo
 class PurchaseOrder2SaleOrderExportMapper(ExportMapper):
-    _model_name = ['intercompany.purchase.order']
-    _map_child_class = IntercompanyExportMapChild
+    _model_name = ['odooconnector.purchase.order']
+    _map_child_class = OdooExportMapChild
 
     # _direct = ['date_order']
     direct = [('date_order', 'date_order'), ]
 
     children = [
-        ('order_line', 'order_line', 'intercompany.purchase.order.line')
+        ('order_line', 'order_line', 'odooconnector.purchase.order.line')
     ]
 
     @mapping
@@ -142,7 +143,7 @@ class PurchaseOrder2SaleOrderExportMapper(ExportMapper):
 
     @mapping
     def ic_supplier_id(self, record):
-        ic_id = self.binder_for('intercompany.res.partner').to_backend(
+        ic_id = self.binder_for('odooconnector.res.partner').to_backend(
             record.partner_id.id,
             wrap=True
         )
@@ -152,9 +153,9 @@ class PurchaseOrder2SaleOrderExportMapper(ExportMapper):
         return {'ic_supplier_id': ic_id}
 
 
-@ic_odoo
+@oc_odoo
 class PurchaseOrderLine2SaleOrderLineExportMapper(ExportMapper):
-    _model_name = ['intercompany.purchase.order.line']
+    _model_name = ['odooconnector.purchase.order.line']
 
     direct = [
         ('name', 'name'), ('price_unit', 'price_unit'),
@@ -163,7 +164,7 @@ class PurchaseOrderLine2SaleOrderLineExportMapper(ExportMapper):
 
     @mapping
     def product_id(self, record):
-        ic_id = self.binder_for('intercompany.product.product').to_backend(
+        ic_id = self.binder_for('odooconnector.product.product').to_backend(
             record.product_id.id,
             wrap=True
         )
@@ -172,7 +173,7 @@ class PurchaseOrderLine2SaleOrderLineExportMapper(ExportMapper):
 
     @mapping
     def product_uom(self, record):
-        ic_id = self.binder_for('intercompany.product.uom').to_backend(
+        ic_id = self.binder_for('odooconnector.product.uom').to_backend(
             record.product_uom.id,
             wrap=True
         )
