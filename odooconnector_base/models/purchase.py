@@ -101,7 +101,7 @@ class PurchaseOrder2SaleOrderExporter(OdooExporter):
             }
 
         # try get the name of the create sales order in the IC system
-        ic_so = self.backend_adapter.read(self.intercompany_id,
+        ic_so = self.backend_adapter.read(self.external_id,
                                           fields=['name'],
                                           model_name='sale.order')
         if ic_so:

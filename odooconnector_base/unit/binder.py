@@ -4,12 +4,12 @@
 import logging
 from openerp import fields, models
 from openerp.addons.connector.connector import Binder
-from ..backend import ic_odoo
+from ..backend import oc_odoo
 
 _logger = logging.getLogger(__name__)
 
 
-@ic_odoo
+@oc_odoo
 class OdooModelBinder(Binder):
     _model_name = [
         'odooconnector.res.partner',

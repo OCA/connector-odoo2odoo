@@ -3,7 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 import logging
 from openerp.addons.connector.unit.backend_adapter import CRUDAdapter
-from ..backend import ic_odoo
+from ..backend import oc_odoo
 
 _logger = logging.getLogger(__name__)
 
@@ -93,7 +93,7 @@ class OdooAdapterGeneric(CRUDAdapter):
             _logger.exception(e)
 
 
-@ic_odoo
+@oc_odoo
 class OdooAdapter(OdooAdapterGeneric):
 
     _model_name = ['odooconnector.res.partner',

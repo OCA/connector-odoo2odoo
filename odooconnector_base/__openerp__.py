@@ -14,10 +14,19 @@
     'external_dependencies': {
         'python': ['oerplib'],
     },
-    'depends': ['base',
-                'connector',
-                ],
+    'depends': [
+        'base',
+        'product',
+        'purchase',
+        'connector',
+    ],
     'data': [
+        'data/odooconnector_base.xml',
+        'views/odooconnector_base.xml',
+        'views/partner.xml',
+        'views/product.xml',
+        'views/product_uom.xml',
+        'views/purchase.xml',
     ],
     'demo': [
     ],

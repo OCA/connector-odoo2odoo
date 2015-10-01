@@ -39,7 +39,7 @@ class OdooBinding(models.AbstractModel):
 
 
 class OdooBackend(models.Model):
-    """ Model for Odoo Intercompany Backends """
+    """ Model for Odoo Backends """
     _name = 'odooconnector.backend'
     _description = 'Odoo Backend'
     _inherit = 'connector.backend'
@@ -87,13 +87,13 @@ class OdooBackend(models.Model):
     )
 
     export_backend_id = fields.Integer(
-        string='Export: Id of the backend in the IC system',
+        string='Export: Id of the backend in the external system',
         help="""The backend id that represents this system in the external
                 system """
     )
 
     export_partner_id = fields.Integer(
-        string='Export: Our Partner ID in the Intercompany System',
+        string='Export: Our Partner ID in the external System',
         help="""The partner id that represents this company in the
                 external system"""
     )

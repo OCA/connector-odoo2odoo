@@ -161,14 +161,14 @@ class TranslationExporter(Exporter):
             )
 
 
-@job(default_channel='root.intercompany')
+@job(default_channel='root.odooconnector')
 def export_record(session, model_name, backend_id, binding_id,
                   fields=None, api=None):
     _logger.debug('Export record for "%s"', model_name)
     env = get_environment(session, model_name, backend_id, api=api)
 
     # TODO: LANGUAGE STUFF
-    exporter = env.get_connector_unit(IntercompanyExporter)
+    exporter = env.get_connector_unit(OdooExporter)
     exporter.run(binding_id)
 
 
@@ -179,7 +179,7 @@ def delay_export_all_bindings(session, model_name, record_id, fields=None):
     _logger.debug('delay export with a model')
     record = session.env[model_name].browse(record_id)
     if record.state == 'draft':
-        for binding in record.ic_bind_ids:
+        for binding in record.oc_bind_ids:
             export_record(
                 session, binding._model._name, binding.backend_id.id,
                 binding.id, fields=fields
