@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="view_intercompany_backend_form" model="ir.ui.view">
+            <field name="name">intercompany.backend.form</field>
+            <field name="model">intercompany.backend</field>
+            <field name="arch" type="xml">
+                <form string="Intercompany Backend">
+                    <header>
+                        <button name="import_partners"
+                                type="object"
+                                string="Import Partners" />
+
+                        <button name="import_products"
+                                type="object"
+                                string="Import Products" />
+
+                        <button name="import_product_uom"
+                                type="object"
+                                string="Import Product UoMs" />
+                    </header>
+                    <sheet>
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" class="oe_inline"/>
+                        </h1>
+                        <group>
+                            <field name="version" />
+                        </group>
+                        <group>
+                            <field name="hostname" />
+                            <field name="port" />
+                            <field name="database" />
+                            <field name="username"/>
+                            <field name="password" />
+                        </group>
+                        <notebook>
+                            <page string="Default">
+                                <group>
+                                    <field name="import_partner_domain_filter" />
+                                    <field name="import_product_domain_filter" />
+                                    <field name="export_backend_id" />
+                                    <field name="export_partner_id" />
+                                    <field name="export_purchase_order_default_location_id" />
+                                    <field name="export_purchase_order_default_pricelist_id" />
+                                    <field name="default_lang_id"/>
+                                    <field name="default_export_backend"/>
+                                    <field name="default_export_partner"/>
+                                    <field name="default_export_partner_domain"
+                                        attrs="{'invisible': [('default_export_partner', '=', False)]}"/>
+                                    <field name="default_export_product"/>
+                                    <field name="default_export_product_domain"
+                                        attrs="{'invisible': [('default_export_product', '=', False)]}"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_intercompany_backend" model="ir.actions.act_window">
+            <field name="name">Intercompany Backends</field>
+            <field name="res_model">intercompany.backend</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="menu_intercompany_root" name="Intercompany"
+                  parent="connector.menu_connector_root" sequence="10"/>
+
+        <menuitem id="menu_intercompany_backends" name="Backends"
+                  parent="menu_intercompany_root" action="action_intercompany_backend" />
+
+    </data>
+</openerp>
