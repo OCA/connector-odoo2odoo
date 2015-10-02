@@ -39,7 +39,7 @@ def export_odooconnector_object(session, model_name, record_id, fields=None):
     if session.context.get('connector_no_export'):
         return
 
-    _logger.debug('Record create triggered for "%s(%s)"',
+    _logger.debug('Record creation triggered for "%s(%s)"',
                   model_name, record_id)
     sync_object(session, model_name, record_id, fields)
 
@@ -49,7 +49,7 @@ def export_odooconnector_object(session, model_name, record_id, fields=None):
 def create_default_binding(session, model_name, record_id, fields=None):
     if session.context.get('connector_no_export'):
         return
-    _logger.debug('Record create triggered for "%s(%s)"',
+    _logger.debug('Record creation triggered for "%s(%s)"',
                   model_name, record_id)
 
     obj = session.env[model_name].browse(record_id)

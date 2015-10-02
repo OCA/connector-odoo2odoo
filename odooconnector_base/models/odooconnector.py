@@ -28,7 +28,7 @@ class OdooBinding(models.AbstractModel):
 
     exported_record = fields.Boolean(
         string='Exported',
-        help='Indicator if the record is exported by this system or not.',
+        help='Indicator whether the record is exported by this system or not.',
         default=False,
     )
 
@@ -96,14 +96,6 @@ class OdooBackend(models.Model):
         string='Export: Our Partner ID in the external System',
         help="""The partner id that represents this company in the
                 external system"""
-    )
-
-    export_purchase_order_default_location_id = fields.Integer(
-        string='Export: Default location ID for POs'
-    )
-
-    export_purchase_order_default_pricelist_id = fields.Integer(
-        string='Export: Default pricelist ID for POs'
     )
 
     default_lang_id = fields.Many2one(

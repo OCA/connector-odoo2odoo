@@ -2,74 +2,14 @@
 # © 2015 Malte Jacobi (maljac @ github)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 import logging
-from openerp import models, fields
 from openerp.addons.connector.unit.mapper import (ExportMapper, mapping)
 from openerp.addons.connector.exception import MappingError
-from ..unit.mapper import OdooExportMapChild
-from ..unit.export_synchronizer import OdooExporter
-from ..backend import oc_odoo
+from openerp.addons.odooconnector_base.unit.mapper import OdooExportMapChild
+from openerp.addons.odooconnector_base.unit.export_synchronizer import (
+    OdooExporter)
+from openerp.addons.odooconnector_base.backend import oc_odoo
 
 _logger = logging.getLogger(__name__)
-
-
-"""
-
-Purchase
-========
-
-All implementations specific related to the export / import / mapping etc.
-of purchase order objects.
-
-"""
-
-
-class OdooConnectorPurchaseOrder(models.Model):
-    _name = 'odooconnector.purchase.order'
-    _inherit = 'odooconnector.binding'
-    _inherits = {'purchase.order': 'openerp_id'}
-    _description = 'Odoo Connector Purchase Order'
-
-    openerp_id = fields.Many2one(
-        comodel_name='purchase.order',
-        string='Purchase Order',
-        required=True,
-        ondelete='restrict'
-    )
-
-
-class PurchaseOrder(models.Model):
-    _inherit = 'purchase.order'
-
-    oc_bind_ids = fields.One2many(
-        comodel_name='odooconnector.purchase.order',
-        inverse_name='openerp_id',
-        string='Odoo Binding'
-    )
-
-
-class OdooConnectorPurchaseOrderLine(models.Model):
-    _name = 'odooconnector.purchase.order.line'
-    _inherit = 'odooconnector.binding'
-    _inherits = {'purchase.order.line': 'openerp_id'}
-    _description = 'Odoo Connector Purchase Order Line'
-
-    openerp_id = fields.Many2one(
-        comodel_name='purchase.order.line',
-        string='Purchase Order Line',
-        required=True,
-        ondelete='restrict'
-    )
-
-
-class PurchaseOrderLine(models.Model):
-    _inherit = 'purchase.order.line'
-
-    oc_bind_ids = fields.One2many(
-        comodel_name='odooconnector.purchase.order.line',
-        inverse_name='openerp_id',
-        string='Odoo Binding'
-    )
-
 
 """
 E X P O R T

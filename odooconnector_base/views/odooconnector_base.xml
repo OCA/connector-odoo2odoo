@@ -42,8 +42,6 @@
                                     <field name="import_product_domain_filter" />
                                     <field name="export_backend_id" />
                                     <field name="export_partner_id" />
-                                    <field name="export_purchase_order_default_location_id" />
-                                    <field name="export_purchase_order_default_pricelist_id" />
                                     <field name="default_lang_id"/>
                                     <field name="default_export_backend"/>
                                     <field name="default_export_partner"/>
