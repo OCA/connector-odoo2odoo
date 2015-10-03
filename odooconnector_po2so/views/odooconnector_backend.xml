@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="view_odooconnector_po2so_backend_form" model="ir.ui.view">
+            <field name="name">odooconnector.po2so.backend.form</field>
+            <field name="model">odooconnector.backend</field>
+            <field name="inherit_id" ref="odooconnector_base.view_odooconnector_backend_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//notebook/page[last()]" position="after">
+                    <page string="PO2SO">
+                        <group>
+                            <field name="po2so_external_partner"/>
+                            <field name="po2so_default_backend"/>
+                        </group>
+                    </page>
+                </xpath>
+                
+            </field>
+        </record>
+
+    </data>
+</openerp>

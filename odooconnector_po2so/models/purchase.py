@@ -2,6 +2,7 @@
 # © 2015 Malte Jacobi (maljac @ github)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 import logging
+from openerp import models, fields
 from openerp.addons.connector.unit.mapper import (ExportMapper, mapping)
 from openerp.addons.connector.exception import MappingError
 from openerp.addons.odooconnector_base.unit.mapper import OdooExportMapChild
@@ -10,6 +11,32 @@ from openerp.addons.odooconnector_base.unit.export_synchronizer import (
 from openerp.addons.odooconnector_base.backend import oc_odoo
 
 _logger = logging.getLogger(__name__)
+
+
+class PurchaseOrder(models.Model):
+    _inherit = 'purchase.order'
+
+    ic_enable = fields.Boolean(
+        string='Intercompany',
+        states={'confirmed': [('readonly', True)],
+                'approved': [('readonly', True)],
+                'done': [('readonly', True)]},
+    )
+
+    ic_enforce_supplier = fields.Boolean(
+        string='IC: Enforce Supplier',
+        states={'confirmed': [('readonly', True)],
+                'approved': [('readonly', True)],
+                'done': [('readonly', True)]},
+    )
+
+    ic_original_partner_id = fields.Many2one(
+        comodel_name='res.partner',
+        string='Original Supplier',
+        readonly=True,
+        copy=False
+    )
+
 
 """
 E X P O R T
@@ -33,7 +60,7 @@ class PurchaseOrder2SaleOrderExporter(OdooExporter):
         data = {}
 
         purchase_order = self.model.browse(self.binding_id)
-        po2so_partner = self.backend_record.po2so_intercompany_partner
+        po2so_partner = self.backend_record.po2so_external_partner
         if po2so_partner:
             data = {
                 'partner_id': po2so_partner.id,

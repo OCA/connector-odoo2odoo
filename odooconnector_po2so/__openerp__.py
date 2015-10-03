@@ -20,6 +20,8 @@
         'odooconnector_purchase'
     ],
     'data': [
+        'views/odooconnector_backend.xml',
+        'views/purchase.xml',
     ],
     'demo': [
     ],

@@ -19,6 +19,7 @@
         'odooconnector_base',
     ],
     'data': [
+        'views/purchase.xml',
     ],
     'demo': [
     ],

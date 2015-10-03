@@ -2,7 +2,7 @@
 <openerp>
     <data>
 
-        <record id="view_odoo2odoo_backend_form" model="ir.ui.view">
+        <record id="view_odooconnector_backend_form" model="ir.ui.view">
             <field name="name">odooconnector.backend.form</field>
             <field name="model">odooconnector.backend</field>
             <field name="arch" type="xml">
