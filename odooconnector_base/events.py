@@ -5,7 +5,7 @@ import logging
 
 from openerp.addons.connector.event import on_record_write, on_record_create
 
-from unit.export_synchronizer import export_record
+from .unit.export_synchronizer import export_record
 
 
 _logger = logging.getLogger(__name__)
@@ -94,7 +94,7 @@ def update_product(session, model_name, record_id, fields=None):
             fields = {}  # product.template fields are not compatible with p.p
             obj = session.env['product.template'].browse(record_id)
             for product in obj.product_variant_ids:
-                for binding in ocoduct.ic_bind_ids:
+                for binding in product.ic_bind_ids:
                     bindings.append(binding)
 
         else:

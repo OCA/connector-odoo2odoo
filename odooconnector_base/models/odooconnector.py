@@ -54,6 +54,11 @@ class OdooBackend(models.Model):
                 ('800', 'Version 8.00'),
                 ('900', 'Version 9.00')]
 
+    active = fields.Boolean(
+        string='Active',
+        default=True
+    )
+
     version = fields.Selection(
         selection='_select_versions',
         string='Version',

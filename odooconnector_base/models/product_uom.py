@@ -38,13 +38,6 @@ class ProductUom(models.Model):
     )
 
 
-"""
-C O N N E C T O R   U N I T S
-
--- IMPORT
-"""
-
-
 @oc_odoo
 class ProductUomBatchImporter(DirectBatchImporter):
     _model_name = ['odooconnector.product.uom']

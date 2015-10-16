@@ -42,13 +42,6 @@ class ProductProduct(models.Model):
     )
 
 
-"""
-C O N N E C T O R   U N I T S
-
--- IMPORT
-"""
-
-
 @oc_odoo
 class ProductBatchImporter(DirectBatchImporter):
     _model_name = ['odooconnector.product.product']
@@ -162,8 +155,7 @@ class ProductImporter(OdooImporter):
             if product_tmpl:
                 date_from_string = fields.Datetime.from_string
                 sync_date = date_from_string(binding.sync_date)
-                external_date = date_from_string(product_tmpl[
-                                                     'write_date'])
+                external_date = date_from_string(product_tmpl['write_date'])
 
                 return external_date < sync_date
 
@@ -173,13 +165,6 @@ class ProductImporter(OdooImporter):
 @oc_odoo
 class ProductImportChildMapper(OdooImportMapChild):
     _model_name = ['odooconnector.product.supplierinfo']
-
-
-"""
-C O N N E C T O R   U N I T S
-
--- EXPORT
-"""
 
 
 @oc_odoo

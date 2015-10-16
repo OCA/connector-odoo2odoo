@@ -26,7 +26,7 @@ Usage
 Known issues / Roadmap
 ======================
 
-* .
+.
 
 Bug Tracker
 ===========

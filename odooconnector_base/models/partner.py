@@ -40,13 +40,6 @@ class ResPartner(models.Model):
     )
 
 
-"""
-C O N N E C T O R   U N I T S
-
--- IMPORT
-"""
-
-
 @oc_odoo
 class PartnerBatchImporter(DirectBatchImporter):
     _model_name = ['odooconnector.res.partner']
@@ -80,13 +73,6 @@ class PartnerImportMapper(OdooImportMapper):
         )
         if country:
             return {'country_id': country.id}
-
-
-"""
-C O N N E C T O R   U N I T S
-
--- EXPORT
-"""
 
 
 @oc_odoo

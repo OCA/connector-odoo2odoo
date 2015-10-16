@@ -39,13 +39,6 @@ class ProductSupplierInfo(models.Model):
     )
 
 
-"""
-C O N N E C T O R   U N I T S
-
--- IMPORT
-"""
-
-
 @oc_odoo
 class ProductSupplierInfoBatchImporter(DirectBatchImporter):
     _model_name = ['odooconnector.product.supplierinfo']
@@ -114,12 +107,6 @@ class PricelistPartnerInfoImportMapper(ImportMapper):
 
     direct = [('name', 'name'), ('min_quantity', 'min_quantity'),
               ('price', 'price')]
-
-"""
-C O N N E C T O R   U N I T S
-
--- EXPORT
-"""
 
 
 @oc_odoo
