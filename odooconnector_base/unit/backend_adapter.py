@@ -2,6 +2,9 @@
 # © 2015 Malte Jacobi (maljac @ github)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 import logging
+
+import oerplib.error
+
 from openerp.addons.connector.unit.backend_adapter import CRUDAdapter
 from ..backend import oc_odoo
 
@@ -21,17 +24,29 @@ class OdooAdapterGeneric(CRUDAdapter):
     def delete(self, *args, **kwargs):
         raise NotImplementedError
 
-    def read(self, id):
+    def read(self, id, **kwargs):
         raise NotImplementedError
 
-    def search(self, filters):
-        raise NotImplementedError
-
-    def search_record(self, *args, **kwargs):
+    def search(self, filters, **kwargs):
         raise NotImplementedError
 
     def write(self, id, data, **kwargs):
         raise NotImplementedError
+
+    def _get_api_model(self, model_name=None):
+        """ Get the API model object to work with """
+        if not model_name:
+            model_name = self.model.openerp_id._name
+
+        _logger.debug('Adapter is using model "%s" for call', model_name)
+        return self.api.get(model_name)
+
+    def _api_reset_context(self, old_context, new_context):
+        """ Reset the APIs context to the old_context """
+        for k, v in new_context.iteritems():
+            self.api.context.pop(k)
+        for k, v in old_context.iteritems():
+            self.api.context[k] = v
 
     def _call(self, method, data,
               object_id=None, model_name=None, fields=None, context=None):
@@ -39,6 +54,7 @@ class OdooAdapterGeneric(CRUDAdapter):
 
         :param method: name of the method to be called
         :param data: data to be used for the method call
+        :param object_id: id of the object in the remote system
         :param model_name: define a specific model on which the method should
                            be called.
         :param context: custom context in which the query must be executed.
@@ -53,21 +69,16 @@ class OdooAdapterGeneric(CRUDAdapter):
         _logger.debug('Adapter is using backend_record "%s:%s"',
                       self.backend_record, self.backend_record.name)
         try:
+            self.api = self.connector_env.api
 
-            api = self.connector_env.api
             # if a context is given we update the api context
             # TODO(MJ): Use a contextmanager for context changing!
             if context:
-                context_copy = dict(api.context)
+                org_context = dict(self.api.context)
                 for k, v in context.iteritems():
-                    api.context[k] = v
+                    self.api.context[k] = v
 
-            # Get the model object to work with
-            if not model_name:
-                model_name = self.model.openerp_id._name
-
-            _logger.debug('Adapter is using model "%s" for call', model_name)
-            model_obj = api.get(model_name)
+            model_obj = self._get_api_model(model_name)
 
             if not object_id:
                 result = getattr(model_obj, method)(data)
@@ -80,14 +91,13 @@ class OdooAdapterGeneric(CRUDAdapter):
 
             _logger.debug('Backend call result: {}'.format(result))
 
-            # Reset the context to old values
             if context:
-                for k, v in context_copy.iteritems():
-                    api.context[k] = v
-                for k, v in context.iteritems():
-                    api.context.pop(k)
+                self._api_reset_context(org_context, context)
 
             return result
+
+        except oerplib.error.RPCError as e:
+            _logger.exception(e)
 
         except Exception as e:
             _logger.exception(e)
@@ -105,45 +115,33 @@ class OdooAdapter(OdooAdapterGeneric):
                    ]
 
     def create(self, data, **kwargs):
-        model_name = kwargs.get('model_name', None)
-        context = kwargs.get('context', None)
-        return self._call('create', data,
-                          model_name=model_name, context=context)
+        # model_name = kwargs.get('model_name', None)
+        # context = kwargs.get('context', None)
+        return self._call('create', data, **kwargs)
 
     def delete(self, *args, **kwargs):
         return self._call('delete', 'somearg')
 
     def read(self, id, **kwargs):
-        model_name = kwargs.get('model_name', None)
-        context = kwargs.get('context', None)
-        fields = kwargs.get('fields', None)
-        return self._call('read', id, model_name=model_name,
-                          fields=fields, context=context)
+        # model_name = kwargs.get('model_name', None)
+        # context = kwargs.get('context', None)
+        # fields = kwargs.get('fields', None)
+        return self._call('read', id, **kwargs)
 
     def search(self, filters, **kwargs):
         """ Search according filters and return list of ids """
         if not filters:
             filters = []
-        if 'domain' in filters:
-            if not filters['domain']:
-                filters.pop('domain')
-            else:
-                filters = eval(filters['domain'])
 
-        context = kwargs.get('context', None)
-        model_name = kwargs.get('model_name', None)
-        result = self._call('search', filters, model_name=model_name,
-                            context=context)
+        # context = kwargs.get('context', None)
+        # model_name = kwargs.get('model_name', None)
+        result = self._call('search', filters, **kwargs)
         _logger.debug("External search found this ids: {}".format(result))
 
         return result
 
-    def search_record(self, *args, **kwargs):
-        return self._call('search_record', 'somearg')
-
     def write(self, object_id, data, **kwargs):
-        model_name = kwargs.get('model_name', None)
-        context = kwargs.get('context', None)
+        # model_name = kwargs.get('model_name', None)
+        # context = kwargs.get('context', None)
         return self._call('write', data,
-                          object_id=object_id, model_name=model_name,
-                          context=context)
+                          object_id=object_id, **kwargs)

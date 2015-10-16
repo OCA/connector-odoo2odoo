@@ -128,9 +128,10 @@ class OdooBackend(models.Model):
         session = ConnectorSession(self.env.cr, self.env.uid,
                                    context=self.env.context)
         for backend in self:
-            filters = {
-                'domain': self.import_partner_domain_filter,
-            }
+            filters = self.import_partner_domain_filter
+            if filters and isinstance(filters, str):
+                filters = eval(filters)
+
             import_batch(session, 'odooconnector.res.partner', backend.id,
                          filters)
 
@@ -143,9 +144,10 @@ class OdooBackend(models.Model):
                                    context=self.env.context)
 
         for backend in self:
-            filters = {
-                'domain': self.import_product_domain_filter,
-            }
+            filters = self.import_product_domain_filter
+            if filters and isinstance(filters, str):
+                filters = eval(filters)
+
             import_batch(session, 'odooconnector.product.product',
                          backend.id, filters)
 
