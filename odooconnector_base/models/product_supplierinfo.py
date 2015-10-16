@@ -5,9 +5,8 @@ import logging
 from openerp import models, fields
 from openerp.addons.connector.unit.mapper import mapping
 from openerp.addons.connector.unit.mapper import ImportMapper, ExportMapper
-from ..unit.import_synchronizer import (OdooImporter,
-                                        DirectBatchImporter)
-from ..unit.mapper import (OdooImportMapChild,
+from ..unit.import_synchronizer import (OdooImporter, DirectBatchImporter)
+from ..unit.mapper import (OdooImportMapper, OdooImportMapChild,
                            OdooExportMapChild)
 from ..unit.backend_adapter import OdooAdapter
 from ..backend import oc_odoo
@@ -41,7 +40,9 @@ class ProductSupplierInfo(models.Model):
 
 
 """
-I M P O R T
+C O N N E C T O R   U N I T S
+
+-- IMPORT
 """
 
 
@@ -56,7 +57,7 @@ class ProductSupplierInfoImporter(OdooImporter):
 
 
 @oc_odoo
-class ProductSupplierInfoImportMapper(ImportMapper):
+class ProductSupplierInfoImportMapper(OdooImportMapper):
     _model_name = ['odooconnector.product.supplierinfo']
 
     _map_child_class = OdooImportMapChild
@@ -101,14 +102,12 @@ class ProductSupplierInfoImportMapper(ImportMapper):
         return {'name': partner_id}
 
     @mapping
-    def backend_id(self, record):
-        return {'backend_id': self.backend_record.id}
-
-    @mapping
     def external_id(self, record):
         return {'external_id': record['id']}
 
 
+# We use the ImportMapper since the priceliste.partnerinfo is not part of
+# a odooconnector binding model so far.
 @oc_odoo
 class PricelistPartnerInfoImportMapper(ImportMapper):
     _model_name = ['pricelist.partnerinfo']
@@ -117,7 +116,9 @@ class PricelistPartnerInfoImportMapper(ImportMapper):
               ('price', 'price')]
 
 """
-E X P O R T
+C O N N E C T O R   U N I T S
+
+-- EXPORT
 """
 
 

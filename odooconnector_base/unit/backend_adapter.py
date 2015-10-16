@@ -100,7 +100,6 @@ class OdooAdapter(OdooAdapterGeneric):
                    'odooconnector.product.product',
                    'odooconnector.product.uom',
                    'odooconnector.product.supplierinfo',
-                   'odooconnector.purchase.order',
                    'pricelist.partnerinfo',
                    'product.uom'
                    ]

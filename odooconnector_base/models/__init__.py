@@ -4,6 +4,5 @@
 from . import odooconnector
 from . import partner
 from . import product
-from . import product_uom
 from . import product_supplierinfo
-from . import purchase
+from . import product_uom

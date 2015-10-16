@@ -36,15 +36,17 @@ class OdooImporter(Importer):
                                          model_name=self._ic_model_name)
 
     def _is_uptodate(self, binding):
-        """ Return true if the import should be skipped because it is
-        up-to-date """
+        """ Check if the import is uptodate and should be skipped.
+
+        :returns: True if the import is uptodate
+        """
         assert self.external_record
 
         # no write date --> import it
         if not self.external_record.get('write_date'):
             return False
 
-        # no binding exist, so the record is not existing --> import it
+        # no binding exist, so the record does not exist --> import it
         if not binding:
             return False
 
@@ -156,9 +158,13 @@ class TranslationImporter(Importer):
     _ic_model_name = None
 
     def _get_languages(self):
-        """ Hook method for languages to retrieve """
-        languages = ['de_DE', 'en_US']
-        return languages
+        """ Hook method for languages to retrieve
+
+        :returns: list of language codes
+        """
+        term = [('translatable', '=', True)]
+        langs = self.env['res.lang'].search(term)
+        return [l.code for l in langs]
 
     def _get_external_data(self, language):
         """ Return the raw data """

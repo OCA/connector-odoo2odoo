@@ -2,15 +2,14 @@
 # © 2015 Malte Jacobi (maljac @ github)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 import logging
+
 from openerp import models, fields
-from openerp.addons.connector.unit.mapper import (mapping, ImportMapper,
-                                                  ExportMapper)
-from ..unit.import_synchronizer import (OdooImporter,
-                                        DirectBatchImporter,
+from openerp.addons.connector.unit.mapper import (mapping, ExportMapper)
+
+from ..unit.import_synchronizer import (OdooImporter, DirectBatchImporter,
                                         TranslationImporter)
-from ..unit.export_synchronizer import (OdooExporter,
-                                        TranslationExporter)
-from ..unit.mapper import (OdooImportMapChild,
+from ..unit.export_synchronizer import (OdooExporter, TranslationExporter)
+from ..unit.mapper import (OdooImportMapper, OdooImportMapChild,
                            OdooExportMapChild)
 from ..unit.backend_adapter import OdooAdapter
 from ..backend import oc_odoo
@@ -43,6 +42,13 @@ class ProductProduct(models.Model):
     )
 
 
+"""
+C O N N E C T O R   U N I T S
+
+-- IMPORT
+"""
+
+
 @oc_odoo
 class ProductBatchImporter(DirectBatchImporter):
     _model_name = ['odooconnector.product.product']
@@ -54,7 +60,7 @@ class ProductTranslationImporter(TranslationImporter):
 
 
 @oc_odoo
-class ProductImportMapper(ImportMapper):
+class ProductImportMapper(OdooImportMapper):
     _model_name = ['odooconnector.product.product']
     _map_child_class = OdooImportMapChild
 
@@ -86,15 +92,10 @@ class ProductImportMapper(ImportMapper):
         items = mapper.get_items(
             detail_records, map_record, to_attr, options=self.options
         )
-        # children.extend(items)
 
         _logger.debug('Product child "%s": %s', model_name, items)
 
         return items
-
-    @mapping
-    def backend_id(self, record):
-        return {'backend_id': self.backend_record.id}
 
     @mapping
     def uom_id(self, record):
@@ -126,15 +127,11 @@ class ProductImportMapper(ImportMapper):
 
 
 @oc_odoo
-class ProductSimpleImportMapper(ImportMapper):
+class ProductSimpleImportMapper(OdooImportMapper):
     _model_name = ['odooconnector.product.product']
 
     direct = [('name', 'name'), ('name_template', 'name_template'),
               ('description', 'description')]
-
-    @mapping
-    def backend_id(self, record):
-        return {'backend_id': self.backend_record.id}
 
 
 @oc_odoo
@@ -179,9 +176,9 @@ class ProductImportChildMapper(OdooImportMapChild):
 
 
 """
-E X P O R T
+C O N N E C T O R   U N I T S
 
-Classes related to exporting data
+-- EXPORT
 """
 
 

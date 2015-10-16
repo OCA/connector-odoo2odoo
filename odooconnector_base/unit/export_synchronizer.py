@@ -36,15 +36,15 @@ class OdooExporter(Exporter):
         return False
 
     def _get_remote_model(self):
-        """ Use this method to overwrite to explicitly define a model which
-            shall be called in the remote intercompany system """
+        """ Use this method to explicitly define a model which shall be called
+        in the remote system """
         return
 
-    def _after_export(self, record_created=None):
+    def _after_export(self, record_created=False):
         """ Hook called at the end of the export
 
-        Use this hook for executing arbitrary actions (e.g. export
-                                                       translations)
+        Use this hook for executing arbitrary actions, e.g. export translations
+        :param record_created: indicates whether the record was created
         """
         return
 
@@ -109,15 +109,26 @@ class TranslationExporter(Exporter):
     """ Exporter for translation enabled fields """
 
     def _get_record(self, language):
+        """Get the to be exported recorded in the defined language """
         context = {'lang': language}
         return self.model.with_context(**context).browse(self.binding_id)
 
     def _get_languages(self):
-        """ Hook method to select languages to export """
-        languages = ['de_DE', 'en_US']
-        return languages
+        """ Hook method for languages to export
+
+        :returns: language codes
+        :rtype: list
+        """
+        term = [('translatable', '=', True)]
+        langs = self.env['res.lang'].search(term)
+        return [l.code for l in langs]
 
     def _get_translatable_fields(self):
+        """ Get the names of the fields that can be translated
+
+        :returns: list of translatable fields
+        :rtype: list
+        """
         model_fields = self.model.fields_get()
         trans_fields = [field for field, attrs in model_fields.iteritems()
                         if attrs.get('translate')]
@@ -170,17 +181,3 @@ def export_record(session, model_name, backend_id, binding_id,
     # TODO: LANGUAGE STUFF
     exporter = env.get_connector_unit(OdooExporter)
     exporter.run(binding_id)
-
-
-def delay_export_all_bindings(session, model_name, record_id, fields=None):
-    """ Delay a job to export all the bindings on a record """
-    if session.context.get('connector_no_export'):
-        return
-    _logger.debug('delay export with a model')
-    record = session.env[model_name].browse(record_id)
-    if record.state == 'draft':
-        for binding in record.oc_bind_ids:
-            export_record(
-                session, binding._model._name, binding.backend_id.id,
-                binding.id, fields=fields
-            )

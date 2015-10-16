@@ -3,9 +3,19 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 import logging
 from openerp.addons.connector.unit.mapper import (ExportMapChild,
-                                                  ImportMapChild)
+                                                  ImportMapChild,
+                                                  ImportMapper,
+                                                  mapping)
+
 
 _logger = logging.getLogger(__name__)
+
+
+class OdooImportMapper(ImportMapper):
+    """ Base Import Mapper for Odoo2Odoo """
+    @mapping
+    def backend_id(self, record):
+        return {'backend_id': self.backend_record.id}
 
 
 class OdooExportMapChild(ExportMapChild):

@@ -3,6 +3,9 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 import logging
 from openerp import models, fields
+from openerp.addons.odooconnector_base.backend import oc_odoo
+from openerp.addons.odooconnector_base.unit.backend_adapter import OdooAdapter
+from openerp.addons.odooconnector_base.unit.binder import OdooModelBinder
 
 _logger = logging.getLogger(__name__)
 
@@ -64,3 +67,21 @@ class PurchaseOrderLine(models.Model):
         inverse_name='openerp_id',
         string='Odoo Binding'
     )
+
+"""
+C O N N E C T O R  U N I T S
+"""
+
+
+@oc_odoo
+class OdooModelBinderPurchase(OdooModelBinder):
+    _model_name = [
+        'odooconnector.purchase.order',
+    ]
+
+
+@oc_odoo
+class OdooAdapterPurchase(OdooAdapter):
+    _model_name = [
+        'odooconnector.purchase.order'
+    ]

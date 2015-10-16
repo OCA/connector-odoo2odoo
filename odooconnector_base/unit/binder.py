@@ -16,7 +16,6 @@ class OdooModelBinder(Binder):
         'odooconnector.product.product',
         'odooconnector.product.supplierinfo',
         'odooconnector.product.uom',
-        'odooconnector.purchase.order',
     ]
 
     def to_openerp(self, external_id, unwrap=False, browse=False):

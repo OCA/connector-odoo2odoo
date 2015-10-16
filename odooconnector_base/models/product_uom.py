@@ -3,10 +3,11 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 import logging
 from openerp import models, fields
-from openerp.addons.connector.unit.mapper import (mapping, ImportMapper)
+from openerp.addons.connector.unit.mapper import (mapping)
 from ..unit.import_synchronizer import (OdooImporter,
                                         DirectBatchImporter,
                                         TranslationImporter)
+from ..unit.mapper import (OdooImportMapper)
 from ..backend import oc_odoo
 
 
@@ -37,6 +38,13 @@ class ProductUom(models.Model):
     )
 
 
+"""
+C O N N E C T O R   U N I T S
+
+-- IMPORT
+"""
+
+
 @oc_odoo
 class ProductUomBatchImporter(DirectBatchImporter):
     _model_name = ['odooconnector.product.uom']
@@ -50,7 +58,7 @@ class ProductUomTranslationImporter(TranslationImporter):
 
 
 @oc_odoo
-class ProductUomImportMapper(ImportMapper):
+class ProductUomImportMapper(OdooImportMapper):
     _model_name = ['odooconnector.product.uom']
 
     direct = [('name', 'name'), ('active', 'active'),
@@ -69,20 +77,12 @@ class ProductUomImportMapper(ImportMapper):
             if res:
                 return {'category_id': res.id}
 
-    @mapping
-    def backend_id(self, record):
-        return {'backend_id': self.backend_record.id}
-
 
 @oc_odoo
-class ProductUomSimpleImportMapper(ImportMapper):
+class ProductUomSimpleImportMapper(OdooImportMapper):
     _model_name = ['odooconnector.product.uom']
 
     direct = [('name', 'name')]
-
-    @mapping
-    def backend_id(self, record):
-        return {'backend_id': self.backend_record.id}
 
 
 @oc_odoo
@@ -92,7 +92,7 @@ class ProductUomImporter(OdooImporter):
     _base_mapper = ProductUomImportMapper
 
     def _create(self, data):
-        """Check first if we find the UoM by name"""
+        # Check first if we find the UoM by name
         search = [('name', '=', data['name'])]
         for l in ['de_DE', 'en_US']:
             res = self.env['product.uom'].with_context(lang=l).search(search)
@@ -101,6 +101,9 @@ class ProductUomImporter(OdooImporter):
                          'openerp_id': res.id}
                 binding = super(ProductUomImporter, self)._create(_data)
                 return binding
+
+        # TODO: Make the creation of product.uom depend on a flag in the
+        #       backend record which determines if it should be created or not
         return super(ProductUomImporter, self)._create(data)
 
     def _after_import(self, binding):

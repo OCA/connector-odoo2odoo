@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
 # © 2015 Malte Jacobi (maljac @ github)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+import logging
+
 from openerp import models, fields
-from openerp.addons.connector.unit.mapper import (mapping,
-                                                  ImportMapper,
-                                                  ExportMapper)
+from openerp.addons.connector.unit.mapper import (mapping, ExportMapper)
+
 from ..unit.import_synchronizer import (OdooImporter,
                                         DirectBatchImporter)
 from ..unit.export_synchronizer import (OdooExporter)
+from ..unit.mapper import OdooImportMapper
 from ..backend import oc_odoo
+
+
+_logger = logging.getLogger(__name__)
 
 
 class OdooConnectorPartner(models.Model):
@@ -35,6 +40,13 @@ class ResPartner(models.Model):
     )
 
 
+"""
+C O N N E C T O R   U N I T S
+
+-- IMPORT
+"""
+
+
 @oc_odoo
 class PartnerBatchImporter(DirectBatchImporter):
     _model_name = ['odooconnector.res.partner']
@@ -46,7 +58,7 @@ class PartnerImporter(OdooImporter):
 
 
 @oc_odoo
-class PartnerImportMapper(ImportMapper):
+class PartnerImportMapper(OdooImportMapper):
     _model_name = 'odooconnector.res.partner'
 
     direct = [('name', 'name'), ('is_company', 'is_company'),
@@ -56,10 +68,6 @@ class PartnerImportMapper(ImportMapper):
               ('comment', 'comment'), ('supplier', 'supplier'),
               ('customer', 'customer'), ('ref', 'ref'), ('lang', 'lang'),
               ('date', 'date'), ('notify_email', 'notify_email')]
-
-    @mapping
-    def backend_id(self, record):
-        return {'backend_id': self.backend_record.id}
 
     @mapping
     def country_id(self, record):
@@ -73,8 +81,11 @@ class PartnerImportMapper(ImportMapper):
         if country:
             return {'country_id': country.id}
 
+
 """
-E X P O R T
+C O N N E C T O R   U N I T S
+
+-- EXPORT
 """
 
 
@@ -93,7 +104,8 @@ class PartnerExporter(OdooExporter):
         return self._pre_export_domain_check(record, domain)
 
     def _after_export(self, record_created):
-        # create a ic_binding indicating that the partner was exported
+        # create a ic_binding in the backend, indicating that the partner
+        # was exported
         if record_created:
             record_id = self.binder.unwrap_binding(self.binding_id)
             data = {

@@ -3,6 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 from openerp import models, fields, api
 from openerp.addons.connector.session import ConnectorSession
+
 from ..unit.import_synchronizer import import_batch
 
 
@@ -73,34 +74,29 @@ class OdooBackend(models.Model):
     hostname = fields.Char(string='Hostname', required=True)
     port = fields.Integer(string='Port', required=True)
 
-    import_partner_from_date = fields.Datetime(
-        string='Import parterns from date',
-        readonly=True
+    default_lang_id = fields.Many2one(
+        comodel_name='res.lang',
+        string='Default Language'
     )
 
     import_partner_domain_filter = fields.Char(
-        string='Import partner domain filter',
+        string='Partner domain filter',
     )
 
     import_product_domain_filter = fields.Char(
-        string='Import product domain filter',
+        string='Product domain filter',
     )
 
     export_backend_id = fields.Integer(
-        string='Export: Id of the backend in the external system',
+        string='Backend ID in the external system',
         help="""The backend id that represents this system in the external
                 system """
     )
 
     export_partner_id = fields.Integer(
-        string='Export: Our Partner ID in the external System',
+        string='Partner ID in the external System',
         help="""The partner id that represents this company in the
                 external system"""
-    )
-
-    default_lang_id = fields.Many2one(
-        comodel_name='res.lang',
-        string='Default Language'
     )
 
     default_export_backend = fields.Boolean(
