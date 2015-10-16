@@ -23,7 +23,6 @@ To configure this module, you need to:
 
 * create and configure a new Backend (Menu -> Connector -> Odoo -> Backends)
 * activate the needed cron jobs
-* ...
 
 Usage
 =====

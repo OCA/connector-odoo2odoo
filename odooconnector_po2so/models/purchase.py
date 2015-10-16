@@ -38,11 +38,6 @@ class PurchaseOrder(models.Model):
     )
 
 
-"""
-E X P O R T
-"""
-
-
 @oc_odoo
 class PurchaseOrder2SaleOrderExporter(OdooExporter):
     _model_name = ['odooconnector.purchase.order']

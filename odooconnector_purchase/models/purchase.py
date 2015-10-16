@@ -68,10 +68,6 @@ class PurchaseOrderLine(models.Model):
         string='Odoo Binding'
     )
 
-"""
-C O N N E C T O R  U N I T S
-"""
-
 
 @oc_odoo
 class OdooModelBinderPurchase(OdooModelBinder):
