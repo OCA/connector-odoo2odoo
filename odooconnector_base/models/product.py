@@ -187,16 +187,33 @@ class ProductExportMapper(ExportMapper):
     def uom_id(self, record):
         if not record.uom_id.id:
             return
+        uom_id = self._uom_name_search(record.uom_id.name)
+        if uom_id:
+            return {'uom_id': uom_id}
+
+    @mapping
+    def uom_po_id(self, record):
+        if not record.uom_po_id.id:
+            return
+        uom_id = self._uom_name_search(record.uom_po_id.name)
+        if uom_id:
+            return {'uom_po_id': uom_id}
+
+    def _uom_name_search(self, uom_name):
+        """Search for a uom by name
+
+        :returns: uom id or None
+        """
         # TODO: Unnecessary round trip ...
         adapter = self.unit_for(OdooAdapter, 'product.uom')
-        filters = [('name', '=', record.uom_id.name), ]
+        filters = [('name', '=', uom_name), ]
         uom = adapter.search(
             filters=filters,
             context={'lang': 'en_US'},  # TODO: In general better lang support!
             model_name='product.uom')
 
         if uom and len(uom) == 1:
-            return {'uom_id': uom[0]}
+            return uom[0]
 
 
 @oc_odoo
