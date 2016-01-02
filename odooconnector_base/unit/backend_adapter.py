@@ -3,7 +3,10 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 import logging
 
-import oerplib.error
+try:
+    import oerplib.error
+except ImportError:
+    pass
 
 from openerp.addons.connector.unit.backend_adapter import CRUDAdapter
 from ..backend import oc_odoo

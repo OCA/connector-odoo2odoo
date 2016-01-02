@@ -4,7 +4,7 @@
 {
     'name': 'Odoo Connector - Base',
     'summary': 'Base connector for Odoo2Odoo scenarios',
-    'version': '0.0.1',
+    'version': '8.0.1.0.0',
     'category': 'Connector',
     'website': 'https://odoo-community.org/',
     'author': 'IBO Institut (Malte Jacobi), Odoo Community Association (OCA)',

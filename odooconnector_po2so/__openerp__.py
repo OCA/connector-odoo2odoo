@@ -3,8 +3,8 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 {
     'name': 'Odoo Connector - PO2SO',
-    'summary': 'PO2SO Process Addon',
-    'version': '0.0.1',
+    'summary': 'Purchase to SO Intercompany process addon.',
+    'version': '8.0.1.0.0',
     'category': 'Connector',
     'website': 'https://odoo-community.org/',
     'author': 'IBO Institut (Malte Jacobi), Odoo Community Association (OCA)',

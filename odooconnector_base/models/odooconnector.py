@@ -68,12 +68,11 @@ class OdooBackend(models.Model):
     username = fields.Char(
         string='Username',
         required=True,
-        help='Username in the external Odoo Backend'
+        help='Username in the external Odoo Backend.'
     )
     password = fields.Char(
         string='Password',
         required=True,
-        help='Password'
     )
     database = fields.Char(string='Database', required=True)
     hostname = fields.Char(string='Hostname', required=True)
@@ -95,18 +94,18 @@ class OdooBackend(models.Model):
     export_backend_id = fields.Integer(
         string='Backend ID in the external system',
         help="""The backend id that represents this system in the external
-                system """
+                system."""
     )
 
     export_partner_id = fields.Integer(
         string='Partner ID in the external System',
         help="""The partner id that represents this company in the
-                external system"""
+                external system."""
     )
 
     default_export_backend = fields.Boolean(
         string='Default Export Backend',
-        help='Use this backend as an automatic export targed'
+        help='Use this backend as an automatic export target.'
     )
 
     default_export_partner = fields.Boolean(

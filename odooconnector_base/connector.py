@@ -2,7 +2,10 @@
 # © 2015 Malte Jacobi (maljac @ github)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 import logging
-import oerplib
+try:
+    import oerplib
+except ImportError:
+    pass
 from openerp.addons.connector.connector import ConnectorEnvironment
 
 
