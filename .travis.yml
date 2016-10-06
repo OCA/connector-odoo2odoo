@@ -16,7 +16,7 @@ addons:
 
 env:
   global:
-  - VERSION="9.0" TESTS="0" LINT_CHECK="0" TRANSIFEX="0"
+  - VERSION="10.0" TESTS="0" LINT_CHECK="0" TRANSIFEX="0"
   - TRANSIFEX_USER='transbot@odoo-community.org'
   - secure: IvoafFeeA+k7ohSi0XRq8Wd8C5huxCb5yGRSHDBzJuNOPXfnSezrc/M41nJOw2eooHYSYhGvkzbymDtxcRS3sDucECtu5t9LU9GA7IghCX9RPSbE3EVEfG4g3GZGkHdnv1zQCpcDuYsnmzdxRKbp18yebJ0v/FpkZ5cs3UqAJb1NvsxE2raD5E2PAJIaqwbczsGF1Xd3r9FC09lZozPEIBQqTbiGthZdcjyMidOQrX6C41pVOP0bm6aXSG3JxQPDr39FmzF/Qix3WOYZMrHdquWuBn3G54zzFEgeJp6B6J71+ukM/k1VxZONIvzBGp/EXOpKoE3xsniwSLbt7Qrpi8/9av6PgIGSVRAz9avtqduwgmcQVDKpmgrpVih3ECGS8Koglj7RcWOu28/cycPuM+1Sib4vWzLic/vh9qRpE9f809M5/ZAqpQeI1zqpgDyNPHXyZrcZJu+Z50SaIukxqVYlcMrWNpgPe3gXHCFH4V8oUXxKZ0dv7SwuXb72FcxA9dds/y/pacEErpAQomN074PTEQcAs5Og9yjraMpBLQq2j8gze/7qMs4p/t+VP5LoHOl49KyUiGWp/+NzQyA/M7eZApdLhrWFcoFGb6NQQUSqF/5a6f2a8pwj7VqVojhlSiVrcvjAWkcaLWRH88gBsP9j6PtFfuBAO3g73G8grew=
 
