@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+
+    <menuitem id="menu_odoo2odoo_root"
+              parent="connector.menu_connector_root"
+              name="Odoo2Odoo"
+              sequence="10"
+              groups="connector.group_connector_manager"/>
+
+  </data>
+</openerp>

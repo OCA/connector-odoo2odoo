@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="view_odoo_backend_form" model="ir.ui.view">
+            <field name="name">odoo.backend.form</field>
+            <field name="model">odoo.backend</field>
+            <field name="arch" type="xml">
+                <form string="Odoo Backend">
+                    <header>
+                        <button name="check_auth" type="object"
+                            string="Check connection" colspan="2"
+                            class="oe_highlight"
+                            attrs="{'invisible': [('location', '=', False)]}"/>
+                    </header>
+                    <sheet>
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" class="oe_inline" />
+                        </h1>
+                        <group name="odoo" string="Configuration">
+                            <group colspan="4" col="4">
+                                <field name="version" colspan="2" style="width: 5%;"/>
+                                <field name="active" colspan="2"/>
+                                <field name="location"
+                                    placeholder="e.g. https://my.odoo.net or http://my.odoo.net:8069"/>
+                                <field name="database"/>
+                                <field name="username" colspan="2"/>
+                                <field name="password" colspan="2" password="True"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_odoo_backend_tree" model="ir.ui.view">
+            <field name="name">odoo.backend.tree</field>
+            <field name="model">odoo.backend</field>
+            <field name="arch" type="xml">
+                <tree string="Odoo Backends">
+                    <field name="name"/>
+                    <field name="location"/>
+                    <field name="database"/>
+                    <field name="username"/>
+                    <field name="active"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_odoo_backend_tree">
+            <field name="name">Odoo Backends</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">odoo.backend</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="view_odoo_backend_tree"/>
+            <field name="domain">['|', ('active', '=', True), ('active', '=', False)]</field>
+        </record>
+
+        <menuitem id="menu_action_odoo_backend_tree"
+            parent="menu_odoo2odoo_root"
+            action="action_odoo_backend_tree"/>
+
+    </data>
+</openerp>
