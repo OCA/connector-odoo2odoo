@@ -8,35 +8,50 @@ import logging
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from odoo import models, fields, api, _
+from odoo.exceptions import UserError
+
+from odoo.addons.connector_odoo.components.backend_adapter import OdooLocation, OdooAPI
+from vminstall.msg import protocol
 
 _logger = logging.getLogger(__name__)
 
 class OdooBackend(models.Model):
     """ Model for Odoo Backends """
-    _name = 'odooconnector.backend'
+    _name = 'odoo.backend'
     _description = 'Odoo Backend'
     _inherit = 'connector.backend'
 
     _backend_type = 'odoo'
 
+
+    @api.model
+    def _select_state(self):
+        """Available States for this Backend"""
+        return [('draft', 'Draft'),
+                ('checked', 'Checked'),
+                ('production', 'In Production'),]
+        
     @api.model
     def _select_versions(self):
         """ Available versions for this backend """
-        return [('100', 'Version 10.0.x'),]
+        return [('10.0', 'Version 10.0.x'),]
 
     active = fields.Boolean(
         string='Active',
         default=True
     )
-
+    state = fields.Selection(
+        selection='_select_state',
+        string='State',
+        default='draft'
+    )
     version = fields.Selection(
         selection='_select_versions',
         string='Version',
         required=True,
     )
-
-    username = fields.Char(
-        string='Username',
+    login = fields.Char(
+        string='Username / Login',
         required=True,
         help='Username in the external Odoo Backend.'
     )
@@ -46,8 +61,22 @@ class OdooBackend(models.Model):
     )
     database = fields.Char(string='Database', required=True)
     hostname = fields.Char(string='Hostname', required=True)
-    port = fields.Integer(string='Port', required=True)
+    port = fields.Integer(
+        string='Port', 
+        required=True,
+        help="For SSL, 443 is mostly the right choice",
+        default=8069
+        )
 
+    protocol = fields.Selection(
+        selection=[('jsonrpc', 'JsonRPC'),
+                   ('jsonrpc+ssl', 'JsonRPC with SSL')],
+        string='Protocol',
+        required=True,
+        default='jsonrpc',
+        help="For SSL, consider changing the port to 443 is mostly the right choice",
+        
+    )
     default_lang_id = fields.Many2one(
         comodel_name='res.lang',
         string='Default Language'
@@ -62,11 +91,11 @@ class OdooBackend(models.Model):
     )
 
     
-#     export_backend_id = fields.Integer(
-#         string='Backend ID in the external system',
-#         help="""The backend id that represents this system in the external
-#                 system."""
-#     )
+    export_backend_id = fields.Integer(
+        string='Backend ID in the external system',
+        help="""The backend id that represents this system in the external
+                system."""
+    )
 
     export_partner_id = fields.Integer(
         string='Partner ID in the external System',
@@ -98,60 +127,141 @@ class OdooBackend(models.Model):
     )
 
     @api.multi
-    def get_environment(self, binding_model_name, api=None):
+    def _check_connection(self):
         self.ensure_one()
-        if not api:
-            api = odoorpc.ODOO(self.hostname, 'jsonrpc', self.port)
-            api.login(self.database, self.username, self.password)
-            _logger.info('Created a new Odoo API instance')
-        env = APIConnectorEnvironment(self, binding_model_name, api=api)
-        return env
+        odoo_location = OdooLocation(
+            hostname=self.hostname,
+            login=self.login,
+            password=self.password,
+            database=self.database,
+            port=self.port,
+            version=self.version,
+            protocol=self.protocol
+        )
+        odoo_api =  OdooAPI(odoo_location)
+        odoo_api.complete_check()        
+        self.write({'state': 'checked'})
+        
 
     @api.multi
-    @job
-    def import_batch(self, binding_model_name, filters=None):
-        """ Prepare a batch import of records from CSV """
+    def button_check_connection(self):
+        self._check_connection()
+#         raise UserError(_('Connection successful for %s' % self.hostname))
+
+    
+    @api.multi
+    def button_reset_to_draft(self):
         self.ensure_one()
-        connector_env = self.get_environment(binding_model_name)
-        importer = connector_env.get_connector_unit(BatchImporter)
-        importer.run(filters=filters)
+        self.write({'state': 'draft'})
+        
 
+    @contextmanager
     @api.multi
-    @job
-    def import_record(self, binding_model_name, ext_id, force=False, api=None):
-        """ Import a record from CSV """
+    def work_on(self, model_name, **kwargs):
+        """
+        Place the connexion here regarding the documentation
+        http://odoo-connector.com/api/api_components.html#odoo.addons.component.models.collection.Collection
+        """
         self.ensure_one()
-        connector_env = self.get_environment(binding_model_name)
-        importer = connector_env.get_connector_unit(OdooImporter)
-        importer.run(ext_id, force=force)
+        lang = self.default_lang_id
+        if lang.code != self.env.context.get('lang'):
+            self = self.with_context(lang=lang.code)
+        odoo_location = OdooLocation(
+            host=self.hostname,
+            login=self.username,
+            passowrd=self.password,
+            database=self.database,
+            port=self.port,
+            version=self.version,
+            protocol=self.protocol            
+        )
+        with OdooAPI(odoo_location) as odoo_api:
+            _super = super(OdooBackend, self)
+            # from the components we'll be able to do: self.work.magento_api
+            with _super.work_on(
+                    model_name, odoo_api=odoo_api, **kwargs) as work:
+                yield work
+
+
 
     @api.multi
-    def import_partners(self):
-        """ Import partners from external system """
-        for backend in self:
-            filters = self.import_partner_domain_filter
-            if filters and isinstance(filters, str):
-                filters = eval(filters)
+    def synchronize_basedata(self):
+        try:
+            for backend in self:
+                for model_name in ('odoo.product.uom',
+#                                    'odoo.product.category',
+#                                    'odoo.product.attribute',
+#                                    'odoo.product.attribute.value'
+                                   ):
+                    # import directly, do not delay because this
+                    # is a fast operation, a direct return is fine
+                    # and it is simpler to import them sequentially
+                    self.env[model_name].import_batch(backend)
+            return True
+        except Exception as e:
+            _logger.error(e.message, exc_info=True)
+            raise UserError(
+                _(u"Check your configuration, we can't get the data. "
+                  u"Here is the error:\n%s") %
+                str(e).decode('utf-8', 'ignore'))
 
-            backend.import_batch('odooconnector.res.partner', filters)
+  
+# 
+#     @api.multi
+#     def get_environment(self, binding_model_name, api=None):
+#         self.ensure_one()
+#         if not api:
+#             api = odoorpc.ODOO(self.hostname, 'jsonrpc', self.port)
+#             api.login(self.database, self.username, self.password)
+#             _logger.info('Created a new Odoo API instance')
+#         env = APIConnectorEnvironment(self, binding_model_name, api=api)
+#         return env
 
-        return True
-
-    @api.multi
-    def import_products(self):
-        """ Import products from external system """
-        for backend in self:
-            filters = self.import_product_domain_filter
-            if filters and isinstance(filters, str):
-                filters = eval(filters)
-
-            backend.import_batch('odooconnector.product.product', filters)
-
-        return True
-
-    @api.multi
-    def import_product_uom(self):
-        """Import Product UoM from external System"""
-        for backend in self:
-            backend.import_batch('odooconnector.product.uom')
-return True
+#     @api.multi
+#     @job
+#     def import_batch(self, binding_model_name, filters=None):
+#         """ Prepare a batch import of records from CSV """
+#         self.ensure_one()
+#         connector_env = self.get_environment(binding_model_name)
+#         importer = connector_env.get_connector_unit(BatchImporter)
+#         importer.run(filters=filters)
+# 
+#     @api.multi
+#     @job
+#     def import_record(self, binding_model_name, ext_id, force=False, api=None):
+#         """ Import a record from CSV """
+#         self.ensure_one()
+#         connector_env = self.get_environment(binding_model_name)
+#         importer = connector_env.get_connector_unit(OdooImporter)
+#         importer.run(ext_id, force=force)
+# 
+#     @api.multi
+#     def import_partners(self):
+#         """ Import partners from external system """
+#         for backend in self:
+#             filters = self.import_partner_domain_filter
+#             if filters and isinstance(filters, str):
+#                 filters = eval(filters)
+# 
+#             backend.import_batch('odooconnector.res.partner', filters)
+# 
+#         return True
+# 
+#     @api.multi
+#     def import_products(self):
+#         """ Import products from external system """
+#         for backend in self:
+#             filters = self.import_product_domain_filter
+#             if filters and isinstance(filters, str):
+#                 filters = eval(filters)
+# 
+#             backend.import_batch('odooconnector.product.product', filters)
+# 
+#         return True
+# 
+#     @api.multi
+#     def import_product_uom(self):
+#         """Import Product UoM from external System"""
+#         for backend in self:
+#             backend.import_batch('odooconnector.product.uom')
+#         return True
