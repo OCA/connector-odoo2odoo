@@ -89,6 +89,25 @@ class OdooBackend(models.Model):
         _logger.info(u"%s: OK", message)
         raise UserError(u"Connection OK")
 
+    @api.multi
+    def get_model_bindings(self):
+        """Return the mapping between the data models and their corresponding
+        bindings involved in the synchronization. E.g.:
+
+            {
+                'product.uom.categ': 'odoo.product.uom.categ',
+                'product.uom': 'odoo.product.uom',
+                'product.template': 'odoo.product.template',
+                'product.product': 'odoo.product.product',
+            }
+
+        This is used by the synchronizers to allow the import/export
+        of a record.
+
+        This method must be implemented.
+        """
+        raise NotImplementedError
+
 
 @odoo
 class GenericCheckAuth(CheckAuth, GenericAPIAdapter):

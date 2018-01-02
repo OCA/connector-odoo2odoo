@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_odoo_product_template_user,access_odoo_product_template,model_odoo_product_template,base.group_user,1,0,0,0
+access_odoo_product_product_user,access_odoo_product_product,model_odoo_product_product,base.group_user,1,0,0,0

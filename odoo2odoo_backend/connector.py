@@ -20,14 +20,14 @@ def create_bindings(session, model_name, record_id):
         create_binding(session, model_name, record_id, backend.id)
 
 
-def create_binding(session, model_name, record_id, backend_id):
+def create_binding(session, model_name, record_id, backend_id, force=False):
     """Create the binding record for a given backend without any external
     Odoo ID. This record will then be exported to the backend.
 
     This function assumes that the corresponding binding model of `model_name`
     is `odoo.{model_name}` (e.g. `res.partner` => `odoo.res.partner`).
     """
-    if session.env.context.get('connector_no_export'):
+    if not force and session.env.context.get('connector_no_export'):
         return
     if session.env.context.get('connector_check_recursivity'):
         return
@@ -51,3 +51,4 @@ def create_binding(session, model_name, record_id, backend_id):
             binding, record)
     else:
         binding.write({})
+    return binding

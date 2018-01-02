@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2018 ABF OSIELL <http://osiell.com>
+     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl). -->
+<openerp>
+<data>
+
+<record id="view_product_product_form_inherit" model="ir.ui.view">
+    <field name="name">product.product.form.inherit</field>
+    <field name="model">product.product</field>
+    <field name="type">form</field>
+    <field name="inherit_id" ref="product.product_normal_form_view"/>
+    <field name="arch" type="xml">
+        <notebook position="inside">
+            <page string="Connecteurs" name="connector" groups="base.group_erp_manager">
+                <group name="odoo2odoo" string="Odoo2Odoo">
+                    <field name="odoo_bind_ids" nolabel="1"/>
+                </group>
+            </page>
+        </notebook>
+    </field>
+</record>
+
+<record id="view_odoo_product_product_tree" model="ir.ui.view">
+    <field name="name">odoo.product.product.tree</field>
+    <field name="model">odoo.product.product</field>
+    <field name="arch" type="xml">
+        <tree string="Odoo2Odoo Bindings">
+            <field name="backend_id"/>
+            <field name="odoo_id"/>
+            <field name="external_odoo_id"/>
+        </tree>
+    </field>
+</record>
+
+</data>
+</openerp>

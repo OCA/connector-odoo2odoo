@@ -4,17 +4,18 @@
 import logging
 import urllib2
 
+from openerp.addons.connector.unit.backend_adapter \
+    import BackendAdapter, CRUDAdapter
+from openerp.addons.connector.exception import IDMissingInBackend
+
+from ..exceptions import O2OConnectionError
+
 _logger = logging.getLogger(__name__)
 
 try:
     import odoorpc
 except ImportError:
     _logger.debug('Cannot `import odoorpc`.')
-
-from openerp.addons.connector.unit.backend_adapter \
-    import BackendAdapter, CRUDAdapter
-
-from ..exceptions import O2OConnectionError
 
 
 class CheckAuth(BackendAdapter):
@@ -57,7 +58,6 @@ class GenericAPIAdapter(BackendAdapter):
             _logger.error(exc)
             raise O2OConnectionError(exc.reason)    # e.g unreachable, timeout
 
-
     def execute(self, method, *args, **kwargs):
         binder = self.binder_for(self.model._name)
         model_name = self.model.fields_get(
@@ -68,13 +68,19 @@ class GenericAPIAdapter(BackendAdapter):
             'args': args,
             'kwargs': kwargs,
         }
-        #try:
         _logger.info("%s - %s", self.backend_record.name, log)
-        odoo_model = self.odoo_session.env[model_name]
-        return getattr(odoo_model, method)(*args, **kwargs)
-        # except urllib2.HTTPError, exc:
-        #     _logger.error(exc)
-        #     raise
+        try:
+            odoo_model = self.odoo_session.env[model_name]
+            data = getattr(odoo_model, method)(*args, **kwargs)
+        except odoorpc.error.RPCError as exc:
+            if exc.info['data']['exception_type'] == 'missing_error':
+                _logger.error(
+                    "%s - ID missing in backend - %s - %s",
+                    self.backend_record.name, log, exc.message)
+                raise IDMissingInBackend
+            raise
+        else:
+            return data
 
 
 class GenericCRUDAdapter(GenericAPIAdapter, CRUDAdapter):
@@ -95,7 +101,10 @@ class GenericCRUDAdapter(GenericAPIAdapter, CRUDAdapter):
     def read(self, *args, **kwargs):
         """Returns the information of a record from the external Odoo server.
         """
-        return self.execute('read', *args, **kwargs)
+        data = self.execute('read', *args, **kwargs)
+        if not data:
+            raise IDMissingInBackend
+        return data
 
     def search_read(self, *args, **kwargs):
         return self.execute('search_read', *args, **kwargs)
@@ -114,7 +123,10 @@ class GenericCRUDAdapter(GenericAPIAdapter, CRUDAdapter):
     def raw_read(self, *args, **kwargs):
         """Returns the information of a record from the external Odoo server.
         """
-        return self.execute('o2o_read', *args, **kwargs)
+        data = self.execute('o2o_read', *args, **kwargs)
+        if not data:
+            raise IDMissingInBackend
+        return data
 
     def raw_create(self, *args, **kwargs):
         return self.execute('o2o_create', *args, **kwargs)

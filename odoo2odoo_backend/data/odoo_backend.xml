@@ -8,9 +8,8 @@
 <record id="odoo_backend_default" model="odoo.backend">
     <field name="name">Odoo</field>
     <field name="version">8.0</field>
-    <field name="active" eval="True"/>
+    <field name="active" eval="False"/>
     <field name="location">my.odoo.net</field>
-    <field name="ssl" eval="False"/>
     <field name="port">8069</field>
     <field name="database">my_company/</field>
     <field name="username">admin</field>

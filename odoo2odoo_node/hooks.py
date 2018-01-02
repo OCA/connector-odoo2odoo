@@ -9,17 +9,21 @@ from openerp import api, models
 def o2o_create(self, vals):
     return models.BaseModel.create(self, vals)
 
+
 @api.v8
 def o2o_read(self, fields=None, load='_classic_read'):
     return models.BaseModel.read(self, fields, load)
+
 
 @api.multi
 def o2o_write(self, vals):
     return models.BaseModel.write(self, vals)
 
+
 @api.multi
 def o2o_unlink(self):
     return models.BaseModel.unlink(self)
+
 
 def post_load():
     models.BaseModel.o2o_create = o2o_create

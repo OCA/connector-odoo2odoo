@@ -13,6 +13,7 @@ _logger = logging.getLogger(__name__)
 
 class OdooExporter(Exporter):
     _model_name = []
+    _raw_mode = False   # TODO does nothing currently, feature to implement
 
     def run(self, binding_id):
         """Run the synchronization (create or update the external Odoo record).
@@ -48,8 +49,8 @@ class OdooExporter(Exporter):
 
 
 @job(default_channel='root.o2o')
-def export_record(session, model_name, binding_id):
-    """Export a record on Odoo."""
+def export_binding(session, model_name, binding_id):
+    """Export a binding record on Odoo."""
     binding = session.env[model_name].browse(binding_id)
     backend_id = binding.backend_id.id
     env = get_environment(session, model_name, backend_id)
@@ -58,3 +59,7 @@ def export_record(session, model_name, binding_id):
         u"%s - Exporting binding record '%s'...",
         binding.backend_id.name, binding)
     exporter.run(binding_id)
+
+
+# Deprecated, kept for backward compatibility.
+export_record = export_binding
