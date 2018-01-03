@@ -9,8 +9,7 @@
     <field name="name">Odoo</field>
     <field name="version">8.0</field>
     <field name="active" eval="False"/>
-    <field name="location">my.odoo.net</field>
-    <field name="port">8069</field>
+    <field name="location">http://my.odoo.net:8069</field>
     <field name="database">my_company/</field>
     <field name="username">admin</field>
     <field name="password">admin</field>

@@ -2,6 +2,7 @@
 # Copyright 2018 ABF OSIELL <http://osiell.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 from collections import OrderedDict
+import sys
 
 from openerp.addons.connector.event import on_record_create, on_record_write
 
@@ -20,24 +21,8 @@ from openerp.addons.odoo2odoo_backend.backend import odoo
 
 # Data models to synchronize (with their binding model)
 BINDINGS = OrderedDict([
-    ('product.uom.categ', 'odoo.product.uom.categ'),
-    ('product.uom', 'odoo.product.uom'),
-    ('product.category', 'odoo.product.category'),
-    ('product.template', 'odoo.product.template'),
-    ('product.product', 'odoo.product.product'),
+    ('ir.translation', 'odoo.ir.translation'),
 ])
-
-# Data models which trigger the synchronization
-TRIGGER_ON = [
-    'product.uom.categ',
-    'product.uom',
-    'product.category',
-    'product.template',
-    'product.product',
-]
-TRIGGERS = OrderedDict(
-    [(key, value) for key, value in BINDINGS.iteritems()
-     if key in TRIGGER_ON])
 
 
 @on_record_create(model_names=BINDINGS.keys())
@@ -46,14 +31,14 @@ def on_event_create_bindings(session, model_name, record_id, vals):
     create_bindings(session, model_name, record_id)
 
 
-@on_record_create(model_names=TRIGGERS.values())
-@on_record_write(model_names=TRIGGERS.values())
+@on_record_create(model_names=BINDINGS.values())
+@on_record_write(model_names=BINDINGS.values())
 def delay_export_binding(session, model_name, record_id, vals):
     if session.env.context.get('connector_no_export'):
         return
     export_binding.delay(
         session, model_name, record_id,
-        priority=TRIGGERS.values().index(model_name))
+        priority=2147483647)    # Lower priority (max PostgreSQL integer value)
 
 
 @odoo
@@ -95,4 +80,3 @@ class OdooSyncDelayedBatchImporter(DelayedBatchOdooImporter):
 @odoo
 class OdooSyncExporter(OdooExporter):
     _model_name = BINDINGS.values()
-    _raw_mode = True

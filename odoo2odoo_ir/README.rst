@@ -2,17 +2,13 @@
    :target: https://www.gnu.org/licenses/agpl
    :alt: License: AGPL-3
 
-================
-Odoo2Odoo - Node
-================
+=====================
+Odoo2Odoo - Base (ir)
+=====================
 
-This module is required on all *Odoo* instances synchronized by an *Odoo*
-backend (see the ``odoo2odoo_backend`` module).
-
-It simply adds new CRUD methods similar to ``create``, ``read``, ``write``
-and ``unlink`` to focus on the data and avoid undesirable behavior (custom
-overloads of the standard methods). These new methods are then used by the
-``odoo2odoo_backend`` module to drive the synchronization.
+This module aims to synchronize basic and technical data between Odoo servers
+(like translations).
+Other high-level synchronisation modules may depend on it.
 
 Bug Tracker
 ===========

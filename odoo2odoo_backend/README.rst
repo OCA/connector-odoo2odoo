@@ -1,50 +1,31 @@
-.. image:: https://img.shields.io/badge/licence-AGPL--3-blue.svg
-   :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
+.. image:: https://img.shields.io/badge/license-AGPL--3-blue.png
+   :target: https://www.gnu.org/licenses/agpl
    :alt: License: AGPL-3
 
 ===================
 Odoo2Odoo - Backend
 ===================
 
-This module extends the functionality of ... to support ...
-and to allow you to ...
+Odoo connector framework to synchronize records between Odoo servers.
 
-Installation
-============
+This connector uses the `OdooRPC` Python module and is based on the
+``connector`` framework.
 
-To install this module, you need to:
-
-#. Do this ...
-
-Configuration
+Documentation
 =============
 
-To configure this module, you need to:
-
-#. Go to ...
-
-.. figure:: path/to/local/image.png
-   :alt: alternative description
-   :width: 600 px
-
-Usage
-=====
-
-To use this module, you need to:
-
-#. Go to ...
+This module does nothing on its own.  It is a ground for developing
+Odoo synchronization modules. As an example, you should check the
+``odoo2odoo_product`` module in this repository.
 
 .. image:: https://odoo-community.org/website/image/ir.attachment/5784_f2813bd/datas
    :alt: Try me on Runbot
-   :target: https://runbot.odoo-community.org/runbot/{repo_id}/{branch}
-
-.. repo_id is available in https://github.com/OCA/maintainer-tools/blob/master/tools/repos_with_ids.txt
-.. branch is "8.0" for example
+   :target: https://runbot.odoo-community.org/runbot/209/8.0
 
 Known issues / Roadmap
 ======================
 
-TODO
+* TODO : Handle deleted records
 
 Bug Tracker
 ===========
@@ -60,12 +41,14 @@ Credits
 Images
 ------
 
-* Odoo Community Association: `Icon <https://github.com/OCA/maintainer-tools/blob/master/template/module/static/description/icon.svg>`_.
+* Odoo Community Association: `Icon <https://odoo-community.org/logo.png>`_.
 
 Contributors
 ------------
 
-* Sébastien Alix <sebastien.alix@osiell.com>
+* Sébastien Alix <sebastien.alix@osiell.com> (https://osiell.com)
+
+Do not contact contributors directly about support or help with technical issues.
 
 Maintainer
 ----------

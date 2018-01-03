@@ -4,23 +4,7 @@
 <openerp>
 <data>
 
-<record id="view_product_product_form_inherit" model="ir.ui.view">
-    <field name="name">product.product.form.inherit</field>
-    <field name="model">product.product</field>
-    <field name="type">form</field>
-    <field name="inherit_id" ref="product.product_normal_form_view"/>
-    <field name="arch" type="xml">
-        <notebook position="inside">
-            <page string="Connecteurs" name="connector" groups="base.group_erp_manager">
-                <group name="odoo2odoo" string="Odoo2Odoo">
-                    <field name="odoo_bind_ids" nolabel="1"/>
-                </group>
-            </page>
-        </notebook>
-    </field>
-</record>
-
-<record id="view_odoo_product_product_tree" model="ir.ui.view">
+<record id="odoo_product_product_view_tree" model="ir.ui.view">
     <field name="name">odoo.product.product.tree</field>
     <field name="model">odoo.product.product</field>
     <field name="arch" type="xml">
@@ -28,6 +12,7 @@
             <field name="backend_id"/>
             <field name="odoo_id"/>
             <field name="external_odoo_id"/>
+            <field name="sync_date"/>
         </tree>
     </field>
 </record>

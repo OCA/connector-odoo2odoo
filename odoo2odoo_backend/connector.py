@@ -27,6 +27,8 @@ def create_binding(session, model_name, record_id, backend_id, force=False):
     This function assumes that the corresponding binding model of `model_name`
     is `odoo.{model_name}` (e.g. `res.partner` => `odoo.res.partner`).
     """
+    # FIXME use 'odoo.backend'.get_model_bindings() method and do not assume
+    # that binding data model names are prefixed with 'odoo.*'
     if not force and session.env.context.get('connector_no_export'):
         return
     if session.env.context.get('connector_check_recursivity'):

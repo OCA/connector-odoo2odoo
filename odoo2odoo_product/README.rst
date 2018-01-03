@@ -6,7 +6,7 @@
 Odoo2Odoo - Products
 ====================
 
-This module allows to sync products between Odoo servers.
+Synchronize products between Odoo servers.
 
 Configuration
 =============
@@ -19,14 +19,10 @@ Usage
 
 Once your Odoo backend is configured and enabled, just create and update your
 products as usual, they will be synced on the configured Odoo backend.
-To use this module, you need to:
 
 .. image:: https://odoo-community.org/website/image/ir.attachment/5784_f2813bd/datas
    :alt: Try me on Runbot
-   :target: https://runbot.odoo-community.org/runbot/{repo_id}/{branch}
-
-.. repo_id is available in https://github.com/OCA/maintainer-tools/blob/master/tools/repos_with_ids.txt
-.. branch is "8.0" for example
+   :target: https://runbot.odoo-community.org/runbot/209/8.0
 
 Known issues / Roadmap
 ======================
@@ -47,12 +43,14 @@ Credits
 Images
 ------
 
-* Odoo Community Association: `Icon <https://github.com/OCA/maintainer-tools/blob/master/template/module/static/description/icon.svg>`_.
+* Odoo Community Association: `Icon <https://odoo-community.org/logo.png>`_.
 
 Contributors
 ------------
 
-* Sébastien Alix <sebastien.alix@osiell.com>
+* Sébastien Alix <sebastien.alix@osiell.com> (https://osiell.com)
+
+Do not contact contributors directly about support or help with technical issues.
 
 Maintainer
 ----------

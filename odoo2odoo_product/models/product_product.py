@@ -29,17 +29,3 @@ class OdooProductProduct(models.Model):
         string=u"Product",
         required=True,
         ondelete='cascade')
-
-
-@odoo(replacing=OdooSyncExportMapper)
-class OdooProductProductExportMapper(OdooSyncExportMapper):
-    _model_name = 'odoo.product.product'
-
-    def odoo2odoo(self, record):
-        product_tmpl_id = record.product_tmpl_id.id
-        binder = self.binder_for('odoo.product.template')
-        external_id = binder.to_backend(product_tmpl_id, wrap=True)
-        data = {
-            'product_tmpl_id': external_id,
-        }
-        return data
