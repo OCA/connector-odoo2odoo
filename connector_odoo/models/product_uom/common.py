@@ -4,22 +4,22 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 from odoo import models, fields
-
+from odoo.addons.component.core import Component
 
 class OdooProductUOM(models.Model):
     _name = 'odoo.product.uom'
-    _inherit = 'odoo.binding'
+    _inherit = ['odoo.binding', ]
     _inherits = {'product.uom': 'odoo_id'}
     _description = 'Odoo Product UOM'
 
-    odoo_id = fields.Many2one(comodel_name='product.uom',
-                              string='Product UOM',
-                              required=True,
-                              ondelete='restrict')
+#     odoo_id = fields.Many2one(comodel_name='product.uom',
+#                               string='Product UOM',
+#                               required=True,
+#                               ondelete='restrict')
     
 
 
-class ProductUOM(models.Model):
+class ProductUoM(models.Model):
     _inherit = 'product.uom'
     
     bind_ids = fields.One2many(
@@ -27,4 +27,11 @@ class ProductUOM(models.Model):
         inverse_name='odoo_id',
         string='Odoo Bindings',
     )
+
+
+
+class ProductUoMAdapter(Component):
+    _name = 'odoo.product.uom.adapter'
+    _inherit = 'odoo.adapter'
+    _apply_on = 'odoo.product.uom'
 
