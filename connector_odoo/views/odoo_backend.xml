@@ -1,100 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
-    <data>
+	<data>
 
-        <record id="view_odooconnector_backend_tree" model="ir.ui.view">
-            <field name="name">odooconnector.backend.tree</field>
-            <field name="model">odooconnector.backend</field>
-            <field name="arch" type="xml">
-                <tree string="Odoo Backends">
-                    <field name="name"/>
-                    <field name="version"/>
-                    <field name="hostname"/>
-                    <field name="port"/>
-                    <field name="database"/>
-                </tree>
-            </field>
-        </record>
+		<record id="view_odoo_backend_tree" model="ir.ui.view">
+			<field name="name">odoo.backend.tree</field>
+			<field name="model">odoo.backend</field>
+			<field name="arch" type="xml">
+				<tree string="Odoo Backends">
+					<field name="name" />
+					<field name="version" />
+					<field name="hostname" />
+					<field name="port" />
+					<field name="database" />
+					<field name="state" />
+				</tree>
+			</field>
+		</record>
 
-        <record id="view_odooconnector_backend_form" model="ir.ui.view">
-            <field name="name">odooconnector.backend.form</field>
-            <field name="model">odooconnector.backend</field>
-            <field name="arch" type="xml">
-                <form string="Odoo Backend">
-                    <header>
-                        <button name="import_partners"
-                                type="object"
-                                string="Import Partners" />
+		<record id="view_odoo_backend_form" model="ir.ui.view">
+			<field name="name">odoo.backend.form</field>
+			<field name="model">odoo.backend</field>
+			<field name="arch" type="xml">
+				<form string="Odoo Backend">
+					<header>
+						<button name="button_check_connection" type="object" class="oe_highlight"
+							string="Check Connection" attrs="{'invisible':[('state', 'not in', ['draft'])]}" />
+						<button name="button_reset_to_draft" type="object"
+							string="Reset To draft Connection" attrs="{'invisible':[('state', 'in', ['draft'])]}" />
+						<button name="import_partners" type="object" string="Import Partners"
+							attrs="{'invisible':[('state', 'in', ['draft'])]}" />
 
-                        <button name="import_products"
-                                type="object"
-                                string="Import Products" />
+						<button name="synchronize_basedata" type="object"
+							attrs="{'invisible':[('state', 'in', ['draft'])]}" string="Synchronize Base Datas" 
+							help="Synchronize UOM, Categories, etc..."/>
+						<field name="state" widget="statusbar" />
+					</header>
+					<sheet>
+						<div class="oe_button_box" name="button_box">
+							<button class="oe_stat_button" type="object" name="toggle_active"
+								icon="fa-archive">
+								<field name="active" widget="boolean_button" options='{"terminology": "archive"}' />
+							</button>
 
-                        <button name="import_product_uom"
-                                type="object"
-                                string="Import Product UoMs" />
-                    </header>
-                    <sheet>
-                        <label for="name"/>
-                        <h1>
-                            <field name="name" class="oe_inline"/>
-                        </h1>
-                        <group>
-                            <group>
-                                <field name="version" />
-                                <field name="active" />
-                            </group>
-                            <group>
-                                <field name="hostname" />
-                                <field name="port" />
-                                <field name="database" />
-                                <field name="username"/>
-                                <field name="password" password="1"/>
-                            </group>
-                        </group>
-                        <notebook>
-                            <page string="Base">
-                                <group>
-                                    <field name="default_lang_id"/>
-                                </group>
+						</div>
+						<label for="name" />
+						<h1>
+							<field name="name" class="oe_inline" />
+						</h1>
+						<group>
+							<group>
+								<field name="hostname" />
+								<field name="version" />
+								<field name="protocol" />
+								<field name="port" />
+							</group>
+							<group>
+								<field name="database" />
+								<field name="login" />
+								<field name="password" password="1" />
+							</group>
+						</group>
+						<notebook>
+							<page string="Base">
+								<group>
+									<field name="default_lang_id" />
+								</group>
 
-                                <group string="Import">
-                                    <field name="import_partner_domain_filter" />
-                                    <field name="import_product_domain_filter" />
+								<group string="Import">
+									<field name="import_partner_domain_filter" />
+									<field name="import_product_domain_filter" />
 
-                                </group>
-                                <group string="Export">
-                                    <field name="export_backend_id" />
-                                    <field name="export_partner_id" />
-                                    <field name="default_export_backend"/>
-                                    <field name="default_export_partner"/>
-                                    <field name="default_export_partner_domain"
-                                        attrs="{'invisible': [('default_export_partner', '=', False)]}"/>
-                                    <field name="default_export_product"/>
-                                    <field name="default_export_product_domain"
-                                        attrs="{'invisible': [('default_export_product', '=', False)]}"/>
-                                </group>
+								</group>
+								<group string="Export">
+									<field name="export_backend_id" />
+									<field name="export_partner_id" />
+									<field name="default_export_backend" />
+									<field name="default_export_partner" />
+									<field name="default_export_partner_domain"
+										attrs="{'invisible': [('default_export_partner', '=', False)]}" />
+									<field name="default_export_product" />
+									<field name="default_export_product_domain"
+										attrs="{'invisible': [('default_export_product', '=', False)]}" />
+								</group>
 
-                            </page>
-                        </notebook>
-                    </sheet>
-                </form>
-            </field>
-        </record>
+							</page>
+							<page string="Product"></page>
+							<page string="Partners"></page>
+							
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
 
-        <record id="action_odooconnector_backend" model="ir.actions.act_window">
-            <field name="name">Odoo Backends</field>
-            <field name="res_model">odooconnector.backend</field>
-            <field name="view_mode">tree,form</field>
-        </record>
+		<record id="action_odoo_backend" model="ir.actions.act_window">
+			<field name="name">Odoo Backends</field>
+			<field name="res_model">odoo.backend</field>
+			<field name="view_mode">tree,form</field>
+		</record>
 
-        <menuitem id="menu_odooconnector_root" name="Odoo"
-                  parent="connector.menu_connector_root" sequence="10"
-                  groups="odooconnector_base.group_oc_manager"/>
+		<menuitem id="menu_odoo_root" name="Odoo"
+			parent="connector.menu_connector_root" sequence="10" />
+		<!-- TODO: Implement security strategy groups="odoo_base.group_oc_manager" -->
+		<menuitem id="menu_odoo_backends" name="Backends" parent="menu_odoo_root"
+			action="action_odoo_backend" />
 
-        <menuitem id="menu_odooconnector_backends" name="Backends"
-                  parent="menu_odooconnector_root" action="action_odooconnector_backend"
-                  groups="odooconnector_base.group_oc_manager" />
-
-    </data>
+	</data>
 </openerp>
