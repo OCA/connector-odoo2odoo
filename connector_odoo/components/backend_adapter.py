@@ -176,7 +176,7 @@ class GenericAdapter(AbstractComponent):
  
         :rtype: list
         """
-        return self._call('%s.search' % self._Odoo_model,
+        return self._call('%s.search' % self._odoo_model,
                           [filters] if filters else [{}])
  
     def read(self, id, attributes=None):
@@ -195,25 +195,25 @@ class GenericAdapter(AbstractComponent):
             # attributes). The right correction is to install the
             # compatibility patch on odoo.
             arguments.append(attributes)
-        return self._call('%s.info' % self._Odoo_model,
+        return self._call('%s.info' % self._odoo_model,
                           arguments)
  
     def search_read(self, filters=None):
         """ Search records according to some criterias
         and returns their information"""
-        return self._call('%s.list' % self._Odoo_model, [filters])
+        return self._call('%s.list' % self._odoo_model, [filters])
  
     def create(self, data):
         """ Create a record on the external system """
-        return self._call('%s.create' % self._Odoo_model, [data])
+        return self._call('%s.create' % self._odoo_model, [data])
  
     def write(self, id, data):
         """ Update records on the external system """
-        return self._call('%s.update' % self._Odoo_model,
+        return self._call('%s.update' % self._odoo_model,
                           [int(id), data])
  
     def delete(self, id):
         """ Delete a record on the external system """
-        return self._call('%s.delete' % self._Odoo_model, [int(id)])
+        return self._call('%s.delete' % self._odoo_model, [int(id)])
 
 
