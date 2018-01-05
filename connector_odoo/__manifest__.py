@@ -12,13 +12,13 @@
     'author': 'Florent THOMAS (Mind And Go), Odoo Community Association (OCA)',
     "application": False,
     "installable": True,
-    "pre_init_hook": "pre_init_hook",
-    "post_init_hook": "post_init_hook",
-    "post_load": "post_load",
-    "uninstall_hook": "uninstall_hook",
+#     "pre_init_hook": "pre_init_hook",
+#     "post_init_hook": "post_init_hook",
+#     "post_load": "post_load",
+#     "uninstall_hook": "uninstall_hook",
     "external_dependencies": {
         "python": [
-            'OdooRPC'
+            'odoorpc'
             ],
         "bin": [],
     },

@@ -167,13 +167,13 @@ class OdooBackend(models.Model):
         if lang.code != self.env.context.get('lang'):
             self = self.with_context(lang=lang.code)
         odoo_location = OdooLocation(
-            host=self.hostname,
-            login=self.username,
-            passowrd=self.password,
+            hostname=self.hostname,
+            login=self.login,
+            password=self.password,
             database=self.database,
             port=self.port,
             version=self.version,
-            protocol=self.protocol            
+            protocol=self.protocol       
         )
         with OdooAPI(odoo_location) as odoo_api:
             _super = super(OdooBackend, self)
