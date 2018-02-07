@@ -14,13 +14,46 @@ class ProductUomMapper(Component):
     _inherit = 'odoo.import.mapper'
     _apply_on = 'odoo.product.uom'
 
-    direct = [('name', 'name')]
+    direct = [('name', 'name'),
+              ('factor_inv', 'factor_inv'),
+              ('factor', 'factor'),
+              ]
 
     @only_create
     @mapping
-    def check(self, record):
-        # partners are companies so we can bind
-        # addresses on them
-        _logger.info('Checking the UOM correspondances')
-        return {'odoo_id': partner.id}
+    def check_uom_exists(self, record):
+        #TODO: Improve and check family, factor etc...
+        local_uom_id = self.env['product.uom'].search([('name', '=', record.name)])
+        
+        if len(local_uom_id) == 1  :
+            res = local_uom_id.copy_data()[0] #dict((field, value) for field, value in local_uom_id.iteritems())
+            res.update({'odoo_id': local_uom_id.id})
+            
+            return res
+        return {}
+
+class ProductUoMImporter(Component):
+    """ Import Odoo UOM """
+
+    _name = 'odoo.product.uom.importer'
+    _inherit = 'odoo.importer'
+    _apply_on = 'odoo.product.uom'
+
+#     def _create(self, data):
+#         binding = super(ProductUoMImporter, self)._create(data)
+#         self.backend_record.add_checkpoint(binding)
+#         return binding
     
+# class ProductUoM(Component):  
+#     _name = 'odoo.product.uom.batch.importer'
+#     _inherit = 'odoo.batch.importer'
+#     _apply_on = ['odoo.product.uom']
+# 
+#     def _import_record(self, external_id, job_options=None):
+#         """ Delay a job for the import """
+#         super(ProductCategoryBatchImporter, self)._import_record(
+#             external_id, job_options=job_options
+#         )
+
+#     def run(self, filters=None):
+        

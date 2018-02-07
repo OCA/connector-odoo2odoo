@@ -24,8 +24,8 @@ class OdooBinding(models.AbstractModel):
         required=True,
         ondelete='restrict',
     )
-    # fields.Char because 0 is a valid Magento ID
-    odoo_external_id = fields.Char(string='ID on Ext Odoo')
+    
+    external_id = fields.Integer(string='ID on Ext Odoo')
 
     _sql_constraints = [
         ('odoo_backend_uniq', 'unique(backend_id, external_id)',

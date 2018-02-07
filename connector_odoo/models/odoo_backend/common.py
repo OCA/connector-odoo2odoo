@@ -11,7 +11,7 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
 from odoo.addons.connector_odoo.components.backend_adapter import OdooLocation, OdooAPI
-from vminstall.msg import protocol
+# from vminstall.msg import protocol
 
 _logger = logging.getLogger(__name__)
 
@@ -206,62 +206,3 @@ class OdooBackend(models.Model):
                 str(e).decode('utf-8', 'ignore'))
 
   
-# 
-#     @api.multi
-#     def get_environment(self, binding_model_name, api=None):
-#         self.ensure_one()
-#         if not api:
-#             api = odoorpc.ODOO(self.hostname, 'jsonrpc', self.port)
-#             api.login(self.database, self.username, self.password)
-#             _logger.info('Created a new Odoo API instance')
-#         env = APIConnectorEnvironment(self, binding_model_name, api=api)
-#         return env
-
-#     @api.multi
-#     @job
-#     def import_batch(self, binding_model_name, filters=None):
-#         """ Prepare a batch import of records from CSV """
-#         self.ensure_one()
-#         connector_env = self.get_environment(binding_model_name)
-#         importer = connector_env.get_connector_unit(BatchImporter)
-#         importer.run(filters=filters)
-# 
-#     @api.multi
-#     @job
-#     def import_record(self, binding_model_name, ext_id, force=False, api=None):
-#         """ Import a record from CSV """
-#         self.ensure_one()
-#         connector_env = self.get_environment(binding_model_name)
-#         importer = connector_env.get_connector_unit(OdooImporter)
-#         importer.run(ext_id, force=force)
-# 
-#     @api.multi
-#     def import_partners(self):
-#         """ Import partners from external system """
-#         for backend in self:
-#             filters = self.import_partner_domain_filter
-#             if filters and isinstance(filters, str):
-#                 filters = eval(filters)
-# 
-#             backend.import_batch('odooconnector.res.partner', filters)
-# 
-#         return True
-# 
-#     @api.multi
-#     def import_products(self):
-#         """ Import products from external system """
-#         for backend in self:
-#             filters = self.import_product_domain_filter
-#             if filters and isinstance(filters, str):
-#                 filters = eval(filters)
-# 
-#             backend.import_batch('odooconnector.product.product', filters)
-# 
-#         return True
-# 
-#     @api.multi
-#     def import_product_uom(self):
-#         """Import Product UoM from external System"""
-#         for backend in self:
-#             backend.import_batch('odooconnector.product.uom')
-#         return True

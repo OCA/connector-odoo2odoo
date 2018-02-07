@@ -8,7 +8,10 @@ from odoo.addons.component.core import Component
 class MetadataBatchImporter(Component):
     """ Import the records directly, without delaying the jobs.
 
-    Import the Odoo Websites, Stores, Storeviews
+    Import the Odoo Minimal Datas :
+    * UOM
+    * Product categories
+    * Product attributes and theirs values
 
     They are imported directly because this is a rare and fast operation,
     and we don't really bother if it blocks the UI during this time.
@@ -24,3 +27,6 @@ class MetadataBatchImporter(Component):
 #         'odoo.product.attribute',
 #         'odoo.product.attribute.value'
     ]
+    
+#     _usage = 'batch.importer'
+    
