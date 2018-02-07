@@ -23,6 +23,9 @@
 			<field name="arch" type="xml">
 				<form string="Odoo Backend">
 					<header>
+						<button name="synchronize_basedata" type="object" class="oe_highlight"
+							attrs="{'invisible':[('state', 'in', ['draft'])]}" string="Synchronize Base Datas"
+							help="Synchronize UOM, Categories, etc..." />
 						<button name="button_check_connection" type="object" class="oe_highlight"
 							string="Check Connection" attrs="{'invisible':[('state', 'not in', ['draft'])]}" />
 						<button name="button_reset_to_draft" type="object"
@@ -30,9 +33,7 @@
 						<button name="import_partners" type="object" string="Import Partners"
 							attrs="{'invisible':[('state', 'in', ['draft'])]}" />
 
-						<button name="synchronize_basedata" type="object"
-							attrs="{'invisible':[('state', 'in', ['draft'])]}" string="Synchronize Base Datas" 
-							help="Synchronize UOM, Categories, etc..."/>
+
 						<field name="state" widget="statusbar" />
 					</header>
 					<sheet>
@@ -86,7 +87,7 @@
 							</page>
 							<page string="Product"></page>
 							<page string="Partners"></page>
-							
+
 						</notebook>
 					</sheet>
 				</form>

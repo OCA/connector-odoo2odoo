@@ -11,6 +11,12 @@ class OdooProductUOM(models.Model):
     _inherit = ['odoo.binding', ]
     _inherits = {'product.uom': 'odoo_id'}
     _description = 'Odoo Product UOM'
+    
+    """
+    Product UOM are not fully managed with dependecies etc.
+    User has the responsability to check the names are the same in
+    both instances
+    """
 
 #     odoo_id = fields.Many2one(comodel_name='product.uom',
 #                               string='Product UOM',
@@ -34,4 +40,4 @@ class ProductUoMAdapter(Component):
     _name = 'odoo.product.uom.adapter'
     _inherit = 'odoo.adapter'
     _apply_on = 'odoo.product.uom'
-
+    _odoo_model = 'product.uom'

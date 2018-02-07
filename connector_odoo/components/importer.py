@@ -48,7 +48,8 @@ class OdooImporter(AbstractComponent):
         """Return True if the import should be skipped because
         it is already up-to-date in OpenERP"""
         assert self.odoo_record
-        if not self.odoo_record.get('updated_at'):
+        
+        if not self.odoo_record.write_date:
             return  # no update date on Odoo, always import it.
         if not binding:
             return  # it does not exist so it should not be skipped
@@ -57,7 +58,7 @@ class OdooImporter(AbstractComponent):
             return
         from_string = fields.Datetime.from_string
         sync_date = from_string(sync)
-        odoo_date = from_string(self.odoo_record['updated_at'])
+        odoo_date = from_string(self.odoo_record['write_date'])
         # if the last synchronization date is greater than the last
         # update in odoo, we skip the import.
         # Important: at the beginning of the exporters flows, we have to

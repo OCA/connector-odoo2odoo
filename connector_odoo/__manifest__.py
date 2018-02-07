@@ -33,6 +33,7 @@
 #         "security/ir.model.access.csv",
 #         "templates/assets.xml",
         "views/odoo_backend.xml",
+        "views/product_uom.xml",
 #         "views/res_partner_view.xml",
 #         "wizards/wizard_model_view.xml",
     ],
