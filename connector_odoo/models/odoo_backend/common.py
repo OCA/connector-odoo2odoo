@@ -146,15 +146,12 @@ class OdooBackend(models.Model):
     @api.multi
     def button_check_connection(self):
         self._check_connection()
-#         raise UserError(_('Connection successful for %s' % self.hostname))
 
-    
     @api.multi
     def button_reset_to_draft(self):
         self.ensure_one()
         self.write({'state': 'draft'})
         
-
     @contextmanager
     @api.multi
     def work_on(self, model_name, **kwargs):
@@ -173,7 +170,8 @@ class OdooBackend(models.Model):
             database=self.database,
             port=self.port,
             version=self.version,
-            protocol=self.protocol       
+            protocol=self.protocol,
+            lang_id=self.default_lang_id.code     
         )
         with OdooAPI(odoo_location) as odoo_api:
             _super = super(OdooBackend, self)
@@ -190,8 +188,8 @@ class OdooBackend(models.Model):
             for backend in self:
                 for model_name in ('odoo.product.uom',
 #                                    'odoo.product.category',
-#                                    'odoo.product.attribute',
-#                                    'odoo.product.attribute.value'
+                                    'odoo.product.attribute',
+                                    'odoo.product.attribute.value'
                                    ):
                     # import directly, do not delay because this
                     # is a fast operation, a direct return is fine
