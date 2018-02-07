@@ -44,7 +44,7 @@ class OdooAPI(object):
         """
         self._location = location
         self._api = None
-
+        
     @property
     def api(self):
         if self._api is None:

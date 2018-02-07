@@ -19,6 +19,8 @@ class OdooModelBinder(Component):
     _inherit = ['base.binder', 'base.odoo.connector']
     _apply_on = [
         'odoo.product.uom',
+        'odoo.product.attribute',
+        'odoo.product.attribute.value',
 #         'odoo.res.partner',
 #         'odoo.res.partner.category',
 #         'odoo.product.category',
