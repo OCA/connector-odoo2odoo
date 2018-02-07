@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+		<record id="view_odoo_uom_bind_ids" model="ir.ui.view">
+			<field name="name">odoo.product.uom</field>
+			<field name="model">product.uom</field>
+			<field name="inherit_id" ref="product.product_uom_form_view"></field>
+			<field name="arch" type="xml">
+				<form position="inside">
+					<group>
+						<field name="bind_ids" />
+					</group>
+				</form>
+
+			</field>
+		</record>
+
+
+	</data>
+</openerp>

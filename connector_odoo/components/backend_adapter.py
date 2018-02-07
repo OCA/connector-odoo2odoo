@@ -23,7 +23,7 @@ except ImportError:
 
 class OdooLocation(object):
     def __init__(self, hostname, login, password,
-                 database, port, version, protocol,
+                 database, port, version, protocol, lang_id='en_US',
                  use_custom_api_path=False):
       
         self.hostname = hostname
@@ -33,6 +33,7 @@ class OdooLocation(object):
         self.port = port
         self.version = version
         self.protocol = protocol
+        self.lang_id = lang_id
 
 class OdooAPI(object):
 
@@ -52,8 +53,20 @@ class OdooAPI(object):
                 port=self._location.port,
                 protocol=self._location.protocol,
             )
+            try:
+                api.login(
+                    db = self._location.database,
+                    login = self._location.login,
+                    password= self._location.password)
+                    
+            except odoorpc.error.RPCError as e:
+                _logger.exception(e)
+                raise UserError(e)
+            
             self._api = api
-            _logger.info('Created a new Odoo API instance')
+            _logger.info('Created a new Odoo API instance and logged In')
+            if self._location.lang_id:
+                self._api.env.context['lang']= self._location.lang_id
         return self._api
 
     def complete_check(self):
@@ -75,47 +88,14 @@ class OdooAPI(object):
     def __enter__(self):
         # we do nothing, api is lazy
         return self
-
+  
     def __exit__(self, type, value, traceback):
-        if self._api is not None:
-            self._api.__exit__(type, value, traceback)
+#         if self._api is not None:
+#             self._api.__exit__(type, value, traceback)
+        _logger.debug(traceback)
 #         self.__exit__(type, value, traceback)
 
-    def call(self, method, arguments):
-        try:
-            if isinstance(arguments, list):
-                while arguments and arguments[-1] is None:
-                    arguments.pop()
-            start = datetime.now()
-            try:
-                result = self.api.execute(method, arguments)
-            except:
-                _logger.error("api.call('%s', %s) failed", method, arguments)
-                raise
-            else:
-                _logger.debug("api.call('%s', %s) returned %s in %s seconds",
-                              method, arguments, result,
-                              (datetime.now() - start).seconds)
-            # Uncomment to record requests/responses in ``recorder``
-            # record(method, arguments, result)
-            return result
-        except (socket.gaierror, socket.error, socket.timeout) as err:
-            raise NetworkRetryableError(
-                'A network error caused the failure of the job: '
-                '%s' % err)
-        except xmlrpclib.ProtocolError as err:
-            if err.errcode in [502,   # Bad gateway
-                               503,   # Service unavailable
-                               504]:  # Gateway timeout
-                raise RetryableJobError(
-                    'A protocol error caused the failure of the job:\n'
-                    'URL: %s\n'
-                    'HTTP/HTTPS headers: %s\n'
-                    'Error code: %d\n'
-                    'Error message: %s\n' %
-                    (err.url, err.headers, err.errcode, err.errmsg))
-            else:
-                raise
+    
 
  
 class OdooCRUDAdapter(AbstractComponent):
@@ -150,25 +130,18 @@ class OdooCRUDAdapter(AbstractComponent):
     def delete(self, id):
         """ Delete a record on the external system """
         raise NotImplementedError
- 
-    def _call(self, method, arguments):
-        try:
-            odoo_api = getattr(self.work, 'odoo_api')
-        except AttributeError:
-            raise AttributeError(
-                'You must provide a odoo_api attribute with a '
-                'OdooAPI instance to be able to use the '
-                'Backend Adapter.'
-            )
-        return odoo_api.call(method, arguments)
+    
+    def execute(self, id, data ):
+        """ Execute method for a record on the external system """
+        raise NotImplementedError
  
  
 class GenericAdapter(AbstractComponent):
     _name = 'odoo.adapter'
     _inherit = 'odoo.crud.adapter'
  
-    _odoo_model = None
-    _admin_path = None
+#     _odoo_model = None
+#     _admin_path = None
  
     def search(self, filters=None):
         """ Search records according to some criterias
@@ -176,12 +149,24 @@ class GenericAdapter(AbstractComponent):
  
         :rtype: list
         """
-        return self._call('%s.search' % self._odoo_model,
-                          [filters] if filters else [{}])
+        
+        try:
+            odoo_api = getattr(self.work, 'odoo_api')
+            odoo_api = odoo_api.api
+        except AttributeError:
+            raise AttributeError(
+                'You must provide a odoo_api attribute with a '
+                'OdooAPI instance to be able to use the '
+                'Backend Adapter.'
+            )
+        
+        model = odoo_api.env[self._odoo_model]
+        return model.search([filters] if filters else [])
+
  
     def read(self, id, attributes=None):
         """ Returns the information of a record
- 
+  
         :rtype: dict
         """
         arguments = [int(id)]
@@ -195,25 +180,35 @@ class GenericAdapter(AbstractComponent):
             # attributes). The right correction is to install the
             # compatibility patch on odoo.
             arguments.append(attributes)
-        return self._call('%s.info' % self._odoo_model,
-                          arguments)
+        
+        try:
+            odoo_api = getattr(self.work, 'odoo_api')
+            odoo_api = odoo_api.api
+        except AttributeError:
+            raise AttributeError(
+                'You must provide a odoo_api attribute with a '
+                'OdooAPI instance to be able to use the '
+                'Backend Adapter.'
+            )
+        model = odoo_api.env[self._odoo_model]
+        return model.browse(arguments)
  
-    def search_read(self, filters=None):
-        """ Search records according to some criterias
-        and returns their information"""
-        return self._call('%s.list' % self._odoo_model, [filters])
- 
-    def create(self, data):
-        """ Create a record on the external system """
-        return self._call('%s.create' % self._odoo_model, [data])
- 
-    def write(self, id, data):
-        """ Update records on the external system """
-        return self._call('%s.update' % self._odoo_model,
-                          [int(id), data])
- 
-    def delete(self, id):
-        """ Delete a record on the external system """
-        return self._call('%s.delete' % self._odoo_model, [int(id)])
+#     def search_read(self, filters=None):
+#         """ Search records according to some criterias
+#         and returns their information"""
+#         return self._call('%s.list' % self._odoo_model, [filters])
+#  
+#     def create(self, data):
+#         """ Create a record on the external system """
+#         return self._call('%s.create' % self._odoo_model, [data])
+#  
+#     def write(self, id, data):
+#         """ Update records on the external system """
+#         return self._call('%s.update' % self._odoo_model,
+#                           [int(id), data])
+#  
+#     def delete(self, id):
+#         """ Delete a record on the external system """
+#         return self._call('%s.delete' % self._odoo_model, [int(id)])
 
 

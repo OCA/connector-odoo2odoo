@@ -36,8 +36,8 @@ In addition to its export job, an exporter has to:
 class MagentoBaseExporter(AbstractComponent):
     """ Base exporter for Magento """
 
-    _name = 'magento.base.exporter'
-    _inherit = ['base.exporter', 'base.magento.connector']
+    _name = 'odoo.base.exporter'
+    _inherit = ['base.exporter', 'base.odoo.connector']
     _usage = 'record.exporter'
 
     def __init__(self, working_context):
@@ -121,8 +121,8 @@ class MagentoBaseExporter(AbstractComponent):
 class MagentoExporter(AbstractComponent):
     """ A common flow for the exports to Magento """
 
-    _name = 'magento.exporter'
-    _inherit = 'magento.base.exporter'
+    _name = 'odoo.exporter'
+    _inherit = 'odoo.base.exporter'
 
     def __init__(self, working_context):
         super(MagentoExporter, self).__init__(working_context)
@@ -238,7 +238,7 @@ class MagentoExporter(AbstractComponent):
         rel_binder = self.binder_for(binding_model)
         # wrap is typically True if the relation is for instance a
         # 'product.product' record but the binding model is
-        # 'magento.product.product'
+        # 'odoo.product.product'
         wrap = relation._name != binding_model
 
         if wrap and hasattr(relation, binding_field):
@@ -252,7 +252,7 @@ class MagentoExporter(AbstractComponent):
             # we are working with a unwrapped record (e.g.
             # product.category) and the binding does not exist yet.
             # Example: I created a product.product and its binding
-            # magento.product.product and we are exporting it, but we need to
+            # odoo.product.product and we are exporting it, but we need to
             # create the binding for the product.category on which it
             # depends.
             else:
