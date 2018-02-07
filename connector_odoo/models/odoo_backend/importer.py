@@ -24,8 +24,8 @@ class MetadataBatchImporter(Component):
     _apply_on = [
         'odoo.product.uom',
 #         'odoo.product.category',
-#         'odoo.product.attribute',
-#         'odoo.product.attribute.value'
+        'odoo.product.attribute',
+        'odoo.product.attribute.value'
     ]
     
 #     _usage = 'batch.importer'

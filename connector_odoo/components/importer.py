@@ -58,7 +58,7 @@ class OdooImporter(AbstractComponent):
             return
         from_string = fields.Datetime.from_string
         sync_date = from_string(sync)
-        odoo_date = from_string(self.odoo_record['write_date'])
+        odoo_date = self.odoo_record.write_date
         # if the last synchronization date is greater than the last
         # update in odoo, we skip the import.
         # Important: at the beginning of the exporters flows, we have to
