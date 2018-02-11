@@ -19,20 +19,21 @@ class ProductUomMapper(Component):
               ('factor', 'factor'),
               ]
 
+    #TODO: Improve and check family, factor etc...
+
     @only_create
     @mapping
     def check_uom_exists(self, record):
-        #TODO: Improve and check family, factor etc...
-        lang = self.backend_record.default_lang_id or self.env.user.lang  or self.env.context['lang'] or 'en_US'  
+        res = {}
+        lang = self.backend_record.default_lang_id.code or self.env.user.lang or self.env.context['lang'] or 'en_US'  
         local_uom_id = self.env['product.uom'].with_context(
             lang=lang).search([('name', '=', record.name)])
-        
+        _logger.debug('UOM found for %s : %s' % (record, local_uom_id))
         if len(local_uom_id) == 1  :
-            res = local_uom_id.copy_data()[0] #dict((field, value) for field, value in local_uom_id.iteritems())
+#             res = local_uom_id.copy_data()[0] #dict((field, value) for field, value in local_uom_id.iteritems())
             res.update({'odoo_id': local_uom_id.id})
-            
-            return res
-        return {}
+        
+        return res
 
 class ProductUoMImporter(Component):
     """ Import Odoo UOM """
