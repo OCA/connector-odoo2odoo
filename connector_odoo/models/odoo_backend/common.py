@@ -11,7 +11,10 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
 from odoo.addons.connector_odoo.components.backend_adapter import OdooLocation, OdooAPI
-# from vminstall.msg import protocol
+from odoo.addons.connector.checkpoint import checkpoint
+
+#TODO : verify if needed 
+IMPORT_DELTA_BUFFER = 30  # seconds 
 
 _logger = logging.getLogger(__name__)
 
@@ -81,16 +84,7 @@ class OdooBackend(models.Model):
         comodel_name='res.lang',
         string='Default Language'
     )
-
-    import_partner_domain_filter = fields.Char(
-        string='Partner domain filter',
-    )
-
-    import_product_domain_filter = fields.Char(
-        string='Product domain filter',
-    )
-
-    
+   
     export_backend_id = fields.Integer(
         string='Backend ID in the external system',
         help="""The backend id that represents this system in the external
@@ -108,23 +102,88 @@ class OdooBackend(models.Model):
         help='Use this backend as an automatic export target.'
     )
 
+    """
+    PARTNER SYNC OPTIONS
+    """
+
     default_export_partner = fields.Boolean(
         string='Export Partners'
     )
+    default_import_partner = fields.Boolean(
+        string='Import Partners'
+    )
 
-    default_export_partner_domain = fields.Char(
-        string='Export Partners Domain',
+    local_partner_domain_filter = fields.Char(
+        string='Local Partners Domain',
         default='[]'
     )
 
+    external_partner_domain_filter = fields.Char(
+        string='External Partner domain filter',
+        default='[]',
+        help="""Filter in the Odoo Destination
+        """
+    )
+
+    matching_product_product = fields.Boolean(string="Match product", default=True)
+    
+    matching_product_ch = fields.Selection([('default_code','Reference'),('barcode','Barcode')]
+                                           ,string="Matching Field for product",
+                                           default="default_code", required=True)
+    
+    matching_customer = fields.Boolean(string="Matching Customer", 
+                    help="The selected fields will be matched to the ref field \
+                        of the partner. Please adapt your datas consequently.",
+                        default=True
+                        )
+    
+    matching_customer_ch = fields.Selection([('email','Email'),
+                                             ('barcode','Barcode'),
+                                             ('ref', 'Internal reference'),
+                                             ('vat', 'TIN Number')], 
+                                            string="Matching Field for partner",
+                                            default='ref'
+                                            )
+    
+    
+
+    """
+    PRODUCT SYNC OPTIONS
+    """
+    local_product_domain_filter = fields.Char(
+        string='Local Product domain filter', default='[]',
+        help="""Use this option per backend to specify which part of your catalog to synchronize
+        """
+    )
+    
+    external_product_domain_filter = fields.Char(
+        string='External Product domain filter',
+        default='[]',
+        help="""Filter in the Odoo Destination
+        """
+    )
+    
+    default_import_product = fields.Boolean(
+        string='Import products',
+    )
+    import_products_from_date = fields.Datetime(
+        string='Import products from date',
+    )
+    import_categories_from_date = fields.Datetime(
+        string='Import products from date',
+    )
+    
     default_export_product = fields.Boolean(
         string='Export Products'
     )
-
-    default_export_product_domain = fields.Char(
-        string='Export Products Domain',
-        default='[]'
+    export_products_from_date = fields.Datetime(
+        string='Import products from date',
     )
+    export_categories_from_date = fields.Datetime(
+        string='Export Categories from date',
+    )
+    
+    
 
     @api.multi
     def _check_connection(self):
@@ -175,21 +234,19 @@ class OdooBackend(models.Model):
         )
         with OdooAPI(odoo_location) as odoo_api:
             _super = super(OdooBackend, self)
-            # from the components we'll be able to do: self.work.magento_api
+            # from the components we'll be able to do: self.work.odoo_api
             with _super.work_on(
                     model_name, odoo_api=odoo_api, **kwargs) as work:
                 yield work
-
-
 
     @api.multi
     def synchronize_basedata(self):
         try:
             for backend in self:
-                for model_name in ('odoo.product.uom',
-#                                    'odoo.product.category',
-                                    'odoo.product.attribute',
-                                    'odoo.product.attribute.value'
+                for model_name in (
+                    'odoo.product.uom',                    
+                    'odoo.product.attribute',
+                    'odoo.product.attribute.value'
                                    ):
                     # import directly, do not delay because this
                     # is a fast operation, a direct return is fine
@@ -203,4 +260,91 @@ class OdooBackend(models.Model):
                   u"Here is the error:\n%s") %
                 str(e).decode('utf-8', 'ignore'))
 
-  
+    @api.multi
+    def add_checkpoint(self, record):
+        self.ensure_one()
+        record.ensure_one()
+        return checkpoint.add_checkpoint(self.env, record._name, record.id,
+                                         self._name, self.id)
+    
+    @api.multi
+    def import_product_product(self):
+        if not self.default_import_product:
+            return False
+        self._import_from_date('odoo.product.product',
+                               'import_products_from_date')
+        return True
+    
+    @api.multi
+    def import_product_categories(self):
+        if not self.default_import_product:
+            return False
+        self._import_from_date('odoo.product.category',
+                               'import_categories_from_date')
+        return True
+
+    
+    @api.multi
+    def _import_from_date(self, model, from_date_field):
+        import_start_time = datetime.now()
+        filters=[('write_date', '<', fields.Datetime.to_string(import_start_time))]
+        
+        for backend in self:
+            from_date = backend[from_date_field]
+            if from_date:
+#                 from_date = fields.Datetime.from_string(from_date)
+                filters.append(('write_date', '>', from_date))
+            else:
+                from_date = None
+            self.env[model].with_delay().import_batch(
+                backend, filters  )
+            
+            
+        # Records from Magento are imported based on their `created_at`
+        # date.  This date is set on Magento at the beginning of a
+        # transaction, so if the import is run between the beginning and
+        # the end of a transaction, the import of a record may be
+        # missed.  That's why we add a small buffer back in time where
+        # the eventually missed records will be retrieved.  This also
+        # means that we'll have jobs that import twice the same records,
+        # but this is not a big deal because they will be skipped when
+        # the last `sync_date` is the same.
+        next_time = import_start_time - timedelta(seconds=IMPORT_DELTA_BUFFER)
+        next_time = fields.Datetime.to_string(next_time)
+        self.write({from_date_field: next_time})
+        
+    @api.multi
+    def export_product_categories(self):
+        if not self.default_export_product:
+            return False
+        self._export_from_date('odoo.product.category',
+                               'export_categories_from_date')
+        return True        
+        
+    @api.multi
+    def export_product_products(self):
+        if not self.default_export_product:
+            return False
+        self._export_from_date('odoo.product.product.batch.exporter',
+                               'export_products_from_date')
+        return True     
+    
+    
+    @api.multi
+    def _export_from_date(self, model, from_date_field):
+        import_start_time = datetime.now()
+        filters=[('write_date', '<', fields.Datetime.to_string(import_start_time))]
+        
+        for backend in self:
+            from_date = backend[from_date_field]
+            if from_date:
+                filters.append(('write_date', '>', from_date))
+            else:
+                from_date = None
+            self.env[model].with_delay().export_batch(
+                backend, filters  )
+                        
+        next_time = import_start_time - timedelta(seconds=IMPORT_DELTA_BUFFER)
+        next_time = fields.Datetime.to_string(next_time)
+        self.write({from_date_field: next_time})
+        

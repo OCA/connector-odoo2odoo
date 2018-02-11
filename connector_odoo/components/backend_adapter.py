@@ -90,14 +90,8 @@ class OdooAPI(object):
         return self
   
     def __exit__(self, type, value, traceback):
-#         if self._api is not None:
-#             self._api.__exit__(type, value, traceback)
         _logger.debug(traceback)
-#         self.__exit__(type, value, traceback)
 
-    
-
- 
 class OdooCRUDAdapter(AbstractComponent):
     """ External Records Adapter for Odoo """
  
@@ -134,7 +128,7 @@ class OdooCRUDAdapter(AbstractComponent):
     def execute(self, id, data ):
         """ Execute method for a record on the external system """
         raise NotImplementedError
- 
+
  
 class GenericAdapter(AbstractComponent):
     _name = 'odoo.adapter'
@@ -143,12 +137,15 @@ class GenericAdapter(AbstractComponent):
 #     _odoo_model = None
 #     _admin_path = None
  
-    def search(self, filters=None):
+     
+    def search(self, filters=None, model=None,):
         """ Search records according to some criterias
         and returns a list of ids
  
         :rtype: list
         """
+        
+        ext_model = model or self._odoo_model 
         
         try:
             odoo_api = getattr(self.work, 'odoo_api')
@@ -159,17 +156,17 @@ class GenericAdapter(AbstractComponent):
                 'OdooAPI instance to be able to use the '
                 'Backend Adapter.'
             )
-        
-        model = odoo_api.env[self._odoo_model]
-        return model.search([filters] if filters else [])
 
- 
-    def read(self, id, attributes=None):
+        model = odoo_api.env[ext_model]
+        return model.search(filters if filters else [])
+    
+    def read(self, id, attributes=None, model=None):
         """ Returns the information of a record
   
         :rtype: dict
         """
         arguments = [int(id)]
+        ext_model = model or self._odoo_model 
         if attributes:
             # Avoid to pass Null values in attributes. Workaround for
             # https://bugs.launchpad.net/openerp-connector-Odoo/+bug/1210775
@@ -180,6 +177,7 @@ class GenericAdapter(AbstractComponent):
             # attributes). The right correction is to install the
             # compatibility patch on odoo.
             arguments.append(attributes)
+
         
         try:
             odoo_api = getattr(self.work, 'odoo_api')
@@ -190,9 +188,43 @@ class GenericAdapter(AbstractComponent):
                 'OdooAPI instance to be able to use the '
                 'Backend Adapter.'
             )
-        model = odoo_api.env[self._odoo_model]
+        model = odoo_api.env[ext_model]
         return model.browse(arguments)
- 
+    
+    
+    
+    def create(self, data):
+        ext_model = self._odoo_model 
+        try:
+            odoo_api = getattr(self.work, 'odoo_api')
+            odoo_api = odoo_api.api
+        except AttributeError:
+            raise AttributeError(
+                'You must provide a odoo_api attribute with a '
+                'OdooAPI instance to be able to use the '
+                'Backend Adapter.'
+            )
+        model = odoo_api.env[ext_model]
+        return model.create(data)
+        
+    def write(self, id, data):
+        arguments = [int(id)]
+        ext_model = self._odoo_model 
+        try:
+            odoo_api = getattr(self.work, 'odoo_api')
+            odoo_api = odoo_api.api
+        except AttributeError:
+            raise AttributeError(
+                'You must provide a odoo_api attribute with a '
+                'OdooAPI instance to be able to use the '
+                'Backend Adapter.'
+            )
+         
+        model = odoo_api.env[self._odoo_model]
+        object_id = model.browse(arguments)
+        return object_id.write(data)
+        
+        
 #     def search_read(self, filters=None):
 #         """ Search records according to some criterias
 #         and returns their information"""

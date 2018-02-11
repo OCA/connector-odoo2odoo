@@ -4,10 +4,42 @@
 
 import logging
 from odoo.addons.component.core import Component
-
 from odoo.addons.connector.components.mapper import mapping, only_create
 
 _logger = logging.getLogger(__name__)
+
+
+class ProductAttributeValueImporter(Component):
+    """ Import Odoo Attribute Value """
+
+    _name = 'odoo.product.attribute.value.importer'
+    _inherit = 'odoo.importer'
+    _apply_on = 'odoo.product.attribute.value'
+
+
+    def _import_dependencies(self):
+        """ Import the dependencies for the record"""
+        record = self.odoo_record        
+        self._import_dependency(record.attribute_id.id, 'odoo.product.attribute')
+
+
+#     def _create(self, data):
+#         binding = super(ProductUoMImporter, self)._create(data)
+#         self.backend_record.add_checkpoint(binding)
+#         return binding
+    
+# class ProductUoM(Component):  
+#     _name = 'odoo.product.uom.batch.importer'
+#     _inherit = 'odoo.batch.importer'
+#     _apply_on = ['odoo.product.uom']
+# 
+#     def _import_record(self, external_id, job_options=None):
+#         """ Delay a job for the import """
+#         super(ProductCategoryBatchImporter, self)._import_record(
+#             external_id, job_options=job_options
+#         )
+
+#     def run(self, filters=None):
 
 class ProductAttributeValueMapper(Component):
     _name = 'odoo.product.attribute.value.mapper'
@@ -42,35 +74,4 @@ class ProductAttributeValueMapper(Component):
 #             return res
 #         return {}
 
-class ProductAttributeValueImporter(Component):
-    """ Import Odoo Attribute Value """
-
-    _name = 'odoo.product.attribute.value.importer'
-    _inherit = 'odoo.importer'
-    _apply_on = 'odoo.product.attribute.value'
-
-
-    def _import_dependencies(self):
-        """ Import the dependencies for the record"""
-        record = self.odoo_record        
-        self._import_dependency(record.attribute_id.id, 'odoo.product.attribute')
-
-
-#     def _create(self, data):
-#         binding = super(ProductUoMImporter, self)._create(data)
-#         self.backend_record.add_checkpoint(binding)
-#         return binding
-    
-# class ProductUoM(Component):  
-#     _name = 'odoo.product.uom.batch.importer'
-#     _inherit = 'odoo.batch.importer'
-#     _apply_on = ['odoo.product.uom']
-# 
-#     def _import_record(self, external_id, job_options=None):
-#         """ Delay a job for the import """
-#         super(ProductCategoryBatchImporter, self)._import_record(
-#             external_id, job_options=job_options
-#         )
-
-#     def run(self, filters=None):
         

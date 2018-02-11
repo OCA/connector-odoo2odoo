@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+		<record id="product_normal_form_view" model="ir.ui.view">
+			<field name="name">product.product.form</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="product.product_normal_form_view" />
+			<field name="arch" type="xml">
+				<xpath expr="//notebook/page[@name='connector']" position="attributes">
+					<attribute name="invisible" eval="0" />
+
+				</xpath>
+				<xpath expr="//notebook/page[@name='connector']" position="inside">
+					<field name="bind_ids" readonly="1" />
+
+				</xpath>
+			</field>
+		</record>
+
+
+		<record id="product_product_tree_view" model="ir.ui.view">
+			<field name="name">odoo.product.product.tree</field>
+			<field name="model">odoo.product.product</field>
+			
+			<field name="arch" type="xml">
+				<tree>
+					<field name="display_name" />
+					<field name="odoo_id" />
+					<field name="backend_id" />
+					<field name="external_id" />
+				</tree>
+			</field>
+		</record>
+
+
+
+	</data>
+</openerp>
