@@ -64,9 +64,11 @@ class OdooAPI(object):
                 raise UserError(e)
             
             self._api = api
-            _logger.info('Created a new Odoo API instance and logged In')
+            
             if self._location.lang_id:
-                self._api.env.context['lang']= self._location.lang_id
+                self._api.env.context['lang'] = self._location.lang_id
+            
+            _logger.info('Created a new Odoo API instance and logged In with context %s' % self._api.env.context)
         return self._api
 
     def complete_check(self):
@@ -135,9 +137,8 @@ class GenericAdapter(AbstractComponent):
     _inherit = 'odoo.crud.adapter'
  
 #     _odoo_model = None
-#     _admin_path = None
- 
-     
+#     _admin_path = None 
+        
     def search(self, filters=None, model=None,):
         """ Search records according to some criterias
         and returns a list of ids

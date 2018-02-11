@@ -183,7 +183,6 @@ class OdooBackend(models.Model):
         string='Export Categories from date',
     )
     
-    
 
     @api.multi
     def _check_connection(self):
@@ -241,6 +240,10 @@ class OdooBackend(models.Model):
 
     @api.multi
     def synchronize_basedata(self):
+        self.ensure_one()
+        lang = self.default_lang_id or self.env.user.lang  or self.env.context['lang'] or 'en_US'  
+        self = self.with_context(lang=lang)
+    
         try:
             for backend in self:
                 for model_name in (
