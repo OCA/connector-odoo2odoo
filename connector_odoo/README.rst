@@ -24,7 +24,14 @@ Configuration
 
 To configure this module, you need to:
 
-#. Go to ...
+#. Connector > Odoo > Backend
+#. Adapt the info to your external instances
+#. Synchronize metadata will import UOM, Attributes and Attribute Values 
+
+To export Product, you need to select product variants (Not template) and 
+use add backend action to select on which backend you want to export.
+Afterwards, you'll be able to export the product in the other Odoo
+
 
 .. figure:: path/to/local/image.png
    :alt: alternative description
@@ -62,9 +69,9 @@ Images
 Contributors
 ------------
 
-* Florent THOMAS (https://mind-and-go.com)
 * Malte Jacobi <malte.jacobi@htwsaar.de>
 * Yelizariev Team (https://github.com/it-projects-llc)
+* Florent THOMAS (https://mind-and-go.com)
 
 Do not contact contributors directly about support or help with technical issues.
 

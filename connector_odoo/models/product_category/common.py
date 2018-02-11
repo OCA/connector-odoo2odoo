@@ -19,11 +19,7 @@ class OdooProductCategory(models.Model):
     _inherits = {'product.category': 'odoo_id'}
     _description = 'Odoo Product Category'
 
-    odoo_id = fields.Many2one(comodel_name='product.category',
-                              string='Product Category',
-                              required=True,
-                              ondelete='cascade')
-    description = fields.Text(translate=True)
+
     odoo_parent_id = fields.Many2one(
         comodel_name='odoo.product.category',
         string='Ext. Odoo Parent Category',
@@ -39,17 +35,18 @@ class OdooProductCategory(models.Model):
 class ProductCategory(models.Model):
     _inherit = 'product.category'
 
-    odoo_bind_ids = fields.One2many(
+    bind_ids = fields.One2many(
         comodel_name='odoo.product.category',
         inverse_name='odoo_id',
         string="Odoo Bindings",
     )
 
 
-# class ProductCategoryAdapter(Component):
-#     _name = 'odoo.product.category.adapter'
-#     _inherit = 'odoo.adapter'
-#     _apply_on = 'odoo.product.category'
+class ProductCategoryAdapter(Component):
+    _name = 'odoo.product.category.adapter'
+    _inherit = 'odoo.adapter'
+    _apply_on = 'odoo.product.category'
+    _odoo_model = 'product.category'
 # 
 #     def _call(self, method, arguments):
 #         try:

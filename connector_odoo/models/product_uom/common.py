@@ -18,13 +18,6 @@ class OdooProductUOM(models.Model):
     both instances
     """
 
-#     odoo_id = fields.Many2one(comodel_name='product.uom',
-#                               string='Product UOM',
-#                               required=True,
-#                               ondelete='restrict')
-    
-
-
 class ProductUoM(models.Model):
     _inherit = 'product.uom'
     
