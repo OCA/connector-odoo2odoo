@@ -38,7 +38,7 @@ class OdooModelBinder(Component):
 
         Example: when called with a ``product.product`` id,
         it will return the corresponding ``odoo.product.product`` id.
-        it assumes that bind_ids is the name used for bind regular to external
+        it assumes that bind_ids is the name used for bind regular to external objects
         
         :param browse: when True, returns a browse_record instance
                        rather than an ID

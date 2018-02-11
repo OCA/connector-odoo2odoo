@@ -23,7 +23,9 @@ class ProductUomMapper(Component):
     @mapping
     def check_uom_exists(self, record):
         #TODO: Improve and check family, factor etc...
-        local_uom_id = self.env['product.uom'].search([('name', '=', record.name)])
+        lang = self.backend_record.default_lang_id or self.env.user.lang  or self.env.context['lang'] or 'en_US'  
+        local_uom_id = self.env['product.uom'].with_context(
+            lang=lang).search([('name', '=', record.name)])
         
         if len(local_uom_id) == 1  :
             res = local_uom_id.copy_data()[0] #dict((field, value) for field, value in local_uom_id.iteritems())
@@ -39,21 +41,3 @@ class ProductUoMImporter(Component):
     _inherit = 'odoo.importer'
     _apply_on = 'odoo.product.uom'
 
-#     def _create(self, data):
-#         binding = super(ProductUoMImporter, self)._create(data)
-#         self.backend_record.add_checkpoint(binding)
-#         return binding
-    
-# class ProductUoM(Component):  
-#     _name = 'odoo.product.uom.batch.importer'
-#     _inherit = 'odoo.batch.importer'
-#     _apply_on = ['odoo.product.uom']
-# 
-#     def _import_record(self, external_id, job_options=None):
-#         """ Delay a job for the import """
-#         super(ProductCategoryBatchImporter, self)._import_record(
-#             external_id, job_options=job_options
-#         )
-
-#     def run(self, filters=None):
-        
