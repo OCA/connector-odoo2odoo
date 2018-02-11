@@ -14,16 +14,12 @@ class ProductUomMapper(Component):
     _inherit = 'odoo.import.mapper'
     _apply_on = 'odoo.product.uom'
 
-#     direct = [('name', 'name'),
-#               ('factor_inv', 'factor_inv'),
-#               ('factor', 'factor'),
-#               ]
+    direct = [('name', 'name'),
+              ('factor_inv', 'factor_inv'),
+              ('factor', 'factor'),
+              ]
 
     #TODO: Improve and check family, factor etc...
-    @mapping
-    def name(self, record):
-        #Force this in order to be sure to pass in (Server issue)
-        return record['name']
 
     @only_create
     @mapping
@@ -37,7 +33,6 @@ class ProductUomMapper(Component):
             lang=lang).search([('name', '=', record.name)])
         _logger.debug('UOM found for %s : %s' % (record, local_uom_id))
         if len(local_uom_id) == 1  :
-#             res = local_uom_id.copy_data()[0] #dict((field, value) for field, value in local_uom_id.iteritems())
             res.update({'odoo_id': local_uom_id.id})
         
         return res
