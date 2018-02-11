@@ -69,9 +69,13 @@ class ProductCategoryImportMapper(Component):
     _apply_on = 'odoo.product.category'
 
     direct = [
-        ('name', 'name'),
+#         ('name', 'name'),
         ('type', 'type'),
     ]
+
+    @mapping
+    def name(self, record):
+        return {'name': record['name']}
 
     @only_create
     @mapping
