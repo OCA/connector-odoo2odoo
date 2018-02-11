@@ -22,26 +22,26 @@ _logger = logging.getLogger(__name__)
 
 """
 
-Exporters for Magento.
+Exporters for Odoo.
 
 In addition to its export job, an exporter has to:
 
-* check in Magento if the record has been updated more recently than the
+* check in Odoo if the record has been updated more recently than the
   last sync date and if yes, delay an import
 * call the ``bind`` method of the binder to update the last sync date
 
 """
 
 
-class MagentoBaseExporter(AbstractComponent):
-    """ Base exporter for Magento """
+class OdooBaseExporter(AbstractComponent):
+    """ Base exporter for Odoo """
 
     _name = 'odoo.base.exporter'
     _inherit = ['base.exporter', 'base.odoo.connector']
     _usage = 'record.exporter'
 
     def __init__(self, working_context):
-        super(MagentoBaseExporter, self).__init__(working_context)
+        super(OdooBaseExporter, self).__init__(working_context)
         self.binding = None
         self.external_id = None
 
@@ -60,9 +60,9 @@ class MagentoBaseExporter(AbstractComponent):
 
     def _should_import(self):
         """ Before the export, compare the update date
-        in Magento and the last sync date in Odoo,
+        in Odoo and the last sync date in Odoo,
         if the former is more recent, schedule an import
-        to not miss changes done in Magento.
+        to not miss changes done in Odoo.
         """
         assert self.binding
         if not self.external_id:
@@ -70,15 +70,14 @@ class MagentoBaseExporter(AbstractComponent):
         sync = self.binding.sync_date
         if not sync:
             return True
-        record = self.backend_adapter.read(self.external_id,
-                                           attributes=['updated_at'])
-        if not record['updated_at']:
+        record = self.backend_adapter.read(self.external_id)
+        if not record['write_date']:
             # in rare case it can be empty, in doubt, import it
             return True
         sync_date = odoo.fields.Datetime.from_string(sync)
-        magento_date = datetime.strptime(record['updated_at'],
-                                         MAGENTO_DATETIME_FORMAT)
-        return sync_date < magento_date
+        odoo_date = record['write_date']
+                                        
+        return sync_date < odoo_date
 
     def run(self, binding, *args, **kwargs):
         """ Run the synchronization
@@ -114,18 +113,62 @@ class MagentoBaseExporter(AbstractComponent):
         raise NotImplementedError
 
     def _after_export(self):
-        """ Can do several actions after exporting a record on magento """
+        """ Can do several actions after exporting a record on odoo """
         pass
 
+class BatchExporter(AbstractComponent):
+    """ The role of a BatchExporter is to search for a list of
+    items to export, then it can either export them directly or delay
+    the export of each item separately.
+    """
 
-class MagentoExporter(AbstractComponent):
-    """ A common flow for the exports to Magento """
+    _name = 'odoo.batch.exporter'
+    _inherit = ['base.exporter', 'base.odoo.connector']
+    _usage = 'batch.exporter'
+
+    def run(self, filters=None):
+        """ Run the synchronization """
+        record_ids = self.backend_adapter.search(filters)
+        for record_id in record_ids:
+            self._export_record(record_id)
+
+    def _export_record(self, external_id):
+        """ Import a record directly or delay the import of the record.
+
+        Method to implement in sub-classes.
+        """
+        raise NotImplementedError
+
+class DelayedBatchExporter(AbstractComponent):
+    """ Delay import of the records """
+
+    _name = 'odoo.delayed.batch.exporter'
+    _inherit = 'odoo.batch.exporter'
+
+    def _export_record(self, external_id, job_options=None, **kwargs):
+        """ Delay the import of the records"""
+        delayable = external_id.with_delay(**job_options or {})
+        delayable.export_record(self.backend_record, **kwargs)
+
+class DirectBatchExporter(AbstractComponent):
+    """ Import the records directly, without delaying the jobs. """
+
+    _name = 'odoo.direct.batch.exporter'
+    _inherit = 'odoo.batch.exporter'
+
+    def _export_record(self, external_id):
+        """ Import the record directly """
+        self.model.export_record(self.backend_record, external_id)
+
+
+class OdooExporter(AbstractComponent):
+    """ A common flow for the exports to Odoo """
 
     _name = 'odoo.exporter'
     _inherit = 'odoo.base.exporter'
 
     def __init__(self, working_context):
-        super(MagentoExporter, self).__init__(working_context)
+        super(OdooExporter, self).__init__(working_context)
         self.binding = None
 
     def _lock(self):
@@ -172,14 +215,14 @@ class MagentoExporter(AbstractComponent):
         record created by :meth:`_export_dependency`), resulting in:
 
             IntegrityError: duplicate key value violates unique
-            constraint "magento_product_product_odoo_uniq"
+            constraint "odoo_product_product_odoo_uniq"
             DETAIL:  Key (backend_id, odoo_id)=(1, 4851) already exists.
 
         In that case, we'll retry the import just later.
 
         .. warning:: The unique constraint must be created on the
                      binding record to prevent 2 bindings to be created
-                     for the same Magento record.
+                     for the same Odoo record.
 
         """
         try:
@@ -196,11 +239,11 @@ class MagentoExporter(AbstractComponent):
 
     def _export_dependency(self, relation, binding_model,
                            component_usage='record.exporter',
-                           binding_field='magento_bind_ids',
+                           binding_field='odoo_bind_ids',
                            binding_extra_vals=None):
         """
         Export a dependency. The exporter class is a subclass of
-        ``MagentoExporter``. If a more precise class need to be defined,
+        ``OdooExporter``. If a more precise class need to be defined,
         it can be passed to the ``exporter_class`` keyword argument.
 
         .. warning:: a commit is done at the end of the export of each
@@ -225,7 +268,7 @@ class MagentoExporter(AbstractComponent):
         :type exporter: str | unicode
         :param binding_field: name of the one2many field on a normal
                               record that points to the binding record
-                              (default: magento_bind_ids).
+                              (default: odoo_bind_ids).
                               It is used only when the relation is not
                               a binding but is a normal record.
         :type binding_field: str | unicode
@@ -276,7 +319,7 @@ class MagentoExporter(AbstractComponent):
                     if not odoo.tools.config['test_enable']:
                         self.env.cr.commit()  # noqa
         else:
-            # If magento_bind_ids does not exist we are typically in a
+            # If odoo_bind_ids does not exist we are typically in a
             # "direct" binding (the binding record is the same record).
             # If wrap is True, relation is already a binding record.
             binding = relation
@@ -322,7 +365,7 @@ class MagentoExporter(AbstractComponent):
         return map_record.values(for_create=True, fields=fields, **kwargs)
 
     def _create(self, data):
-        """ Create the Magento record """
+        """ Create the Odoo record """
         # special check on data before export
         self._validate_create_data(data)
         return self.backend_adapter.create(data)
@@ -332,7 +375,7 @@ class MagentoExporter(AbstractComponent):
         return map_record.values(fields=fields, **kwargs)
 
     def _update(self, data):
-        """ Update an Magento record """
+        """ Update an Odoo record """
         assert self.external_id
         # special check on data before export
         self._validate_update_data(data)
@@ -367,4 +410,5 @@ class MagentoExporter(AbstractComponent):
             if not record:
                 return _('Nothing to export.')
             self.external_id = self._create(record)
-        return _('Record exported with ID %s on Magento.') % self.external_id
+        return _('Record exported with ID %s on Odoo.') % self.external_id
+

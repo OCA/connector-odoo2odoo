@@ -62,32 +62,108 @@
 							</group>
 						</group>
 						<notebook>
-							<page string="Base">
+							<page string="Product">
+								<group>
+									<group string="Import / Export">
+										<field name="default_import_product" />
+										<field name="default_export_product" />
+										<field name="matching_product_product" />
+										<div>
+											<field name="matching_product_ch" class="oe_inline" />
+										</div>
+									</group>
+									<group string="General ">
+										<field name="local_product_domain_filter" />
+										<field name="external_product_domain_filter" />
+									</group>
+								</group>
+								<group >
+									<group string="Import Operations">
+										<group>
+											<div
+												attrs="{'invisible': [('default_import_product', '!=', True)]}">
+												<button name="import_product_categories" type="object"
+													string="Import Categories" class="oe_highlight oe_inline"
+													help="Import Categories" nolabel="1" />
+											</div>
+											<div
+												attrs="{'invisible': [('default_import_product', '!=', True)]}">
+												<field name="import_categories_from_date" class="oe_inline"
+													nolabel="1" />
+											</div>
+										</group>
+										<group>
+											<div
+												attrs="{'invisible': [('default_import_product', '!=', True)]}">
+												<button name="import_product_product" type="object"
+													string="Import Product" class="oe_highlight oe_inline"
+													help="Import Product" nolabel="1" />
+											</div>
+											<div
+												attrs="{'invisible': [('default_import_product', '!=', True)]}">
+												<field name="import_products_from_date" class="oe_inline"
+													nolabel="1" />
+											</div>
+
+										</group>
+									</group>
+									<group string="Export operations">
+										<group>
+											<div
+												attrs="{'invisible': [('default_export_product', '!=', True)]}">
+												<button name="export_product_categories" type="object"
+													string="Export Categories" class="oe_highlight oe_inline"
+													help="Export Categories" nolabel="1" />
+											</div>
+											<div
+												attrs="{'invisible': [('default_export_product', '!=', True)]}">
+												<field name="export_categories_from_date" class="oe_inline"
+													nolabel="1" />
+											</div>
+										</group>
+										<group>
+											<div
+												attrs="{'invisible': [('default_export_product', '!=', True)]}">
+												<button name="export_product_products" type="object"
+													string="Export Product" class="oe_highlight oe_inline"
+													help="Export Products" nolabel="1" />
+											</div>
+											<div
+												attrs="{'invisible': [('default_export_product', '!=', True)]}">
+												<field name="export_products_from_date" class="oe_inline"
+													nolabel="1" />
+											</div>
+
+										</group>
+
+
+									</group>
+
+								</group>
+							</page>
+							<page string="Partners">
+								<group>
+									<group string="Import / Export">
+										<field name="default_import_partner" />
+										<field name="default_export_partner" />
+									</group>
+									<group string="General ">
+										<field name="local_partner_domain_filter" />
+										<field name="external_partner_domain_filter" />
+									</group>
+									<group string="Import / Export">
+										<field name="default_import_partner" />
+										<field name="default_export_partner" />
+									</group>
+
+								</group>
+							</page>
+							<page string="General">
 								<group>
 									<field name="default_lang_id" />
 								</group>
-
-								<group string="Import">
-									<field name="import_partner_domain_filter" />
-									<field name="import_product_domain_filter" />
-
-								</group>
-								<group string="Export">
-									<field name="export_backend_id" />
-									<field name="export_partner_id" />
-									<field name="default_export_backend" />
-									<field name="default_export_partner" />
-									<field name="default_export_partner_domain"
-										attrs="{'invisible': [('default_export_partner', '=', False)]}" />
-									<field name="default_export_product" />
-									<field name="default_export_product_domain"
-										attrs="{'invisible': [('default_export_product', '=', False)]}" />
-								</group>
-
+								<separator />
 							</page>
-							<page string="Product"></page>
-							<page string="Partners"></page>
-
 						</notebook>
 					</sheet>
 				</form>

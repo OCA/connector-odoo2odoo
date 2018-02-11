@@ -34,8 +34,9 @@
 #         "templates/assets.xml",
         "views/odoo_backend.xml",
         "views/product_uom.xml",
-#         "views/res_partner_view.xml",
-#         "wizards/wizard_model_view.xml",
+        "views/odoo_connector_menus.xml",
+        "views/product.xml",
+        "wizards/add_backend.xml",
     ],
     "demo": [
 #         "demo/res_partner_demo.xml",
