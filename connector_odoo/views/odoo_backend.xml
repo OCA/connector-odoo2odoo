@@ -30,10 +30,6 @@
 							string="Check Connection" attrs="{'invisible':[('state', 'not in', ['draft'])]}" />
 						<button name="button_reset_to_draft" type="object"
 							string="Reset To draft Connection" attrs="{'invisible':[('state', 'in', ['draft'])]}" />
-						<button name="import_partners" type="object" string="Import Partners"
-							attrs="{'invisible':[('state', 'in', ['draft'])]}" />
-
-
 						<field name="state" widget="statusbar" />
 					</header>
 					<sheet>
