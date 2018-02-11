@@ -18,11 +18,12 @@ class WizardModel(models.TransientModel):
         if not active_model == 'product.product':
             raise
         
-        if active_ids and active_model == 'product.template' :
+        if active_ids and active_model == 'product.product' :
            domain.append(('id', 'in', active_ids))
-            
-        products = self.env['product.product'].search(domain)
-        return products
+           products = self.env['product.product'].search(domain)
+           return products
+        
+        return []
         
     @api.multi 
     def check_backend_binding(self):
