@@ -187,6 +187,7 @@ class OdooBackend(models.Model):
     @api.multi
     def _check_connection(self):
         self.ensure_one()
+        lang = self.default_lang_id.code or False
         odoo_location = OdooLocation(
             hostname=self.hostname,
             login=self.login,
@@ -194,7 +195,8 @@ class OdooBackend(models.Model):
             database=self.database,
             port=self.port,
             version=self.version,
-            protocol=self.protocol
+            protocol=self.protocol,
+            lang_id=lang
         )
         odoo_api =  OdooAPI(odoo_location)
         odoo_api.complete_check()        

@@ -25,6 +25,7 @@ class ProductUomMapper(Component):
     @mapping
     def check_uom_exists(self, record):
         res = {}
+        _logger.debug("CHECK ONLY CREATE")
         lang = self.backend_record.default_lang_id.code or self.env.user.lang or self.env.context['lang'] or 'en_US'  
         local_uom_id = self.env['product.uom'].with_context(
             lang=lang).search([('name', '=', record.name)])

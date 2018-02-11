@@ -67,7 +67,7 @@ class OdooAPI(object):
             
             _logger.debug("Associated lang %s to location" % self._location.lang_id)
             if self._location.lang_id:
-                self._api.env.context['lang'] = self._location.lang_id.code
+                self._api.env.context['lang'] = self._location.lang_id
             
             _logger.info('Created a new Odoo API instance and logged In with context %s' % self._api.env.context)
         return self._api
