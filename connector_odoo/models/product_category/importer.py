@@ -77,6 +77,10 @@ class ProductCategoryImportMapper(Component):
     def name(self, record):
         return {'name': record['name']}
 
+    @mapping
+    def type(self, record):
+        return {'type': record['type']}
+
     @only_create
     @mapping
     def odoo_id(self, record):
