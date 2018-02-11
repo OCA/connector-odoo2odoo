@@ -3,10 +3,12 @@
 # © 2016 Sodexis
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
+import logging
 from odoo.addons.component.core import Component
 from odoo.addons.connector.components.mapper import mapping, only_create
 from odoo.addons.connector.exception import MappingError
 
+_logger = logging.getLogger(__name__)
 
 class ProductCategoryBatchImporter(Component):
     """ Import the Odoo Product Categories.
@@ -77,7 +79,7 @@ class ProductCategoryImportMapper(Component):
         #TODO: Improve the matching on name and position in the tree so that 
         # multiple categ with the same name will be allowed and not duplicated
         categ_id = self.env['product.category'].search([('name', '=', record.name)])
-        
+        _logger.debug('found category %s for record %s' % (categ_id, record))
         if len(categ_id) == 1  :            
             return {'odoo_id': categ_id.id}
         return {}
@@ -96,3 +98,5 @@ class ProductCategoryImportMapper(Component):
 
         parent = parent_binding.odoo_id
         return {'parent_id': parent.id, 'odoo_parent_id': parent_binding.id}
+
+
