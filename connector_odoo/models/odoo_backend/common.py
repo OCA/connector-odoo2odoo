@@ -182,21 +182,28 @@ class OdooBackend(models.Model):
     export_categories_from_date = fields.Datetime(
         string='Export Categories from date',
     )
+    default_category_id = fields.Integer(string='Default Category ID',
+                        help='If set, this Id will be used instead of getting dependencies')
     
-
+    
+    @api.multi
+    def get_default_language_code(self):
+        lang = self.default_lang_id or self.env.user.lang  or self.env.context['lang'] or 'en_US'  
+        return lang
+    
     @api.multi
     def _check_connection(self):
         self.ensure_one()
-        lang = self.default_lang_id.code or False
+        
         odoo_location = OdooLocation(
-            hostname=self.hostname,
-            login=self.login,
-            password=self.password,
-            database=self.database,
-            port=self.port,
-            version=self.version,
-            protocol=self.protocol,
-            lang_id=lang
+            hostname = self.hostname,
+            login = self.login,
+            password = self.password,
+            database = self.database,
+            port = self.port,
+            version = self.version,
+            protocol = self.protocol,
+            lang_id = self.get_default_language_code()
         )
         odoo_api =  OdooAPI(odoo_location)
         odoo_api.complete_check()        
@@ -220,9 +227,7 @@ class OdooBackend(models.Model):
         http://odoo-connector.com/api/api_components.html#odoo.addons.component.models.collection.Collection
         """
         self.ensure_one()
-        lang = self.default_lang_id
-        if lang.code != self.env.context.get('lang'):
-            self = self.with_context(lang=lang.code)
+        lang=self.get_default_language_code()
         odoo_location = OdooLocation(
             hostname=self.hostname,
             login=self.login,
@@ -231,10 +236,11 @@ class OdooBackend(models.Model):
             port=self.port,
             version=self.version,
             protocol=self.protocol,
-            lang_id=self.default_lang_id.code     
+            lang_id=lang
         )
         with OdooAPI(odoo_location) as odoo_api:
-            _super = super(OdooBackend, self)
+            _super = super(OdooBackend, 
+                           self.with_context(lang=lang))
             # from the components we'll be able to do: self.work.odoo_api
             with _super.work_on(
                     model_name, odoo_api=odoo_api, **kwargs) as work:
@@ -243,7 +249,7 @@ class OdooBackend(models.Model):
     @api.multi
     def synchronize_basedata(self):
         self.ensure_one()
-        lang = self.default_lang_id or self.env.user.lang  or self.env.context['lang'] or 'en_US'  
+        lang = self.get_default_language_code() 
         self = self.with_context(lang=lang)
     
         try:
@@ -256,7 +262,7 @@ class OdooBackend(models.Model):
                     # import directly, do not delay because this
                     # is a fast operation, a direct return is fine
                     # and it is simpler to import them sequentially
-                    self.env[model_name].import_batch(backend)
+                    self.env[model_name].with_context(lang=lang).import_batch(backend)
             return True
         except Exception as e:
             _logger.error(e.message, exc_info=True)
@@ -330,7 +336,7 @@ class OdooBackend(models.Model):
     def export_product_products(self):
         if not self.default_export_product:
             return False
-        self._export_from_date('odoo.product.product.batch.exporter',
+        self._export_from_date('odoo.product.product',
                                'export_products_from_date')
         return True     
     
