@@ -9,47 +9,73 @@ class WizardModel(models.TransientModel):
     _name = "connector_odoo.add_backend.wizard"
 
     @api.multi
-    def get_default_products(self):
+    def get_default_object(self, model):
         
         domain = []
         active_ids = self.env.context.get('active_ids', False)
         active_model = self.env.context.get('active_model', False)
         
-        if not active_model == 'product.product':
-            raise
+        if not active_ids:
+            return []
+        domain.append(('id', 'in', active_ids))
+        export = self.env[active_model]
+        if active_model == 'product.product' :
+           export = self.env['product.product'].search(domain)
+                 
+        if active_model == 'product.category' :
+           export = self.env['product.category'].search(domain)
         
-        if active_ids and active_model == 'product.product' :
-           domain.append(('id', 'in', active_ids))
-           products = self.env['product.product'].search(domain)
-           return products
+        if active_model == model:
+            return export     
         
-        return []
+        
+    @api.multi
+    def get_default_products(self):
+        return self.get_default_object('product.product')
+        
+    @api.multi
+    def get_default_category(self):
+        return self.get_default_object('product.category')
         
     @api.multi 
-    def check_backend_binding(self):
+    def check_backend_binding(self):                
+        active_model = self.env.context.get('active_model', False)
         
-        prod_ids = [p.id for p in self.product_ids]
+        to_export_ids = None        
         
+        dest_model = False
         
-        odoo_prod_ids = self.env['odoo.product.product'].search(
-                                    [('odoo_id', 'in', prod_ids),
+        if active_model == 'product.product':
+            to_export_ids = self.to_export_ids
+            dest_model = 'odoo.product.product'
+        elif active_model == 'product.category':
+            to_export_ids = self.categ_to_export_ids
+            dest_model = 'odoo.product.category'
+            
+        export_ids = [p.id for p in to_export_ids]        
+        
+        odoo_prod_ids = self.env[dest_model].search(
+                                    [('odoo_id', 'in', export_ids),
                                     ('backend_id', '=', self.backend_id.id)])
         prod_already_bind = [p.odoo_id.id for p in odoo_prod_ids]
-        prod_already_bind_ids = self.env['product.product'].search(
+        prod_already_bind_ids = self.env[active_model].search(
                                         [('id', 'in', prod_already_bind)])
         
-        prod_to_export = self.product_ids - prod_already_bind_ids
+        to_export = to_export_ids - prod_already_bind_ids
         
-        for prod in prod_to_export:
+        for prod in to_export:
             vals = {'odoo_id': prod.id,
                     'external_id': 0,
                     'backend_id': self.backend_id.id                
                 }
             
-            self.env['odoo.product.product'].create(vals)
+            self.env[dest_model].create(vals)
 
     backend_id = fields.Many2one(comodel_name='odoo.backend', required=True)
-    product_ids = fields.Many2many(comodel_name='product.product', default=get_default_products)
+    to_export_ids = fields.Many2many(string='Product To export', 
+                                     comodel_name='product.product', default=get_default_products)
+    categ_to_export_ids = fields.Many2many(string='Category To export', 
+                                           comodel_name='product.category', default=get_default_category)
     
     
     @api.multi
