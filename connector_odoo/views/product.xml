@@ -34,6 +34,21 @@
 		</record>
 
 
+		<record id="product_category_tree_view" model="ir.ui.view">
+			<field name="name">odoo.product.category.tree</field>
+			<field name="model">odoo.product.category</field>
+			
+			<field name="arch" type="xml">
+				<tree>
+					<field name="display_name" />
+					<field name="odoo_id" />
+					<field name="backend_id" />
+					<field name="external_id" />
+				</tree>
+			</field>
+		</record>
+
+
 
 	</data>
 </openerp>
