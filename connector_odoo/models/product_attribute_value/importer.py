@@ -50,28 +50,31 @@ class ProductAttributeValueMapper(Component):
               ('price_extra', 'price_extra'),             
               ]
     
+    
+    def get_attribute_id(self, record):
+        attribute_id = None
+        binder = self.binder_for('odoo.product.attribute')
+        local_attribute_id = binder.to_internal(record.attribute_id.id, unwrap=True)
+        return local_attribute_id.id
 
     @mapping
     def attribute_id(self, record):
-        attribute_id = None
-        
-        binder = self.binder_for('odoo.product.attribute')
-        local_attribute_id = binder.to_internal(record.attribute_id.id)
-        
-        return {'attribute_id': local_attribute_id.id}
+        return {'attribute_id': self.get_attribute_id(record)}
     
     
-#     @only_create
-#     @mapping
-#     def check_att_exists(self, record):
-#         #TODO: Improve and check family, factor etc...
-#         local_uom_id = self.env['product.uom'].search([('name', '=', record.name)])
-#         
-#         if len(local_uom_id) == 1  :
-#             res = local_uom_id.copy_data()[0] #dict((field, value) for field, value in local_uom_id.iteritems())
-#             res.update({'odoo_id': local_uom_id.id})
-#             
-#             return res
-#         return {}
+    @only_create
+    @mapping
+    def check_att_value_exists(self, record):
+        #TODO: Improve and check family, factor etc...
+        att_id = self.get_attribute_id(record)
+        value_id = self.env['product.attribute.value'].search([
+                    ('name', '=', record.name),
+                    ('attribute_id', '=', att_id),
+                    ])
+        res =  {} 
+        if len(value_id) == 1  :
+            res.update({'odoo_id': value_id.id})             
+        return res
+        
 
         
