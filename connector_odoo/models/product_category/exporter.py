@@ -52,10 +52,20 @@ class OdooProductCategoryExporter(Component):
             return
         
         parent_ids = self.binding.parent_id.bind_ids
-        parent_id = parent_ids.filtered(lambda c: 
+        parent_id = self.env['odoo.product.category']
+        if parent_ids :
+            parent_id = parent_ids.filtered(lambda c: 
                             c.backend_id == self.backend_record)
+        if not parent_id:
+            parent_id = self.env['odoo.product.category'].create({
+                'odoo_id': self.binding.parent_id.id,
+                'external_id': 0,
+                'backend_id': self.backend_record.id })      
+
         cat = self.binder.to_external(parent_id, wrap=False)
         if not cat:
+            #Export the parent ID if it doesn't exists
+            #TODO: Check if test is necessary (export dependency probably update the record)
             self._export_dependency(parent_id, self.model)
          
 
