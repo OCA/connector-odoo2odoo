@@ -22,14 +22,15 @@ class ProductAttributeMapper(Component):
     @mapping
     def check_att_exists(self, record):
         #TODO: Improve and check family, factor etc...
-        local_uom_id = self.env['product.uom'].search([('name', '=', record.name)])
-        
-        if len(local_uom_id) == 1  :
-            res = local_uom_id.copy_data()[0] #dict((field, value) for field, value in local_uom_id.iteritems())
-            res.update({'odoo_id': local_uom_id.id})
+        att_id = self.env['product.attribute'].search([
+                            ('name', '=', record.name),
+                            ('create_variant', '=', record['create_variant'])])
+        res = {}
+        if len(att_id) == 1  :
+            res.update({'odoo_id': att_id.id})
             
-            return res
-        return {}
+        return res
+        
 
 class ProductAttributeImporter(Component):
     """ Import Odoo UOM """
