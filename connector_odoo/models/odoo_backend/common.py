@@ -188,7 +188,7 @@ class OdooBackend(models.Model):
     
     @api.multi
     def get_default_language_code(self):
-        lang = self.default_lang_id or self.env.user.lang  or self.env.context['lang'] or 'en_US'  
+        lang = self.default_lang_id.code or self.env.user.lang  or self.env.context['lang'] or 'en_US'  
         return lang
     
     @api.multi
