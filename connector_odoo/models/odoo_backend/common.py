@@ -353,7 +353,7 @@ class OdooBackend(models.Model):
             else:
                 from_date = None
             self.env[model].with_delay().export_batch(
-                backend, filters  )
+                backend, filters)
                         
         next_time = import_start_time - timedelta(seconds=IMPORT_DELTA_BUFFER)
         next_time = fields.Datetime.to_string(next_time)
