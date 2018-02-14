@@ -41,12 +41,6 @@ class OdooProductCategoryExporter(Component):
     _apply_on = ['odoo.product.category']
     
     
-#     def _export_dependency(self, relation, binding_model,
-#                            component_usage='record.exporter',
-#                            binding_field='odoo_bind_ids',
-#                            binding_extra_vals=None):
-#         _logger.debug("TODO:\nExport dependency : %s" % binding_model)
-        
     def _export_dependencies(self):
         if not self.binding.parent_id:
             return

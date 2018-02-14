@@ -224,6 +224,7 @@ class GenericAdapter(AbstractComponent):
          
         model = odoo_api.env[self._odoo_model]
         object_id = model.browse(arguments)
+        #TODO: Check the write implementation of odoorpc
         return object_id.write(data)
         
         
