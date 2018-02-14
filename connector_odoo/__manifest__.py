@@ -29,14 +29,15 @@
         "connector_base_product",
     ],
     "data": [
-#         "security/some_model_security.xml",
-#         "security/ir.model.access.csv",
+        "security/connector_odoo_base_security.xml",
+        "security/ir.model.access.csv",
 #         "templates/assets.xml",
         "views/odoo_backend.xml",
         "views/product_uom.xml",
         "views/odoo_connector_menus.xml",
         "views/product.xml",
         "wizards/add_backend.xml",
+        
     ],
     "demo": [
 #         "demo/res_partner_demo.xml",
