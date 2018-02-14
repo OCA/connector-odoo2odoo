@@ -22,15 +22,29 @@ class BatchProductExporter(Component):
 
 
     def run(self, filters=None):        
-        ext_filter = ast.literal_eval(self.backend_record.external_product_domain_filter)
+        ext_filter = ast.literal_eval(self.backend_record.local_product_domain_filter)
         filters += ext_filter
-        filters += [('backend_id', '=', self.backend_record.id)]
+        prod_ids = self.env['product.product'].search(filters)
         
-        prod_ids = self.env['odoo.product.product'].search(filters)
-        for prod in prod_ids:
+        o_ids = self.env['odoo.product.product'].search(
+            [('backend_id', '=', self.backend_record.id)])
+        o_prod_ids = self.env['product.product'].search([
+            ('id', 'in', [o.odoo_id.id for o in o_ids])])
+        to_bind = prod_ids - o_prod_ids
+        
+        for p in to_bind:
+            self.env['odoo.product.product'].create({
+                'odoo_id': p.id,
+                'external_id': 0,
+                'backend_id': self.backend_record.id })
+            
+        filters += [('backend_id', '=', self.backend_record.id)]
+        bind_ids = self.env['odoo.product.product'].search(
+            [('odoo_id', 'in', [p.id for p in prod_ids])])
+        for prod in bind_ids:
             job_options = {
                 'max_retries': 0,
-                'priority': 5,
+                'priority': 15,
             }
             self._export_record(prod, job_options=job_options)
     
@@ -41,29 +55,31 @@ class OdooProductExporter(Component):
     _apply_on = ['odoo.product.product']
     
     
-    def _export_dependency(self, relation, binding_model,
-                           component_usage='record.exporter',
-                           binding_field='odoo_bind_ids',
-                           binding_extra_vals=None):
-        _logger.debug("TODO:\nExport dependency : %s" % binding_model)
-        
-    def _export_dependencies(self):
-        _logger.debug("TODO: Export dependencies")
-        
-        self._export_dependency(False,'odoo.product.category')
-
     
-#     def run(self, binding):
-#         """
-#         Export the products to Odoo
-#         """
-#         if binding.external_id > 0 :
-#             
-#             return _('Already exported')
-#         
-#         self.binder.bind(external_id, binding)
-         
 
+    def _export_dependencies(self):
+        
+        categ_ids = self.binding.categ_id.bind_ids
+        categ_id = self.env['odoo.product.category']
+        
+        if categ_ids :
+            categ_id = categ_ids.filtered(lambda c: 
+                            c.backend_id == self.backend_record)
+        if not categ_id:
+            categ_id = self.env['odoo.product.category'].create({
+                'odoo_id': self.binding.categ_id.id,
+                'external_id': 0,
+                'backend_id': self.backend_record.id })      
+
+        cat = self.binder.to_external(categ_id, wrap=False)
+        if not cat:
+            #Export the parent ID if it doesn't exists
+            #TODO: Check if test is necessary (export dependency probably update the record)   
+#             categ_id.with_delay().export_record()
+#             self.env['product.category'].export_record(self.backend_record, external_id)         
+            self._export_dependency(categ_id,
+                                    'odoo.product.category')
+            
 
 class ProductExportMapper(Component):
     _name = 'odoo.product.product.export.mapper'
@@ -86,18 +102,33 @@ class ProductExportMapper(Component):
                         
               ]
 
-#     @mapping
-#     def is_active(self, record):
-#         """Check if the product is active in Odoo
-#         and set active flag in OpenERP
-#         status == 1 in Odoo means active"""
-#         return {'active': (record.get('status') == '1')}
 
+    def get_product_by_match_field(self, record):
+        match_field = u'default_code' 
+        filters = []
+        
+        if self.backend_record.matching_product_product :
+            match_field = self.backend_record.matching_product_ch
+         
+        filters = ast.literal_eval(self.backend_record.external_product_domain_filter)
+        if record[match_field]:
+            filters.append((match_field, '=', record[match_field]))
+        
+        adapter = self.component(usage='record.exporter').backend_adapter
+        prod_id = adapter.search(filters)
+        if len(prod_id) == 1:
+            return prod_id[0]
+        
+        return False
+        
+        
+        
     @mapping
     def uom_id(self, record):
-        
-        
-        return {'uom_id': 1}
+        binder = self.binder_for('odoo.product.uom')
+        uom_id = binder.wrap_binding(record.uom_id)
+        return {'uom_id': uom_id,
+                'uom_po_id': uom_id}
     
     @mapping
     def price(self, record):
@@ -107,37 +138,29 @@ class ProductExportMapper(Component):
     def default_code(self, record):
         code = record['default_code']
         if not code:
+            #Prevent not null values 
             return {'default_code': '/'}
         return {'default_code': code}
         
 
     @only_create
     @mapping
-    def odoo_id(self, record):
+    def odoo_id(self, record):        
+        external_id = self.get_product_by_match_field(record)
         
-        match_field = u'default_code' 
-#         if self.backend_record.matching_product_product :
-#             match_field = self.backend_record.matching_product_ch
-#         
-#         filters = ast.literal_eval(self.backend_record.local_product_domain_filter)
-#         if record[match_field]:
-#             filters.append((match_field, '=', record[match_field]))
-#            
-#         prod_id = self.env['product.product'].search(filters)
-#         
-#         if len(prod_id) == 1  :            
-#             return {'odoo_id': prod_id.id}
-        return {}
+        if external_id:
+            return {'external_id': external_id}
+            
     
     @mapping
     def category(self, record):
-        categ_id= record['categ_id']
+        categ_id = record['categ_id']
         binder = self.binder_for('odoo.product.category')
         #binder.model = 'odoo.product.category'
         cat = binder.wrap_binding(categ_id)
         if not cat:            
             raise MappingError("The product category with "
                                    "odoo id %s is not available." %
-                                   mag_category_id)
+                                   categ_id)
         return {'categ_id': cat}
 
