@@ -24,7 +24,7 @@ class OdooProductProduct(models.Model):
     _inherit = 'odoo.binding'
     _inherits = {'product.product': 'odoo_id'}
     _description = 'External Odoo Product'
-
+    
     @api.multi
     def name_get(self):
         result = []
@@ -144,7 +144,7 @@ class ProductProductAdapter(Component):
         """
         if filters == None:
             filters = []
-        ext_filter = ast.literal_eval(self.backend_record.external_product_domain_filter)
+        ext_filter = ast.literal_eval(str(self.backend_record.external_product_domain_filter))
         filters += ext_filter
         return super(ProductProductAdapter, self).search( filters=filters, model=model,)
         

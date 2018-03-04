@@ -12,8 +12,6 @@ class OdooProductAttributeValue(models.Model):
     _inherits = {'product.attribute.value': 'odoo_id'}
     _description = 'Odoo Product Attribute Value'
     
-   
-
 class OdooProductAttributeValue(models.Model):
     _inherit = 'product.attribute.value'
     
@@ -22,8 +20,6 @@ class OdooProductAttributeValue(models.Model):
         inverse_name='odoo_id',
         string='Odoo Bindings',
     )
-
-
 
 class OdooProductAttributeAdapter(Component):
     _name = 'odoo.product.attribute.value.adapter'
