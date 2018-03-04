@@ -11,6 +11,7 @@ from odoo.addons.component.core import Component
 from odoo.addons.queue_job.exception import NothingToDoJob
 from odoo.addons.connector.components.mapper import mapping, only_create
 from odoo.addons.connector.exception import MappingError, InvalidDataError
+from odoo.addons.connector_odoo.components.mapper import field_by_lang
 
 _logger = logging.getLogger(__name__)
 
@@ -22,8 +23,8 @@ class BatchProductExporter(Component):
 
 
     def run(self, filters=None):        
-        ext_filter = ast.literal_eval(self.backend_record.local_product_domain_filter)
-        filters += ext_filter
+        loc_filter = ast.literal_eval(self.backend_record.local_product_domain_filter)
+        filters += loc_filter
         prod_ids = self.env['product.product'].search(filters)
         
         o_ids = self.env['odoo.product.product'].search(
@@ -37,10 +38,10 @@ class BatchProductExporter(Component):
                 'odoo_id': p.id,
                 'external_id': 0,
                 'backend_id': self.backend_record.id })
-            
-        filters += [('backend_id', '=', self.backend_record.id)]
+        
         bind_ids = self.env['odoo.product.product'].search(
-            [('odoo_id', 'in', [p.id for p in prod_ids])])
+            [('odoo_id', 'in', [p.id for p in prod_ids]),
+             ('backend_id', '=', self.backend_record.id)])
         for prod in bind_ids:
             job_options = {
                 'max_retries': 0,
@@ -55,8 +56,6 @@ class OdooProductExporter(Component):
     _apply_on = ['odoo.product.product']
     
     
-    
-
     def _export_dependencies(self):
         
         categ_ids = self.binding.categ_id.bind_ids
@@ -81,13 +80,20 @@ class OdooProductExporter(Component):
                                     'odoo.product.category')
             
 
+#     def _map_data(self):
+#         map_datas = super(OdooProductExporter, self)._map_data()
+#         _logger.debug("MAP DATAS fro Mind And Go : %s" % map_datas)
+#         return map_datas
+    
+
+
 class ProductExportMapper(Component):
     _name = 'odoo.product.product.export.mapper'
     _inherit = 'odoo.export.mapper'
     _apply_on = ['odoo.product.product']
 
     # TODO :     categ, special_price => minimal_price
-    direct = [('name', 'name'),
+    direct = [ (field_by_lang('name'), 'name'),
               ('description', 'description'),
               ('weight', 'weight'),
               ('standard_price', 'standard_price'),
@@ -121,7 +127,13 @@ class ProductExportMapper(Component):
         
         return False
         
-        
+#     @mapping
+#     def name(self, record):
+#         
+#         name=record['name']
+#         
+#         
+#         return {'name': name}
         
     @mapping
     def uom_id(self, record):
