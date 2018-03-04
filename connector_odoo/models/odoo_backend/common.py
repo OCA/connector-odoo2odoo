@@ -185,6 +185,9 @@ class OdooBackend(models.Model):
     default_category_id = fields.Integer(string='Default Category ID',
                         help='If set, this Id will be used instead of getting dependencies')
     
+    default_product_export_dict = fields.Char('Default Json for creating/updating products',
+                                              default="{'default_code': '/', 'active': False}")
+    
     
     @api.multi
     def get_default_language_code(self):
@@ -343,6 +346,7 @@ class OdooBackend(models.Model):
     
     @api.multi
     def _export_from_date(self, model, from_date_field):
+        self.ensure_one()
         import_start_time = datetime.now()
         filters=[('write_date', '<', fields.Datetime.to_string(import_start_time))]
         
