@@ -6,6 +6,21 @@
 from odoo.addons.component.core import AbstractComponent
 from odoo.addons.connector.components.mapper import mapping
 
+
+def field_by_lang(field):
+        ''' ``field`` is the name of the source field.
+
+        Naming the arg: ``field`` is required for the conversion'''
+        def modifier(self, record, to_attr):
+            ''' self is the current Mapper,
+                record is the current record to map,
+                to_attr is the target field'''
+            lang_code = self.backend_record.get_default_language_code()
+            rec_lang = record.with_context(lang=lang_code)
+            return rec_lang[field]
+        return modifier
+    
+    
 class OdooImportMapper(AbstractComponent):
     _name = 'odoo.import.mapper'
     _inherit = ['base.odoo.connector', 'base.import.mapper']
@@ -48,4 +63,4 @@ class OdooExportMapper(AbstractComponent):
     _inherit = ['base.odoo.connector', 'base.export.mapper']
     _usage = 'export.mapper'
 
-
+    
