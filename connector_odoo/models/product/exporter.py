@@ -80,34 +80,26 @@ class OdooProductExporter(Component):
                                     'odoo.product.category')
             
 
-#     def _map_data(self):
-#         map_datas = super(OdooProductExporter, self)._map_data()
-#         _logger.debug("MAP DATAS fro Mind And Go : %s" % map_datas)
-#         return map_datas
-    
-
-
 class ProductExportMapper(Component):
     _name = 'odoo.product.product.export.mapper'
     _inherit = 'odoo.export.mapper'
     _apply_on = ['odoo.product.product']
 
     # TODO :     categ, special_price => minimal_price
-    direct = [ (field_by_lang('name'), 'name'),
-              ('description', 'description'),
-              ('weight', 'weight'),
-              ('standard_price', 'standard_price'),
-              ('barcode', 'barcode'),              
-              ('type', 'type'),
-              ('description_sale', 'description_sale'),                            
-              ('description_purchase', 'description_purchase'),               
-              ('description_sale', 'description_sale'),               
-              ('sale_ok', 'sale_ok'),               
-              ('purchase_ok', 'purchase_ok'),     
-              ('image', 'image'),     
-                        
+    direct = [ 
+          (field_by_lang('name'), 'name'),
+          (field_by_lang('description'), 'description'),
+          (field_by_lang('description_sale'), 'description_sale'),                            
+          (field_by_lang('description_purchase'), 'description_purchase'),               
+          (field_by_lang('description_sale'), 'description_sale'),
+          ('weight', 'weight'),
+          ('standard_price', 'standard_price'),
+          ('barcode', 'barcode'),              
+          ('type', 'type'),
+          ('sale_ok', 'sale_ok'),               
+          ('purchase_ok', 'purchase_ok'),     
+          ('image', 'image'),     
               ]
-
 
     def get_product_by_match_field(self, record):
         match_field = u'default_code' 
@@ -126,15 +118,7 @@ class ProductExportMapper(Component):
             return prod_id[0]
         
         return False
-        
-#     @mapping
-#     def name(self, record):
-#         
-#         name=record['name']
-#         
-#         
-#         return {'name': name}
-        
+   
     @mapping
     def uom_id(self, record):
         binder = self.binder_for('odoo.product.uom')
