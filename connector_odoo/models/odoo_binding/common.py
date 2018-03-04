@@ -69,7 +69,7 @@ class OdooBinding(models.AbstractModel):
     def export_record(self, backend, fields=None):
         """ Export a record on Odoo """
         self.ensure_one()
-        with self.backend_id.work_on(self._name) as work:
+        with backend.work_on(self._name) as work:
             exporter = work.component(usage='record.exporter')
             return exporter.run(self)
 
