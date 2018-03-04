@@ -28,11 +28,15 @@ class OdooBinding(models.AbstractModel):
     external_id = fields.Integer(string='ID on Ext Odoo')
 
     _sql_constraints = [
-        ('odoo_backend_uniq', 'unique(backend_id, external_id)',
+        ('odoo_backend_external_uniq', 'unique(backend_id, external_id)',
          'A binding already exists with the same Odoo External ID.'),                        
-        ('odoo_backend_uniq', 'unique(backend_id, odoo_id)',
+        ('odoo_backend_odoo_uniq', 'unique(backend_id, odoo_id)',
          'A binding already exists with the same backend for this object.'),
     ]
+    
+    @api.multi
+    def resync(self):
+        return self.with_delay().export_record(self.backend_id)        
 
     @job(default_channel='root.odoo')
     @api.model
