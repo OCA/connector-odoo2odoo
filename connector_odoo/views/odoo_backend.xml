@@ -58,9 +58,9 @@
 							</group>
 						</group>
 						<notebook>
-							<page string="Product">
-								<group>
-									<group string="Import / Export">
+							<page string="Product" name="product_page">
+								<group name="prod_import_export_options">
+									<group  string="Import / Export">
 										<field name="default_import_product" />
 										<field name="default_export_product" />
 
@@ -70,20 +70,17 @@
 											<field name="matching_product_ch" />
 										</div>
 									</group>
-									<group
-										attrs="{'invisible': [('default_export_product', '!=', True)]}">
-
-
-										<field name="default_product_export_dict" />
-
-									</group>
 									<group string="General ">
 										<field name="local_product_domain_filter" />
 										<field name="external_product_domain_filter" />
+										<field name="default_product_export_dict" 
+										string="Default Values"
+										help="Default Dictionnary with values for creating products"
+										attrs="{'invisible': [('default_export_product', '!=', True)]}"/>
 									</group>
 								</group>
-								<group>
-									<group string="Import Operations">
+								<group >
+									<group name="prod_import_operations" string="Import Operations">
 										<group>
 											<div
 												attrs="{'invisible': [('default_import_product', '!=', True)]}">
@@ -112,7 +109,8 @@
 
 										</group>
 									</group>
-									<group string="Export operations">
+									
+									<group name="prod_export_operations" string="Export operations">
 
 										<group>
 											<div

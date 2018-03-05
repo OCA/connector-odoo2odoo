@@ -31,7 +31,6 @@
     "data": [
         "security/connector_odoo_base_security.xml",
         "security/ir.model.access.csv",
-#         "templates/assets.xml",
         "views/odoo_backend.xml",
         "views/product_uom.xml",
         "views/odoo_connector_menus.xml",
