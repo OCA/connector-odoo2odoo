@@ -4,6 +4,7 @@
 
 from odoo import api, models, fields
 from odoo.addons.queue_job.job import job, related_action
+from odoo.exceptions import UserError, ValidationError
 
 
 class OdooBinding(models.AbstractModel):
@@ -25,14 +26,27 @@ class OdooBinding(models.AbstractModel):
         ondelete='restrict',
     )
     
-    external_id = fields.Integer(string='ID on Ext Odoo')
+    external_id = fields.Integer(string='ID on Ext Odoo', default=-1)
 
-    _sql_constraints = [
-        ('odoo_backend_external_uniq', 'unique(backend_id, external_id)',
-         'A binding already exists with the same Odoo External ID.'),                        
+    _sql_constraints = [                  
         ('odoo_backend_odoo_uniq', 'unique(backend_id, odoo_id)',
          'A binding already exists with the same backend for this object.'),
     ]
+    
+    @api.constrains('backend_id', 'external_id')
+    def unique_backend_external_id(self):
+        if self.external_id > 0:    
+            count = self.env[self._name].search_count([
+                ('backend_id', '=', self.backend_id.id),
+                ('external_id', '=', self.external_id),
+                ('id', '!=', self.id)]
+                )
+            if count > 0:
+                raise ValidationError(_(
+                                "A binding already exists with the same backend '%s' "
+                                "for the external id %s of the model %s")
+                                % (self.backend_id.name,
+                                   self.external_id, self._name))
     
     @api.multi
     def resync(self):
