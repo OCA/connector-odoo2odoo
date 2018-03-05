@@ -80,6 +80,14 @@ class OdooProductExporter(Component):
                                     'odoo.product.category')
             
 
+    def _create_data(self, map_record, fields=None, **kwargs):
+        """ Get the data to pass to :py:meth:`_create` """
+        datas = ast.literal_eval(self.backend_record.default_product_export_dict)
+        cp_datas = map_record.values(for_create=True, fields=fields, **kwargs)
+        #Combine default values with the computed ones
+        datas.update(cp_datas)
+        return datas
+
 class ProductExportMapper(Component):
     _name = 'odoo.product.product.export.mapper'
     _inherit = 'odoo.export.mapper'
