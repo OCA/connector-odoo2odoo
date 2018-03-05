@@ -356,11 +356,11 @@ class OdooExporter(AbstractComponent):
 
     def _create_data(self, map_record, fields=None, **kwargs):
         """ Get the data to pass to :py:meth:`_create` """
-        datas = ast.literal_eval(self.backend_record.default_product_export_dict)
+#         datas = ast.literal_eval(self.backend_record.default_product_export_dict)
         cp_datas = map_record.values(for_create=True, fields=fields, **kwargs)
         #Combine default values with the computed ones
-        datas.update(cp_datas)
-        return datas
+#         datas.update(cp_datas)
+        return cp_datas
 
     def _create(self, data):
         """ Create the Odoo record """
