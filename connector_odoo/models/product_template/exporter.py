@@ -119,6 +119,9 @@ class ProductTemplateExportMapper(Component):
         filters = ast.literal_eval(self.backend_record.external_product_domain_filter)
         if record[match_field]:
             filters.append((match_field, '=', record[match_field]))
+        filters.append('|')
+        filters.append(('active', '=', False))
+        filters.append(('active', '=', True))
         
         adapter = self.component(usage='record.exporter').backend_adapter
         prod_id = adapter.search(filters)
