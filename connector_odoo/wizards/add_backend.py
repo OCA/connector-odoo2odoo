@@ -19,8 +19,14 @@ class WizardModel(models.TransientModel):
             return []
         domain.append(('id', 'in', active_ids))
         export = self.env[active_model]
+ 
+        if active_model == 'product.template' :
+           export = self.env['product.template'].search(domain)
+
         if active_model == 'product.product' :
-           export = self.env['product.product'].search(domain)
+           export_prod = self.env['product.product'].search(domain)
+           tmp_ids = [p.product_tmpl_id for p in export_prod]     
+           export = self.env['product.template'].search([('id', 'in', tmp_ids)])
                  
         if active_model == 'product.category' :
            export = self.env['product.category'].search(domain)
@@ -31,7 +37,7 @@ class WizardModel(models.TransientModel):
         
     @api.multi
     def get_default_products(self):
-        return self.get_default_object('product.product')
+        return self.get_default_object('product.template')
         
     @api.multi
     def get_default_category(self):
@@ -45,9 +51,9 @@ class WizardModel(models.TransientModel):
         
         dest_model = False
         
-        if active_model == 'product.product':
+        if active_model in ['product.product','product.template']:
             to_export_ids = self.to_export_ids
-            dest_model = 'odoo.product.product'
+            dest_model = 'odoo.product.template'
         elif active_model == 'product.category':
             to_export_ids = self.categ_to_export_ids
             dest_model = 'odoo.product.category'
@@ -72,8 +78,9 @@ class WizardModel(models.TransientModel):
             self.env[dest_model].create(vals)
 
     backend_id = fields.Many2one(comodel_name='odoo.backend', required=True)
-    to_export_ids = fields.Many2many(string='Product To export', 
-                                     comodel_name='product.product', default=get_default_products)
+    to_export_ids = fields.Many2many(string='Product Templates To export', 
+                                     comodel_name='product.template', default=get_default_products)
+    
     categ_to_export_ids = fields.Many2many(string='Category To export', 
                                            comodel_name='product.category', default=get_default_category)
     

@@ -27,11 +27,18 @@
 		</record>
 		
 		
+		<record id="action_odoo_product_templates" model="ir.actions.act_window">
+			<field name="name">Odoo Product Templates</field>
+			<field name="res_model">odoo.product.template</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
 		<record id="action_odoo_products" model="ir.actions.act_window">
 			<field name="name">Odoo Products</field>
 			<field name="res_model">odoo.product.product</field>
 			<field name="view_mode">tree,form</field>
 		</record>
+
 
 		<!-- TODO: Implement security strategy groups="odoo_base.group_oc_manager" -->
 		<menuitem id="menu_odoo_external_objects" name="External Objects" parent="connector_odoo.menu_odoo_root"/>
@@ -42,6 +49,8 @@
 			action="action_odoo_attributes" />
 		<menuitem id="menu_odoo_external_values" name="External Attribute Values" parent="menu_odoo_external_objects"
 			action="action_odoo_attributes" />
+		<menuitem id="menu_odoo_external_product_templates" name="External Product Templates" parent="menu_odoo_external_objects"
+			action="action_odoo_product_templates" />
 		<menuitem id="menu_odoo_external_products" name="External Products" parent="menu_odoo_external_objects"
 			action="action_odoo_products" />
 		<menuitem id="menu_odoo_external_categories" name="External Categories" parent="menu_odoo_external_objects"

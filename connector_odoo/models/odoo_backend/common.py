@@ -288,6 +288,15 @@ class OdooBackend(models.Model):
         self._import_from_date('odoo.product.product',
                                'import_products_from_date')
         return True
+
+    
+    @api.multi
+    def import_product_template(self):
+        if not self.default_import_product:
+            return False
+        self._import_from_date('odoo.product.template',
+                               'import_products_from_date')
+        return True
     
     @api.multi
     def import_product_categories(self):
@@ -340,6 +349,14 @@ class OdooBackend(models.Model):
         if not self.default_export_product:
             return False
         self._export_from_date('odoo.product.product',
+                               'export_products_from_date')
+        return True     
+
+    @api.multi
+    def export_product_templates(self):
+        if not self.default_export_product:
+            return False
+        self._export_from_date('odoo.product.template',
                                'export_products_from_date')
         return True     
     

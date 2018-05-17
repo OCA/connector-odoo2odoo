@@ -23,6 +23,7 @@ class OdooModelBinder(Component):
         'odoo.product.attribute.value',
         'odoo.product.category',
         'odoo.product.product',
+        'odoo.product.template',
 #TODO:
 #         'odoo.res.partner',
 #         'odoo.res.partner.category',
