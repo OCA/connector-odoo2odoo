@@ -35,6 +35,7 @@
         "views/product_uom.xml",
         "views/odoo_connector_menus.xml",
         "views/product.xml",
+        "views/product_template.xml",
         "wizards/add_backend.xml",
         
     ],
