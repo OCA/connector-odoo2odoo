@@ -407,7 +407,7 @@ class OdooExporter(AbstractComponent):
             record = self._create_data(map_record, fields=fields)
             if not record:
                 return _('Nothing to export.')
-            if record['external_id']:
+            if 'external_id' in record and record['external_id']:
                 self.external_id = record['external_id']
             else:
                 self.external_id = self._create(record)
