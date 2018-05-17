@@ -129,6 +129,12 @@
 										<group>
 											<div
 												attrs="{'invisible': [('default_export_product', '!=', True)]}">
+												<button name="export_product_templates" type="object"
+													string="Export Product templates" class="oe_highlight oe_inline"
+													help="Export Products Templates" nolabel="1" />
+											</div>
+											<div
+												attrs="{'invisible': [('default_export_product', '!=', True)]}">
 												<button name="export_product_products" type="object"
 													string="Export Product" class="oe_highlight oe_inline"
 													help="Export Products" nolabel="1" />

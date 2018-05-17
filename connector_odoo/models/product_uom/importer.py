@@ -5,7 +5,7 @@
 import logging
 from odoo.addons.component.core import Component
 
-from odoo.addons.connector.components.mapper import mapping, only_create
+from odoo.addons.connector.components.mapper import mapping, only_create, external_to_m2o
 
 _logger = logging.getLogger(__name__)
 
@@ -21,16 +21,22 @@ class ProductUomMapper(Component):
 
     #TODO: Improve and check family, factor etc...
 
+    @mapping
+    def category_id(self, record):
+        category_id = record['category_id']
+        return {'category_id': category_id.id}
+
     @only_create
     @mapping
     def check_uom_exists(self, record):
         res = {}
-        
+        category_id = record['category_id'].id
         lang = self.backend_record.default_lang_id.code or self.env.user.lang or self.env.context['lang'] or 'en_US'  
-        _logger.debug("CHECK ONLY CREATE with lang %s" % lang)
+        _logger.debug("CHECK ONLY CREATE UOM %s with lang %s" % (record['name'], lang))
         
         local_uom_id = self.env['product.uom'].with_context(
-            lang=lang).search([('name', '=', record.name)])
+            lang=lang).search([('name', '=', record.name),
+                               ('category_id', '=', category_id)])
         _logger.debug('UOM found for %s : %s' % (record, local_uom_id))
         if len(local_uom_id) == 1  :
             res.update({'odoo_id': local_uom_id.id})
