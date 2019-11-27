@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="view_odooconnector_partner_form" model="ir.ui.view">
+            <field name="name">odooconnector.res.partner.form</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//page[last()]" position="after">
+                    <page string="Odoo Connector">
+                        <field name="oc_bind_ids">
+                            <tree string="Bindings" editable="bottom">
+                                <field name="backend_id" />
+                                <field name="external_id" />
+                                <field name="exported_record" readonly="1" />
+                            </tree>
+                        </field>
+                    </page>
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</openerp>

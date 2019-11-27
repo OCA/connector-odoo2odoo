@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+
+        <record forcecreate="True" id="ir_cron_import_partners" model="ir.cron">
+            <field name="name">Odoo Connector - Import Partners</field>
+            <field eval="False" name="active"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False" />
+            <field name="model" eval="'odooconnector.backend'" />
+            <field name="function" eval="'import_partners'" />
+            <field name="args" eval="'(1,)'" />
+        </record>
+
+        <record forcecreate="True" id="ir_cron_import_products" model="ir.cron">
+            <field name="name">Odoo Connector - Import Products</field>
+            <field eval="False" name="active"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False" />
+            <field name="model" eval="'odooconnector.backend'" />
+            <field name="function" eval="'import_products'" />
+            <field name="args" eval="'(1,)'" />
+        </record>
+
+        <record id="ir_config_export_sync" model="ir.config_parameter">
+            <field name="key">odooconnector.export_sync</field>
+            <field name="value">False</field>
+        </record>
+    </data>
+
+</openerp>
