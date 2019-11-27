@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_odoo_ir_translation_all,access_odoo_ir_translation,base.model_ir_translation,,1,1,1,1
