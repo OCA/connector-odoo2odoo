@@ -4,7 +4,6 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 import logging
-
 from odoo.addons.component.core import Component
 from odoo.addons.connector.components.mapper import mapping, only_create
 from odoo.addons.connector.exception import MappingError
@@ -19,10 +18,9 @@ class ProductCategoryBatchImporter(Component):
     A priority is set on the jobs according to their level to rise the
     chance to have the top level categories imported first.
     """
-
-    _name = "odoo.product.category.batch.importer"
-    _inherit = "odoo.delayed.batch.importer"
-    _apply_on = ["odoo.product.category"]
+    _name = 'odoo.product.category.batch.importer'
+    _inherit = 'odoo.delayed.batch.importer'
+    _apply_on = ['odoo.product.category']
 
     def _import_record(self, external_id, job_options=None):
         """ Delay a job for the import """
@@ -38,14 +36,17 @@ class ProductCategoryBatchImporter(Component):
         base_priority = 10
         for cat in updated_ids:
             cat_id = self.backend_adapter.read(cat)
-            job_options = {"priority": base_priority + cat_id.parent_left or 0}
-            self._import_record(cat_id.id, job_options=job_options)
+            job_options = {
+                'priority': base_priority + cat_id.parent_left or 0,
+            }
+            self._import_record(
+                cat_id.id, job_options=job_options)
 
 
 class ProductCategoryImporter(Component):
-    _name = "odoo.product.category.importer"
-    _inherit = "odoo.importer"
-    _apply_on = ["odoo.product.category"]
+    _name = 'odoo.product.category.importer'
+    _inherit = 'odoo.importer'
+    _apply_on = ['odoo.product.category']
 
     def _import_dependencies(self):
         """ Import the dependencies for the record"""
@@ -61,23 +62,24 @@ class ProductCategoryImporter(Component):
 
 
 class ProductCategoryImportMapper(Component):
-    _name = "odoo.product.category.import.mapper"
-    _inherit = "odoo.import.mapper"
-    _apply_on = "odoo.product.category"
+    _name = 'odoo.product.category.import.mapper'
+    _inherit = 'odoo.import.mapper'
+    _apply_on = 'odoo.product.category'
 
-    direct = [("name", "name")]
+    direct = [
+        ('name', 'name'),
+    ]
 
     @only_create
     @mapping
     def odoo_id(self, record):
         # TODO: Improve the matching on name and position in the tree so that
         # multiple categ with the same name will be allowed and not duplicated
-        categ_id = self.env["product.category"].search(
-            [("name", "=", record.name)]
-        )
-        _logger.debug("found category {} for record {}".format(categ_id, record))
+        categ_id = self.env['product.category'].search(
+            [('name', '=', record.name)])
+        _logger.debug('found category %s for record %s' % (categ_id, record))
         if len(categ_id) == 1:
-            return {"odoo_id": categ_id.id}
+            return {'odoo_id': categ_id.id}
         return {}
 
     @mapping
@@ -88,10 +90,9 @@ class ProductCategoryImportMapper(Component):
         parent_binding = binder.to_internal(record.parent_id.id)
 
         if not parent_binding:
-            raise MappingError(
-                "The product category with "
-                "Odoo id %s is not imported." % record.parent_id.id
-            )
+            raise MappingError("The product category with "
+                               "Odoo id %s is not imported." %
+                               record.parent_id.id)
 
         parent = parent_binding.odoo_id
-        return {"parent_id": parent.id, "odoo_parent_id": parent_binding.id}
+        return {'parent_id': parent.id, 'odoo_parent_id': parent_binding.id}
