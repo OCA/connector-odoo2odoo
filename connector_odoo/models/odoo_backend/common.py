@@ -174,7 +174,6 @@ class OdooBackend(models.Model):
         "product.pricelist",
         "Pricelist",
         required=True,
-        domain="[('type', '=', 'sale')]",
     )
 
     @api.multi

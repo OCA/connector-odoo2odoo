@@ -95,6 +95,7 @@
                                     name="password"
                                     password="1"
                                 />
+                                                                <field name="pricelist_id" />
                                                         </group>
                                                 </group>
                                                 <notebook>

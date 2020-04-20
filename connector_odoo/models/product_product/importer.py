@@ -55,6 +55,7 @@ class ProductImportMapper(Component):
         ("description_sale", "description_sale"),
         ("description_purchase", "description_purchase"),
         ("description_sale", "description_sale"),
+        ("is_published", "website_published"),
         ("sale_ok", "sale_ok"),
         ("purchase_ok", "purchase_ok"),
         ("image", "image"),
@@ -62,7 +63,15 @@ class ProductImportMapper(Component):
 
     @mapping
     def uom_id(self, record):
-        return {"uom_id": 1}
+        binder = self.binder_for('odoo.uom.uom')
+        uom = binder.to_internal(record.uom_id.id, unwrap=True)
+        return {"uom_id": uom.id}
+
+    @mapping
+    def uom_po_id(self, record):
+        binder = self.binder_for('odoo.uom.uom')
+        uom = binder.to_internal(record.uom_id.id, unwrap=True)
+        return {"uom_po_id": uom.id}
 
     @mapping
     def price(self, record):
