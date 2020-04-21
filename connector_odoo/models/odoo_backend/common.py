@@ -158,6 +158,7 @@ class OdooBackend(models.Model):
     )
     default_import_product = fields.Boolean("Import products")
     import_products_from_date = fields.Datetime("Import products from date")
+    import_partner_from_date = fields.Datetime("Import partner from date")
     import_categories_from_date = fields.Datetime("Import categories from date")
     default_export_product = fields.Boolean("Export Products")
     export_products_from_date = fields.Datetime("Export products from date")
@@ -171,9 +172,7 @@ class OdooBackend(models.Model):
         default="{'default_code': '/', 'active': False}",
     )
     pricelist_id = fields.Many2one(
-        "product.pricelist",
-        "Pricelist",
-        required=True,
+        "product.pricelist", "Pricelist", required=True
     )
 
     @api.multi
@@ -292,6 +291,13 @@ class OdooBackend(models.Model):
         self._import_from_date(
             "odoo.product.template", "import_products_from_date"
         )
+        return True
+
+    @api.multi
+    def import_partner(self):
+        if not self.default_partner:
+            return False
+        self._import_from_date("odoo.res.partner", "import_partner_from_date")
         return True
 
     @api.multi

@@ -95,7 +95,9 @@
                                     name="password"
                                     password="1"
                                 />
-                                                                <field name="pricelist_id" />
+                                                                <field
+                                    name="pricelist_id"
+                                />
                                                         </group>
                                                 </group>
                                                 <notebook>
@@ -308,6 +310,29 @@
                                                                         <field
                                         name="default_lang_id"
                                     />
+                                                                                <group>
+                                                                                        <div
+                                            attrs="{'invisible': [('default_import_partner', '!=', True)]}"
+                                        >
+                                                                                                <button
+                                                name="import_partner"
+                                                type="object"
+                                                string="Import Partner"
+                                                class="oe_highlight oe_inline"
+                                                help="Import Partner"
+                                                nolabel="1"
+                                            />
+                                                                                        </div>
+                                                                                        <div
+                                            attrs="{'invisible': [('default_import_partner', '!=', True)]}"
+                                        >
+                                                                                                <field
+                                                name="import_partner_from_date"
+                                                class="oe_inline"
+                                                nolabel="1"
+                                            />
+                                                                                        </div>
+                                                                                </group>
                                                                 </group>
                                                                 <separator />
                                                         </page>

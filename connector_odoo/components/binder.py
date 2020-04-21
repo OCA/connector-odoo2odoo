@@ -26,8 +26,8 @@ class OdooModelBinder(Component):
         "odoo.product.product",
         "odoo.product.template",
         "odoo.product.pricelist",
+        "odoo.res.partner",
         # TODO:
-        # 'odoo.res.partner',
         # 'odoo.res.partner.category',
         # 'odoo.stock.picking',
         # 'odoo.sale.order',
