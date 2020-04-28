@@ -302,6 +302,29 @@
                                             name="external_partner_domain_filter"
                                         />
                                                                         </group>
+                                                                        <group>
+                                                                                <div
+                                    attrs="{'invisible': [('default_import_partner', '!=', True)]}"
+                                >
+                                                                                        <button
+                                        name="import_partner"
+                                        type="object"
+                                        string="Import Partner"
+                                        class="oe_highlight oe_inline"
+                                        help="Import Partner"
+                                        nolabel="1"
+                                    />
+                                                                                </div>
+                                                                                <div
+                                    attrs="{'invisible': [('default_import_partner', '!=', True)]}"
+                                >
+                                                                                        <field
+                                        name="import_partner_from_date"
+                                        class="oe_inline"
+                                        nolabel="1"
+                                    />
+                                                                                </div>
+                                                                        </group>
 
                                                                 </group>
                                                         </page>
@@ -310,29 +333,6 @@
                                                                         <field
                                         name="default_lang_id"
                                     />
-                                                                                <group>
-                                                                                        <div
-                                            attrs="{'invisible': [('default_import_partner', '!=', True)]}"
-                                        >
-                                                                                                <button
-                                                name="import_partner"
-                                                type="object"
-                                                string="Import Partner"
-                                                class="oe_highlight oe_inline"
-                                                help="Import Partner"
-                                                nolabel="1"
-                                            />
-                                                                                        </div>
-                                                                                        <div
-                                            attrs="{'invisible': [('default_import_partner', '!=', True)]}"
-                                        >
-                                                                                                <field
-                                                name="import_partner_from_date"
-                                                class="oe_inline"
-                                                nolabel="1"
-                                            />
-                                                                                        </div>
-                                                                                </group>
                                                                 </group>
                                                                 <separator />
                                                         </page>

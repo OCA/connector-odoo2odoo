@@ -295,7 +295,7 @@ class OdooBackend(models.Model):
 
     @api.multi
     def import_partner(self):
-        if not self.default_partner:
+        if not self.default_import_partner:
             return False
         self._import_from_date("odoo.res.partner", "import_partner_from_date")
         return True

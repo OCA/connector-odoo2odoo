@@ -94,7 +94,7 @@ class ProductImportMapper(Component):
     @only_create
     @mapping
     def odoo_id(self, record):
-        match_field = u"default_code"
+        match_field = "default_code"
         if self.backend_record.matching_product_product:
             match_field = self.backend_record.matching_product_ch
 

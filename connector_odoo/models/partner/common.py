@@ -8,7 +8,8 @@ import logging
 
 from odoo import api, fields, models
 from odoo.addons.component.core import Component
-from odoo.addons.queue_job.job import job
+# from odoo.addons.queue_job.job import job
+# from odoo.addons.component_event import skip_if
 
 _logger = logging.getLogger(__name__)
 
@@ -24,22 +25,11 @@ class OdooPartner(models.Model):
         result = []
         for op in self:
             name = "{} (Backend: {})".format(
-                op.odoo_id.display_name, op.backend_id.name
+                op.odoo_id.display_name, op.backend_id.display_name
             )
             result.append((op.id, name))
 
         return result
-
-    RECOMPUTE_QTY_STEP = 1000  # Partners at a time
-
-    @job(default_channel="root.odoo")
-    @api.multi
-    def export_inventory(self, fields=None):
-        """ Export the inventory configuration and quantity of a product. """
-        self.ensure_one()
-        with self.backend_id.work_on(self._name) as work:
-            exporter = work.component(usage="product.inventory.exporter")
-            return exporter.run(self, fields)
 
 
 class Partner(models.Model):
@@ -50,6 +40,19 @@ class Partner(models.Model):
         inverse_name="odoo_id",
         string="Odoo Bindings",
     )
+
+    @api.model
+    def create(self, vals):
+        record = super(Partner, self).create(vals)
+        # FIXME: do the proper way
+        bind_model = self.env['odoo.res.partner']
+        backend = self.env['odoo.backend'].search([])
+        bind_model.create({
+            "backend_id": backend[0].id,
+            "odoo_id": record.id,
+            "external_id": 0,
+        })
+        return record
 
 
 class PartnerAdapter(Component):
@@ -72,3 +75,17 @@ class PartnerAdapter(Component):
         )
         filters += ext_filter
         return super(PartnerAdapter, self).search(filters=filters, model=model)
+
+
+class PartnerListener(Component):
+    _name = 'odoo.res.partner.listener'
+    _inherit = 'base.event.listener'
+    _apply_on = ['odoo.res.partner']
+    _usage = 'event.listener'
+
+    # @skip_if(lambda self, record, **kwargs: self.no_connector_export(record))
+    def on_record_create(self, record, fields=None):
+        record.with_delay().export_record(backend=record.backend_id)
+
+    def on_record_write(self, record, fields=None):
+        record.with_delay().export_record(backend=record.backend_id)

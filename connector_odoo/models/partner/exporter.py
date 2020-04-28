@@ -7,35 +7,34 @@ import logging
 
 from odoo.addons.component.core import Component
 from odoo.addons.connector.components.mapper import mapping, only_create
-from odoo.addons.connector.exception import MappingError
-from odoo.addons.connector_odoo.components.mapper import field_by_lang
+# from odoo.addons.connector.exception import MappingError
 
 _logger = logging.getLogger(__name__)
 
 
-class BatchProductTemplateExporter(Component):
-    _name = "odoo.product.template.batch.exporter"
+class BatchPartnerExporter(Component):
+    _name = "odoo.res.partner.batch.exporter"
     _inherit = "odoo.delayed.batch.exporter"
-    _apply_on = ["odoo.product.template"]
+    _apply_on = ["odoo.res.partner"]
     _usage = "batch.exporter"
 
     def run(self, filters=None):
         loc_filter = ast.literal_eval(
-            self.backend_record.local_product_domain_filter
+            self.backend_record.local_partner_domain_filter
         )
         filters += loc_filter
-        prod_ids = self.env["product.template"].search(filters)
+        partner_ids = self.env["res.partner"].search(filters)
 
-        o_ids = self.env["odoo.product.template"].search(
+        o_ids = self.env["odoo.res.partner"].search(
             [("backend_id", "=", self.backend_record.id)]
         )
-        o_prod_ids = self.env["product.template"].search(
+        o_partner_ids = self.env["res.partner"].search(
             [("id", "in", [o.odoo_id.id for o in o_ids])]
         )
-        to_bind = prod_ids - o_prod_ids
+        to_bind = partner_ids - o_partner_ids
 
         for p in to_bind:
-            self.env["odoo.product.template"].create(
+            self.env["odoo.res.partner"].create(
                 {
                     "odoo_id": p.id,
                     "external_id": 0,
@@ -43,91 +42,67 @@ class BatchProductTemplateExporter(Component):
                 }
             )
 
-        bind_ids = self.env["odoo.product.template"].search(
+        bind_ids = self.env["odoo.res.partner"].search(
             [
-                ("odoo_id", "in", [p.id for p in prod_ids]),
+                ("odoo_id", "in", [p.id for p in partner_ids]),
                 ("backend_id", "=", self.backend_record.id),
             ]
         )
-        for prod in bind_ids:
+        for partner in bind_ids:
             job_options = {"max_retries": 0, "priority": 15}
-            self._export_record(prod, job_options=job_options)
+            self._export_record(partner, job_options=job_options)
 
 
-class OdooProductTemplateExporter(Component):
-    _name = "odoo.product.template.exporter"
+class OdooPartnerExporter(Component):
+    _name = "odoo.res.partner.exporter"
     _inherit = "odoo.exporter"
-    _apply_on = ["odoo.product.template"]
+    _apply_on = ["odoo.res.partner"]
 
     def _export_dependencies(self):
+        if not self.binding.parent_id:
+            return
+        parents = self.binding.parent_id.bind_ids
+        parent = self.env["odoo.res.partner"]
 
-        categ_ids = self.binding.categ_id.bind_ids
-        categ_id = self.env["odoo.product.category"]
-
-        if categ_ids:
-            categ_id = categ_ids.filtered(
+        if parents:
+            parent = parents.filtered(
                 lambda c: c.backend_id == self.backend_record
             )
-        if not categ_id:
-            categ_id = self.env["odoo.product.category"].create(
-                {
-                    "odoo_id": self.binding.categ_id.id,
-                    "external_id": 0,
-                    "backend_id": self.backend_record.id,
-                }
-            )
 
-        cat = self.binder.to_external(categ_id, wrap=False)
-        if not cat:
-            # Export the parent ID if it doesn't exists
-            # TODO: Check if test is necessary
-            #  (export dependency probably update the record)
-            # categ_id.with_delay().export_record()
-            # self.env['product.category'].export_record(
-            # self.backend_record, external_id)
-            self._export_dependency(categ_id, "odoo.product.category")
+            partner = self.binder.to_external(parent, wrap=False)
+            self._export_dependency(partner, "odoo.res.partner")
 
     def _create_data(self, map_record, fields=None, **kwargs):
         """ Get the data to pass to :py:meth:`_create` """
-        datas = ast.literal_eval(
-            self.backend_record.default_product_export_dict
-        )
-        cp_datas = map_record.values(for_create=True, fields=fields, **kwargs)
-        # Combine default values with the computed ones
-        datas.update(cp_datas)
+        datas = map_record.values(for_create=True, fields=fields, **kwargs)
         return datas
 
 
-class ProductTemplateExportMapper(Component):
-    _name = "odoo.product.template.export.mapper"
+class PartnerExportMapper(Component):
+    _name = "odoo.res.partner.export.mapper"
     _inherit = "odoo.export.mapper"
-    _apply_on = ["odoo.product.template"]
+    _apply_on = ["odoo.res.partner"]
 
-    # TODO :     categ, special_price => minimal_price
     direct = [
-        (field_by_lang("name"), "name"),
-        (field_by_lang("description"), "description"),
-        (field_by_lang("description_sale"), "description_sale"),
-        (field_by_lang("description_purchase"), "description_purchase"),
-        (field_by_lang("description_sale"), "description_sale"),
-        ("weight", "weight"),
-        ("standard_price", "standard_price"),
-        ("barcode", "barcode"),
-        ("type", "type"),
-        ("sale_ok", "sale_ok"),
-        ("purchase_ok", "purchase_ok"),
-        ("image", "image"),
+        ("name", "name"),
+        ("street", "street"),
+        ("street2", "street2"),
+        ("city", "city"),
+        ("website", "website"),
+        ("phone", "phone"),
+        ("mobile", "mobile"),
+        ("email", "email"),
     ]
 
-    def get_product_by_match_field(self, record):
-        match_field = u"default_code"
+    def get_partner_by_match_field(self, record):
+        match_field = "email"
         filters = []
 
-        if self.backend_record.matching_product_product:
-            match_field = self.backend_record.matching_product_ch
+        if self.backend_record.matching_customer:
+            match_field = self.backend_record.matching_customer_ch
 
         filters = ast.literal_eval(
-            self.backend_record.external_product_domain_filter
+            self.backend_record.external_partner_domain_filter
         )
         if record[match_field]:
             filters.append((match_field, "=", record[match_field]))
@@ -136,47 +111,24 @@ class ProductTemplateExportMapper(Component):
         filters.append(("active", "=", True))
 
         adapter = self.component(usage="record.exporter").backend_adapter
-        prod_id = adapter.search(filters)
-        if len(prod_id) == 1:
-            return prod_id[0]
+        partner = adapter.search(filters)
+        if len(partner) == 1:
+            return partner[0]
 
         return False
 
     @mapping
-    def uom_id(self, record):
-        binder = self.binder_for("odoo.product.uom")
-        uom_id = binder.wrap_binding(record.uom_id)
-        return {"uom_id": uom_id, "uom_po_id": uom_id}
+    def customer(self, record):
+        return {"customer": True}
 
     @mapping
-    def price(self, record):
-        return {"list_price": record.list_price}
-
-    @mapping
-    def default_code(self, record):
-        code = record["default_code"]
-        if not code:
-            # Prevent not null values
-            return {"default_code": "/"}
-        return {"default_code": code}
+    def supplier(self, record):
+        return {"supplier": True}
 
     @only_create
     @mapping
     def odoo_id(self, record):
-        external_id = self.get_product_by_match_field(record)
+        external_id = self.get_partner_by_match_field(record)
 
         if external_id:
             return {"external_id": external_id}
-
-    @mapping
-    def category(self, record):
-        categ_id = record["categ_id"]
-        binder = self.binder_for("odoo.product.category")
-        # binder.model = 'odoo.product.category'
-        cat = binder.wrap_binding(categ_id)
-        if not cat:
-            raise MappingError(
-                "The product category with "
-                "odoo id %s is not available." % categ_id
-            )
-        return {"categ_id": cat}
