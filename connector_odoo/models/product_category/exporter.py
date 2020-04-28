@@ -63,7 +63,7 @@ class ProductExportCategoryMapper(Component):
     _inherit = "odoo.export.mapper"
     _apply_on = ["odoo.product.category"]
 
-    # TODO :     categ, special_price => minimal_price
+    # TODO: categ, special_price => minimal_price
     direct = [("name", "name"), ("type", "type")]
 
     def get_parent_categ(self, record):

@@ -3,10 +3,12 @@
 # © 2016 Sodexis
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
+import ast
 import logging
 
 from odoo.addons.component.core import Component
-from odoo.addons.connector.components.mapper import mapping
+from odoo.addons.connector.components.mapper import mapping, only_create
+from odoo.addons.connector.exception import MappingError
 
 _logger = logging.getLogger(__name__)
 
@@ -53,41 +55,78 @@ class PartnerImportMapper(Component):
         ("supplier", "supplier"),
         ("ref", "ref"),
         ("comment", "comment"),
+        ("company_type", "company_type"),
         ("image", "image"),
     ]
 
     @mapping
     def state_id(self, record):
         state_id = False
-        if record.state_id:
-            state = self.env["res.country.state"].search(
-                [("code", "=", record.state_id.code)]
-            )
-            state_id = state.id
-        return {"state_id": state_id}
-
-    @mapping
-    def country_id(self, record):
         country_id = False
         if record.country_id:
-            country = self.env["res.country"].search(
-                [("code", "=", record.country_id.code)]
-            )
-            country_id = country.id
-        return {"country_id": country_id}
+            country_code = record.country_id.code
+        else:
+            country_code = 'CA'
+        country = self.env["res.country"].search([
+            ("code", "=", country_code),
+        ])
+        country_id = country.id
+        if record.state_id:
+            state = self.env["res.country.state"].search([
+                ("code", "=", record.state_id.code),
+                ("country_id", "=", country_id),
+            ])
+            state_id = state.id
+        return {
+            "state_id": state_id,
+            "country_id": country_id,
+        }
+
+    @mapping
+    def category(self, record):
+        res = {"parent_id": False}
+        parent = record.parent_id
+        if parent:
+            binder = self.binder_for("odoo.res.partner")
+
+            bind_parent = binder.to_internal(parent.id, unwrap=True)
+            if not bind_parent:
+                raise MappingError(
+                    "The parent partner with odoo id %s is not imported."
+                    % parent.name
+                )
+            res.update(parent_id=bind_parent.id)
+        return res
+
+    @only_create
+    @mapping
+    def odoo_id(self, record):
+        filters = ast.literal_eval(
+            self.backend_record.local_partner_domain_filter
+        )
+        if record.ref or record.email:
+            filters.extend([
+                '|', ("ref", "=", record.ref),
+                ("email", "=", record.email),
+            ])
+        partner = self.env["res.partner"].search(filters)
+
+        if len(partner) == 1:
+            return {"odoo_id": partner.id}
+        return {}
 
 
 class PartnerImporter(Component):
-    _name = "odoo.product.template.importer"
+    _name = "odoo.res.partner.importer"
     _inherit = "odoo.importer"
-    _apply_on = ["odoo.product.template"]
+    _apply_on = ["odoo.res.partner"]
 
     def _import_dependencies(self):
         """ Import the dependencies for the record"""
-        # record = self.odoo_record
-        # import related categories
-        # categ_id = self.odoo_record.categ_id
-        # self._import_dependency(categ_id.id, "odoo.product.category")
+        # import parent
+        if self.odoo_record.parent_id:
+            self._import_dependency(
+                self.odoo_record.parent_id.id, "odoo.res.partner")
 
     def _must_skip(self):
         """ Hook called right after we read the data from the backend.
