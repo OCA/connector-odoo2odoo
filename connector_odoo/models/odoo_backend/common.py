@@ -156,10 +156,17 @@ class OdooBackend(models.Model):
         default="[]",
         help="Filter in the Odoo Destination",
     )
+    external_product_pricelist_domain_filter = fields.Char(
+        string="External Product Pricelist domain filter",
+        default="[]",
+        help="Filter in the Odoo Destination",
+    )
     default_import_product = fields.Boolean("Import products")
     import_products_from_date = fields.Datetime("Import products from date")
     import_partner_from_date = fields.Datetime("Import partner from date")
     import_categories_from_date = fields.Datetime("Import categories from date")
+    import_pricelist_items_from_date = fields.Datetime(
+        "Import pricelists from date")
     default_export_product = fields.Boolean("Export Products")
     export_products_from_date = fields.Datetime("Export products from date")
     export_categories_from_date = fields.Datetime("Export Categories from date")
@@ -301,12 +308,27 @@ class OdooBackend(models.Model):
         return True
 
     @api.multi
+    def import_product_pricelist_item(self):
+        if not self.default_import_product:
+            return False
+        self._import_from_date(
+            "odoo.product.pricelist.item", "import_pricelist_items_from_date"
+        )
+        return True
+
+    @api.multi
     def import_product_categories(self):
         if not self.default_import_product:
             return False
         self._import_from_date(
             "odoo.product.category", "import_categories_from_date"
         )
+        return True
+
+    @api.multi
+    def connector_client_synch(self, model, filters=[]):
+        for backend in self:
+            self.env[model].with_delay().import_batch(backend, filters)
         return True
 
     @api.multi

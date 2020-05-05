@@ -3,6 +3,7 @@
 # © 2016 Sodexis
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+import ast
 import logging
 from odoo import models, fields
 from odoo.addons.component.core import Component
@@ -16,17 +17,6 @@ class OdooProductPricelist(models.Model):
     _inherit = 'odoo.binding'
     _inherits = {'product.pricelist': 'odoo_id'}
     _description = 'Odoo Product Pricelist'
-
-    odoo_parent_id = fields.Many2one(
-        comodel_name='odoo.product.pricelist',
-        string='Ext. Odoo Parent Pricelist',
-        ondelete='cascade',
-    )
-    odoo_child_ids = fields.One2many(
-        comodel_name='odoo.product.pricelist',
-        inverse_name='odoo_parent_id',
-        string='Ext. Odoo Child Categories',
-    )
 
 
 class ProductPricelist(models.Model):
@@ -44,3 +34,43 @@ class ProductPricelistAdapter(Component):
     _inherit = 'odoo.adapter'
     _apply_on = 'odoo.product.pricelist'
     _odoo_model = 'product.pricelist'
+
+
+class OdooProductPricelistItem(models.Model):
+    _name = 'odoo.product.pricelist.item'
+    _inherit = 'odoo.binding'
+    _inherits = {'product.pricelist.item': 'odoo_id'}
+    _description = 'Odoo Product Pricelist Item'
+
+
+class ProductPricelistItem(models.Model):
+    _inherit = 'product.pricelist.item'
+
+    bind_ids = fields.One2many(
+        comodel_name='odoo.product.pricelist.item',
+        inverse_name='odoo_id',
+        string="Odoo Bindings",
+    )
+
+
+class ProductPricelistItemAdapter(Component):
+    _name = 'odoo.product.pricelist.item.adapter'
+    _inherit = 'odoo.adapter'
+    _apply_on = 'odoo.product.pricelist.item'
+    _odoo_model = 'product.pricelist.item'
+
+    def search(self, filters=None, model=None):
+        """ Search records according to some criteria
+        and returns a list of ids
+
+        :rtype: list
+        """
+        if filters is None:
+            filters = []
+        ext_filter = ast.literal_eval(
+            str(self.backend_record.external_product_pricelist_domain_filter)
+        )
+        filters += ext_filter
+        return super(ProductPricelistItemAdapter, self).search(
+            filters=filters, model=model
+        )
