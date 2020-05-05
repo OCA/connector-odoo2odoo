@@ -25,7 +25,7 @@ class OdooProductTemplate(models.Model):
         for op in self:
             name = "{} (Backend: {})".format(
                 op.odoo_id.display_name,
-                op.backend_id.name,
+                op.backend_id.display_name,
             )
             result.append((op.id, name))
 

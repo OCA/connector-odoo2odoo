@@ -13,7 +13,13 @@
     "application": False,
     "installable": True,
     "external_dependencies": {"python": ["odoorpc"], "bin": []},
-    "depends": ["base", "product", "connector", "connector_base_product"],
+    "depends": [
+        "base",
+        "sale",
+        "product",
+        "connector",
+        "connector_base_product",
+    ],
     "data": [
         "security/connector_odoo_base_security.xml",
         "security/ir.model.access.csv",

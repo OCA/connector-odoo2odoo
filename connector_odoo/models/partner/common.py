@@ -9,7 +9,7 @@ import logging
 from odoo import api, fields, models
 from odoo.addons.component.core import Component
 # from odoo.addons.queue_job.job import job
-# from odoo.addons.component_event import skip_if
+from odoo.addons.component_event.components.event import skip_if
 
 _logger = logging.getLogger(__name__)
 
@@ -41,19 +41,6 @@ class Partner(models.Model):
         string="Odoo Bindings",
     )
 
-    @api.model
-    def create(self, vals):
-        record = super(Partner, self).create(vals)
-        # FIXME: do the proper way
-        bind_model = self.env['odoo.res.partner']
-        backend = self.env['odoo.backend'].search([])
-        bind_model.create({
-            "backend_id": backend[0].id,
-            "odoo_id": record.id,
-            "external_id": 0,
-        })
-        return record
-
 
 class PartnerAdapter(Component):
     _name = "odoo.res.partner.adapter"
@@ -78,14 +65,26 @@ class PartnerAdapter(Component):
 
 
 class PartnerListener(Component):
-    _name = 'odoo.res.partner.listener'
-    _inherit = 'base.event.listener'
-    _apply_on = ['odoo.res.partner']
+    _name = 'res.partner.listener'
+    _inherit = 'base.connector.listener'
+    _apply_on = ['res.partner']
     _usage = 'event.listener'
 
-    # @skip_if(lambda self, record, **kwargs: self.no_connector_export(record))
+    @skip_if(lambda self, record, **kwargs: self.no_connector_export(record))
     def on_record_create(self, record, fields=None):
-        record.with_delay().export_record(backend=record.backend_id)
+        # FIXME: do the proper way
+        bind_model = self.env['odoo.res.partner']
+        backend = self.env['odoo.backend'].search([])
+        binding = bind_model.create({
+            "backend_id": backend[0].id,
+            "odoo_id": record.id,
+            "external_id": 0,
+        })
+        binding.with_delay().export_record(backend)
 
+    """
+    @skip_if(lambda self, record, **kwargs: self.no_connector_export(record))
     def on_record_write(self, record, fields=None):
+        self.binder.to_external(parent, wrap=False)
         record.with_delay().export_record(backend=record.backend_id)
+    """

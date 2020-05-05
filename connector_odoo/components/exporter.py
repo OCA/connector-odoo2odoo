@@ -80,7 +80,8 @@ class OdooBaseExporter(AbstractComponent):
         """
         self.binding = binding
 
-        self.external_id = self.binder.to_external(self.binding)
+        self.external_id = self.binder.to_external(
+            self.binding, wrap=True)
         try:
             should_import = self._should_import()
         except IDMissingInBackend:
@@ -101,7 +102,6 @@ class OdooBaseExporter(AbstractComponent):
         return result
 
     #     def _run(self):
-    #         """ Flow of the synchronization, implemented in inherited classes"""
     #         raise NotImplementedError
 
     def _after_export(self):
@@ -324,7 +324,7 @@ class OdooExporter(AbstractComponent):
             # If wrap is True, relation is already a binding record.
             binding = relation
 
-        if not rel_binder.to_external(binding):
+        if not rel_binder.to_external(binding, wrap=wrap):
             exporter = self.component(
                 usage=component_usage, model_name=binding_model
             )

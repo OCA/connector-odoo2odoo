@@ -51,6 +51,27 @@ class ProductProduct(models.Model):
         string="Odoo Bindings",
     )
 
+    @api.multi
+    def get_remote_qty_available(self, location=False):
+        res = {}
+        for product in self:
+            context = {}
+            bindings = product.bind_ids or product.product_tmpl_id.bind_ids
+            if not bindings:
+                continue
+            # FIXME: Not sure how we should specify one
+            binding = bindings[0]
+            location = location or self._context.get('location', False)
+            if location:
+                context.update(location=location)
+            with binding.backend_id.work_on('odoo.product.product') as work:
+                adapter = work.component(
+                    usage='record.importer').backend_adapter
+                res[product.id] = adapter.read(
+                    binding.external_id, context=context
+                ).qty_available
+        return res
+
 
 class ProductProductAdapter(Component):
     _name = "odoo.product.product.adapter"

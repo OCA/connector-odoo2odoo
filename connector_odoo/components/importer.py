@@ -48,7 +48,6 @@ class OdooImporter(AbstractComponent):
         """Return True if the import should be skipped because
         it is already up-to-date in OpenERP"""
         assert self.odoo_record
-        
         if not self.odoo_record.write_date:
             return  # no update date on Odoo, always import it.
         if not binding:
@@ -276,4 +275,3 @@ class SimpleRecordImporter(Component):
     _apply_on = [
         'odoo.res.partner.category',
     ]
-

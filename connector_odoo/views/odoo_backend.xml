@@ -152,6 +152,10 @@
                                             string="Ext. UOM Filter"
                                         />
                                                                                 <field
+                                            name="external_product_pricelist_domain_filter"
+                                            string="Local Product Filter"
+                                        />
+                                                                                <field
                                             name="default_product_export_dict"
                                             string="Default Values"
                                             help="Default Dictionnary with values for creating products"
@@ -210,6 +214,29 @@
                                                 />
                                                                                         </div>
 
+                                                                                </group>
+                                                                                <group>
+                                                                                        <div
+                                                attrs="{'invisible': [('default_import_product', '!=', True)]}"
+                                            >
+                                                                                                <button
+                                                    name="import_product_pricelist_item"
+                                                    type="object"
+                                                    string="Import Pricelists"
+                                                    class="oe_highlight oe_inline"
+                                                    help="Import Pricelists"
+                                                    nolabel="1"
+                                                />
+                                                                                        </div>
+                                                                                        <div
+                                                attrs="{'invisible': [('default_import_product', '!=', True)]}"
+                                            >
+                                                                                                <field
+                                                    name="import_pricelist_items_from_date"
+                                                    class="oe_inline"
+                                                    nolabel="1"
+                                                />
+                                                                                        </div>
                                                                                 </group>
                                                                         </group>
                                                                         <group

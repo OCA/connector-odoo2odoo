@@ -174,7 +174,7 @@ class GenericAdapter(AbstractComponent):
         model = odoo_api.env[ext_model]
         return model.search(filters if filters else [])
 
-    def read(self, id, attributes=None, model=None):
+    def read(self, id, attributes=None, model=None, context=None):
         """ Returns the information of a record
         :rtype: dict
         """
@@ -201,6 +201,8 @@ class GenericAdapter(AbstractComponent):
                 "Backend Adapter."
             )
         model = odoo_api.env[ext_model]
+        if context:
+            return model.with_context(context).browse(arguments)
         return model.browse(arguments)
 
     def create(self, data):
