@@ -15,7 +15,6 @@
     "external_dependencies": {"python": ["odoorpc"], "bin": []},
     "depends": [
         "base",
-        "sale",
         "product",
         "connector",
         "connector_base_product",

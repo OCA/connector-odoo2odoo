@@ -28,8 +28,8 @@ class OdooModelBinder(Component):
         "odoo.product.pricelist",
         "odoo.product.pricelist.item",
         "odoo.res.partner",
-        'odoo.sale.order',
-        'odoo.sale.order.line',
+        # 'odoo.sale.order',
+        # 'odoo.sale.order.line',
         # TODO:
         # 'odoo.res.partner.category',
         # 'odoo.stock.picking',
