@@ -41,7 +41,11 @@ class OdooBackend(models.Model):
     @api.model
     def _select_versions(self):
         """ Available versions for this backend """
-        return [("10.0", "Version 10.0.x"), ("12.0", "Version 12.0.x")]
+        return [
+            ("10.0", "Version 10.0.x"),
+            ("11.0", "Version 11.0.x"),
+            ("12.0", "Version 12.0.x")
+        ]
 
     active = fields.Boolean(string="Active", default=True)
     state = fields.Selection(
