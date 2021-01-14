@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+		<record id="view_odoo_backend_tree" model="ir.ui.view">
+			<field name="name">odoo.backend.tree</field>
+			<field name="model">odoo.backend</field>
+			<field name="arch" type="xml">
+				<tree string="Odoo Backends">
+					<field name="name" />
+					<field name="version" />
+					<field name="hostname" />
+					<field name="port" />
+					<field name="database" />
+					<field name="state" />
+				</tree>
+			</field>
+		</record>
+
+		<record id="view_odoo_backend_form" model="ir.ui.view">
+			<field name="name">odoo.backend.form</field>
+			<field name="model">odoo.backend</field>
+			<field name="arch" type="xml">
+				<form string="Odoo Backend">
+					<header>
+						<button name="synchronize_basedata" type="object" class="oe_highlight"
+							attrs="{'invisible':[('state', 'in', ['draft'])]}" string="Synchronize Base Datas"
+							help="Synchronize UOM, Categories, etc..." />
+						<button name="button_check_connection" type="object" class="oe_highlight"
+							string="Check Connection" attrs="{'invisible':[('state', 'not in', ['draft'])]}" />
+						<button name="button_reset_to_draft" type="object"
+							string="Reset To draft Connection" attrs="{'invisible':[('state', 'in', ['draft'])]}" />
+						<field name="state" widget="statusbar" />
+					</header>
+					<sheet>
+						<div class="oe_button_box" name="button_box">
+							<button class="oe_stat_button" type="object" name="toggle_active"
+								icon="fa-archive">
+								<field name="active" widget="boolean_button" options='{"terminology": "archive"}' />
+							</button>
+
+						</div>
+						<label for="name" />
+						<h1>
+							<field name="name" class="oe_inline" />
+						</h1>
+						<group>
+							<group>
+								<field name="hostname" />
+								<field name="version" />
+								<field name="protocol" />
+								<field name="port" />
+							</group>
+							<group>
+								<field name="database" />
+								<field name="login" />
+								<field name="password" password="1" />
+							</group>
+						</group>
+						<notebook>
+							<page string="Product" name="product_page">
+								<group name="prod_import_export_options">
+									<group  string="Import / Export">
+										<field name="default_import_product" />
+										<field name="default_export_product" />
+
+										<div>
+											<label for="matching_product_product" string="Match On" />
+											<field name="matching_product_product" class="oe_inline" />
+											<field name="matching_product_ch" />
+										</div>
+									</group>
+									<group string="General ">
+										<field name="local_product_domain_filter" />
+										<field name="external_product_domain_filter" />
+										<field name="default_product_export_dict" 
+										string="Default Values"
+										help="Default Dictionnary with values for creating products"
+										attrs="{'invisible': [('default_export_product', '!=', True)]}"/>
+									</group>
+								</group>
+								<group >
+									<group name="prod_import_operations" string="Import Operations">
+										<group>
+											<div
+												attrs="{'invisible': [('default_import_product', '!=', True)]}">
+												<button name="import_product_categories" type="object"
+													string="Import Categories" class="oe_highlight oe_inline"
+													help="Import Categories" nolabel="1" />
+											</div>
+											<div
+												attrs="{'invisible': [('default_import_product', '!=', True)]}">
+												<field name="import_categories_from_date" class="oe_inline"
+													nolabel="1" />
+											</div>
+										</group>
+										<group>
+											<div
+												attrs="{'invisible': [('default_import_product', '!=', True)]}">
+												<button name="import_product_product" type="object"
+													string="Import Product" class="oe_highlight oe_inline"
+													help="Import Product" nolabel="1" />
+											</div>
+											<div
+												attrs="{'invisible': [('default_import_product', '!=', True)]}">
+												<field name="import_products_from_date" class="oe_inline"
+													nolabel="1" />
+											</div>
+
+										</group>
+									</group>
+									
+									<group name="prod_export_operations" string="Export operations">
+
+										<group>
+											<div
+												attrs="{'invisible': [('default_export_product', '!=', True)]}">
+												<button name="export_product_categories" type="object"
+													string="Export Categories" class="oe_highlight oe_inline"
+													help="Export Categories" nolabel="1" />
+											</div>
+											<div
+												attrs="{'invisible': [('default_export_product', '!=', True)]}">
+												<field name="export_categories_from_date" class="oe_inline"
+													nolabel="1" />
+											</div>
+										</group>
+
+										<group>
+											<div
+												attrs="{'invisible': [('default_export_product', '!=', True)]}">
+												<button name="export_product_templates" type="object"
+													string="Export Product templates" class="oe_highlight oe_inline"
+													help="Export Products Templates" nolabel="1" />
+											</div>
+											<div
+												attrs="{'invisible': [('default_export_product', '!=', True)]}">
+												<button name="export_product_products" type="object"
+													string="Export Product" class="oe_highlight oe_inline"
+													help="Export Products" nolabel="1" />
+											</div>
+											<div
+												attrs="{'invisible': [('default_export_product', '!=', True)]}">
+												<field name="export_products_from_date" class="oe_inline"
+													nolabel="1" />
+											</div>
+										</group>
+									</group>
+
+								</group>
+							</page>
+							<page string="Partners">
+								<group>
+									<group string="Import / Export">
+										<field name="default_import_partner" />
+										<field name="default_export_partner" />
+									</group>
+									<group string="General ">
+										<field name="local_partner_domain_filter" />
+										<field name="external_partner_domain_filter" />
+									</group>
+									<group string="Import / Export">
+										<field name="default_import_partner" />
+										<field name="default_export_partner" />
+									</group>
+
+								</group>
+							</page>
+							<page string="General">
+								<group>
+									<field name="default_lang_id" />
+								</group>
+								<separator />
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record id="action_odoo_backend" model="ir.actions.act_window">
+			<field name="name">Odoo Backends</field>
+			<field name="res_model">odoo.backend</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<menuitem id="menu_odoo_root" name="Odoo"
+			parent="connector.menu_connector_root" sequence="10" />
+		<!-- TODO: Implement security strategy groups="odoo_base.group_oc_manager" -->
+		<menuitem id="menu_odoo_backends" name="Backends" parent="menu_odoo_root"
+			action="action_odoo_backend" />
+
+	</data>
+</openerp>
