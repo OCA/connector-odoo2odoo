@@ -160,7 +160,7 @@ class GenericAdapter(AbstractComponent):
             )
 
         model = odoo_api.env[ext_model]
-        return model.search(filters if filters else [])
+        return model.with_context(active_test=False).search(filters if filters else [])
     
     def read(self, id, attributes=None, model=None):
         """ Returns the information of a record
