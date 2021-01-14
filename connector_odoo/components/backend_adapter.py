@@ -69,6 +69,8 @@ class OdooAPI(object):
             if self._location.lang_id:
                 self._api.env.context['lang'] = self._location.lang_id
             
+            
+            self._api.env.context['active_test'] = False
             _logger.info('Created a new Odoo API instance and logged In with context %s' % self._api.env.context)
         return self._api
 
@@ -160,7 +162,7 @@ class GenericAdapter(AbstractComponent):
             )
 
         model = odoo_api.env[ext_model]
-        return model.with_context(active_test=False).search(filters if filters else [])
+        return model.search(filters if filters else [])
     
     def read(self, id, attributes=None, model=None):
         """ Returns the information of a record
