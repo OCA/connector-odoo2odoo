@@ -26,6 +26,24 @@
                         <field name="view_mode">tree,form</field>
                 </record>
 
+                <record id="action_odoo_partners" model="ir.actions.act_window">
+                    <field name="name">Odoo Partners</field>
+                    <field name="res_model">odoo.res.partner</field>
+                    <field name="view_mode">tree,form</field>
+            </record>
+
+            <record id="action_odoo_users" model="ir.actions.act_window">
+                <field name="name">Odoo Users</field>
+                <field name="res_model">odoo.res.users</field>
+                <field name="view_mode">tree,form</field>
+        </record>
+
+        <record id="action_odoo_res_partner_category" model="ir.actions.act_window">
+            <field name="name">Odoo Res Partner Category</field>
+            <field name="res_model">odoo.res.partner.category</field>
+            <field name="view_mode">tree,form</field>
+    </record>
+
 
                 <record
             id="action_odoo_product_templates"
@@ -85,6 +103,27 @@
             name="External Categories"
             parent="menu_odoo_external_objects"
             action="action_odoo_categories"
+        />
+
+        <menuitem
+            id="menu_odoo_external_partners"
+            name="External Partners"
+            parent="menu_odoo_external_objects"
+            action="action_odoo_partners"
+        />
+
+        <menuitem
+            id="menu_odoo_external_res_partner_category"
+            name="External Partner Category"
+            parent="menu_odoo_external_objects"
+            action="action_odoo_res_partner_category"
+        />
+
+        <menuitem
+            id="menu_odoo_external_users"
+            name="External Users"
+            parent="menu_odoo_external_objects"
+            action="action_odoo_users"
         />
 
         </data>

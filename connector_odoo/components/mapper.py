@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2013 Guewen Baconnier,Camptocamp SA,Akretion
 # © 2016 Sodexis
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
@@ -19,13 +18,13 @@ def field_by_lang(field):
             rec_lang = record.with_context(lang=lang_code)
             return rec_lang[field]
         return modifier
-    
-    
+
+
 class OdooImportMapper(AbstractComponent):
     _name = 'odoo.import.mapper'
     _inherit = ['base.odoo.connector', 'base.import.mapper']
     _usage = 'import.mapper'
-    
+
     @mapping
     def backend_id(self, record):
         return {'backend_id': self.backend_record.id}
@@ -43,7 +42,7 @@ class OdooImportMapper(AbstractComponent):
         if callable(from_attr):
             return from_attr(self, record, to_attr)
 
-        value = record[from_attr]
+        value = record[from_attr] if hasattr(record, from_attr) else False
         if not value:
             return False
 
@@ -51,8 +50,8 @@ class OdooImportMapper(AbstractComponent):
         # not used, we assume that the relation model is a binding.
         # Use an explicit modifier external_to_m2o in the 'direct' mappings to
         # change that.
-        field = self.model._fields[to_attr]
-        if field.type == 'many2one':
+        field = self.model._fields[to_attr] if to_attr in self.model._fields else None
+        if field and field.type == 'many2one':
             mapping_func = external_to_m2o(from_attr)
             value = mapping_func(self, record, to_attr)
         return value
@@ -63,4 +62,3 @@ class OdooExportMapper(AbstractComponent):
     _inherit = ['base.odoo.connector', 'base.export.mapper']
     _usage = 'export.mapper'
 
-    

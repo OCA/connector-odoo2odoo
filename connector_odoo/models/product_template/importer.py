@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2013-2017 Camptocamp SA
 # © 2016 Sodexis
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
@@ -14,7 +13,7 @@ _logger = logging.getLogger(__name__)
 
 
 class ProductTemplateBatchImporter(Component):
-    """ Import the Odoo Products Template.
+    """Import the Odoo Products Template.
 
     For every product category in the list, a delayed job is created.
     Import from a date
@@ -25,13 +24,13 @@ class ProductTemplateBatchImporter(Component):
     _apply_on = ["odoo.product.template"]
 
     def run(self, filters=None):
-        """ Run the synchronization """
+        """Run the synchronization"""
 
         external_ids = self.backend_adapter.search(filters)
         _logger.info(
-            "search for odoo products template %s returned %s",
+            "search for odoo products template %s returned %s items",
             filters,
-            external_ids,
+            len(external_ids),
         )
         for external_id in external_ids:
             # TODO : get the parent_left of the category so that we change
@@ -67,13 +66,13 @@ class ProductTemplateImportMapper(Component):
 
     @mapping
     def uom_id(self, record):
-        binder = self.binder_for('odoo.uom.uom')
+        binder = self.binder_for("odoo.uom.uom")
         uom = binder.to_internal(record.uom_id.id, unwrap=True)
         return {"uom_id": uom.id}
 
     @mapping
     def uom_po_id(self, record):
-        binder = self.binder_for('odoo.uom.uom')
+        binder = self.binder_for("odoo.uom.uom")
         uom = binder.to_internal(record.uom_id.id, unwrap=True)
         return {"uom_po_id": uom.id}
 
@@ -101,9 +100,7 @@ class ProductTemplateImportMapper(Component):
         match_field = u"default_code"
         if self.backend_record.matching_product_product:
             match_field = self.backend_record.matching_product_ch
-        filters = ast.literal_eval(
-            self.backend_record.local_product_domain_filter
-        )
+        filters = ast.literal_eval(self.backend_record.local_product_domain_filter)
         if record[match_field]:
             filters.append((match_field, "=", record[match_field]))
         prod_id = self.env["product.product"].search(filters)
@@ -129,14 +126,14 @@ class ProductTemplateImporter(Component):
     _apply_on = ["odoo.product.template"]
 
     def _import_dependencies(self):
-        """ Import the dependencies for the record"""
+        """Import the dependencies for the record"""
         # record = self.odoo_record
         # import related categories
         categ_id = self.odoo_record.categ_id
         self._import_dependency(categ_id.id, "odoo.product.category")
 
     def _must_skip(self):
-        """ Hook called right after we read the data from the backend.
+        """Hook called right after we read the data from the backend.
 
         If the method returns a message giving a reason for the
         skipping, the import will be interrupted and the message
@@ -154,4 +151,4 @@ class ProductTemplateImporter(Component):
         return binding
 
     def _after_import(self, binding):
-        """ Hook called at the end of the import """
+        """Hook called at the end of the import"""

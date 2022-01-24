@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2013 Guewen Baconnier,Camptocamp SA,Akretion
 # © 2016 Sodexis
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
@@ -67,7 +66,7 @@ class OdooBaseExporter(AbstractComponent):
         if not sync:
             return True
         record = self.backend_adapter.read(self.external_id)
-        if not record["write_date"]:
+        if not hasattr(record, "write_date") and not record.write_date:
             # in rare case it can be empty, in doubt, import it
             return True
         sync_date = odoo.fields.Datetime.from_string(sync)

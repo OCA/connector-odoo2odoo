@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
 # © 2013-2017 Guewen Baconnier,Camptocamp SA,Akretion
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import _, api, fields, models
-from odoo.addons.queue_job.job import job
 from odoo.exceptions import ValidationError
 
 
@@ -55,11 +53,9 @@ class OdooBinding(models.AbstractModel):
                     % (self.backend_id.name, self.external_id, self._name)
                 )
 
-    @api.multi
     def resync(self):
         return self.with_delay().export_record(self.backend_id)
 
-    @job(default_channel="root.odoo")
     @api.model
     def import_batch(self, backend, filters=None):
         """ Prepare the import of records modified on Odoo """
@@ -69,7 +65,6 @@ class OdooBinding(models.AbstractModel):
             importer = work.component(usage="batch.importer")
             return importer.run(filters=filters)
 
-    @job(default_channel="root.odoo")
     @api.model
     def import_record(self, backend, external_id, force=False):
         """ Import a Odoo record """
@@ -77,7 +72,6 @@ class OdooBinding(models.AbstractModel):
             importer = work.component(usage="record.importer")
             return importer.run(external_id, force=force)
 
-    @job(default_channel="root.odoo")
     @api.model
     def export_batch(self, backend, filters=None):
         """ Prepare the import of records modified on Odoo """
@@ -87,8 +81,6 @@ class OdooBinding(models.AbstractModel):
             exporter = work.component(usage="batch.exporter")
             return exporter.run(filters=filters)
 
-    @job(default_channel="root.odoo")
-    @api.multi
     def export_record(self, backend, fields=None):
         """ Export a record on Odoo """
         self.ensure_one()
@@ -96,8 +88,6 @@ class OdooBinding(models.AbstractModel):
             exporter = work.component(usage="record.exporter")
             return exporter.run(self)
 
-    @job(default_channel="root.odoo")
-    @api.multi
     def export_delete_record(self, backend, external_id):
         """ Delete a record on Odoo """
         with backend.work_on(self._name) as work:

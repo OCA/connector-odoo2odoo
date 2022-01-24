@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright 2013-2017 Camptocamp SA
 # © 2016 Sodexis
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 import logging
 
-from odoo import api, fields, models
+from odoo import fields, models
+
 from odoo.addons.component.core import Component
-# from odoo.addons.queue_job.job import job
 from odoo.addons.component_event.components.event import skip_if
 
 _logger = logging.getLogger(__name__)
@@ -19,7 +18,6 @@ class OdooSaleOrder(models.Model):
     _inherits = {"sale.order": "odoo_id"}
     _description = "External Odoo Sale Order"
 
-    @api.multi
     def name_get(self):
         result = []
         for op in self:
@@ -29,6 +27,12 @@ class OdooSaleOrder(models.Model):
             result.append((op.id, name))
 
         return result
+
+    def resync(self):
+        if self.backend_id.product_main_record == "odoo":
+            return self.with_delay().export_record(self.backend_id)
+        else:
+            return self.with_delay().import_record(self.backend_id, self.external_id)
 
 
 class SaleOrder(models.Model):
@@ -40,10 +44,9 @@ class SaleOrder(models.Model):
         string="Odoo Bindings",
     )
 
-    @api.multi
     def action_confirm(self):
         res = super(SaleOrder, self).action_confirm()
-        self._event('on_sale_order_confirm').notify(self)
+        self._event("on_sale_order_confirm").notify(self)
         return res
 
 
@@ -55,22 +58,27 @@ class SaleOrderAdapter(Component):
 
 
 class SaleOrderListener(Component):
-    _name = 'odoo.sale.order.listener'
-    _inherit = 'base.connector.listener'
-    _apply_on = ['sale.order']
-    _usage = 'event.listener'
+    _name = "odoo.sale.order.listener"
+    _inherit = "base.connector.listener"
+    _apply_on = ["sale.order"]
+    _usage = "event.listener"
 
     @skip_if(lambda self, record, **kwargs: self.no_connector_export(record))
     def on_sale_order_confirm(self, record):
         # FIXME: do the proper way
-        bind_model = self.env['odoo.sale.order']
-        backend = self.env['odoo.backend'].search([])
-        binding = bind_model.create({
-            "backend_id": backend[0].id,
-            "odoo_id": record.id,
-            "external_id": 0,
-        })
-        binding.with_delay().export_record(backend)
+        bind_model = self.env["odoo.sale.order"]
+        backend = self.env["odoo.backend"].search([])
+        if backend:
+            binding = bind_model.create(
+                {
+                    "backend_id": backend[0].id,
+                    "odoo_id": record.id,
+                    "external_id": 0,
+                }
+            )
+            binding.with_delay().export_record(backend)
+        else:
+            _logger.info("No backend found for sale order %s", record.id)
 
 
 class OdooSaleOrderLine(models.Model):
@@ -78,6 +86,12 @@ class OdooSaleOrderLine(models.Model):
     _inherit = "odoo.binding"
     _inherits = {"sale.order.line": "odoo_id"}
     _description = "External Odoo Sale Order Line"
+
+    def resync(self):
+        if self.backend_id.product_main_record == "odoo":
+            return self.with_delay().export_record(self.backend_id)
+        else:
+            return self.with_delay().import_record(self.backend_id, self.external_id)
 
 
 class SaleOrderLine(models.Model):

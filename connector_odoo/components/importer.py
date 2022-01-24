@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # © 2013 Guewen Baconnier,Camptocamp SA,Akretion
 # © 2016 Sodexis
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
@@ -16,8 +15,10 @@ are already bound, to update the last sync date.
 """
 
 import logging
-from odoo import fields, _
-from odoo.addons.component.core import AbstractComponent, Component
+
+from odoo import _, fields
+
+from odoo.addons.component.core import AbstractComponent
 from odoo.addons.connector.exception import IDMissingInBackend
 from odoo.addons.queue_job.exception import NothingToDoJob
 
@@ -25,11 +26,11 @@ _logger = logging.getLogger(__name__)
 
 
 class OdooImporter(AbstractComponent):
-    """ Base importer for Odoo """
+    """Base importer for Odoo"""
 
-    _name = 'odoo.importer'
-    _inherit = ['base.importer', 'base.odoo.connector']
-    _usage = 'record.importer'
+    _name = "odoo.importer"
+    _inherit = ["base.importer", "base.odoo.connector"]
+    _usage = "record.importer"
 
     def __init__(self, work_context):
         super(OdooImporter, self).__init__(work_context)
@@ -37,18 +38,24 @@ class OdooImporter(AbstractComponent):
         self.odoo_record = None
 
     def _get_odoo_data(self):
-        """ Return the raw Odoo data for ``self.external_id`` """
-        return self.backend_adapter.read(self.external_id)
+        """Return the raw Odoo data for ``self.external_id``"""
+        res = self.backend_adapter.read(self.external_id)
+        if self.work.odoo_api.api.version in ("6.1",):
+            res = res.model.browse(res.ids[0])
+        return res
 
     def _before_import(self):
-        """ Hook called before the import, when we have the Odoo
+        """Hook called before the import, when we have the Odoo
         data"""
 
     def _is_uptodate(self, binding):
         """Return True if the import should be skipped because
-        it is already up-to-date in OpenERP"""
+        it is already up-to-date in Odoo"""
         assert self.odoo_record
-        if not self.odoo_record.write_date:
+        if (
+            not hasattr(self.odoo_record, "write_date")
+            or not self.odoo_record.write_date
+        ):
             return  # no update date on Odoo, always import it.
         if not binding:
             return  # it does not exist so it should not be skipped
@@ -66,9 +73,10 @@ class OdooImporter(AbstractComponent):
         # miss changes done in Odoo
         return odoo_date < sync_date
 
-    def _import_dependency(self, external_id, binding_model,
-                           importer=None, always=False):
-        """ Import a dependency.
+    def _import_dependency(
+        self, external_id, binding_model, importer=None, always=False
+    ):
+        """Import a dependency.
 
         The importer class is a class or subclass of
         :class:`OdooImporter`. A specific class can be defined.
@@ -91,18 +99,20 @@ class OdooImporter(AbstractComponent):
         binder = self.binder_for(binding_model)
         if always or not binder.to_internal(external_id):
             if importer is None:
-                importer = self.component(usage='record.importer',
-                                          model_name=binding_model)
+                importer = self.component(
+                    usage="record.importer", model_name=binding_model
+                )
             try:
                 importer.run(external_id)
             except NothingToDoJob:
                 _logger.info(
-                    'Dependency import of %s(%s) has been ignored.',
-                    binding_model._name, external_id
+                    "Dependency import of %s(%s) has been ignored.",
+                    binding_model._name,
+                    external_id,
                 )
 
     def _import_dependencies(self):
-        """ Import the dependencies for the record
+        """Import the dependencies for the record
 
         Import of dependencies can be done manually or by calling
         :meth:`_import_dependency` for each dependency.
@@ -110,14 +120,14 @@ class OdooImporter(AbstractComponent):
         return
 
     def _map_data(self):
-        """ Returns an instance of
+        """Returns an instance of
         :py:class:`~odoo.addons.connector.components.mapper.MapRecord`
 
         """
         return self.mapper.map_record(self.odoo_record)
 
     def _validate_data(self, data):
-        """ Check if the values to import are correct
+        """Check if the values to import are correct
 
         Pro-actively check before the ``_create`` or
         ``_update`` if some fields are missing or invalid.
@@ -127,7 +137,7 @@ class OdooImporter(AbstractComponent):
         return
 
     def _must_skip(self):
-        """ Hook called right after we read the data from the backend.
+        """Hook called right after we read the data from the backend.
 
         If the method returns a message giving a reason for the
         skipping, the import will be interrupted and the message
@@ -147,36 +157,37 @@ class OdooImporter(AbstractComponent):
         return map_record.values(for_create=True, **kwargs)
 
     def _create(self, data):
-        """ Create the OpenERP record """
+        """Create the Odoo record"""
         # special check on data before import
         self._validate_data(data)
         model = self.model.with_context(connector_no_export=True)
+
         binding = model.create(data)
-        _logger.debug('%d created from odoo %s', binding, self.external_id)
+        _logger.debug("%d created from Odoo %s", binding, self.external_id)
         return binding
 
     def _update_data(self, map_record, **kwargs):
         return map_record.values(**kwargs)
 
     def _update(self, binding, data):
-        """ Update an OpenERP record """
+        """Update an Odoo record"""
         # special check on data before import
         self._validate_data(data)
         binding.with_context(connector_no_export=True).write(data)
-        _logger.debug('%d updated from odoo %s', binding, self.external_id)
+        _logger.debug("%d updated from Odoo %s", binding, self.external_id)
         return
 
     def _after_import(self, binding):
-        """ Hook called at the end of the import """
+        """Hook called at the end of the import"""
         return
 
     def run(self, external_id, force=False):
-        """ Run the synchronization
+        """Run the synchronization
 
         :param external_id: identifier of the record on Odoo
         """
         self.external_id = external_id
-        lock_name = 'import({}, {}, {}, {})'.format(
+        lock_name = "import({}, {}, {}, {})".format(
             self.backend_record._name,
             self.backend_record.id,
             self.work.model_name,
@@ -186,16 +197,15 @@ class OdooImporter(AbstractComponent):
         try:
             self.odoo_record = self._get_odoo_data()
         except IDMissingInBackend:
-            return _('Record does no longer exist in Odoo')
+            return _("Record does no longer exist in Odoo")
 
-        skip = self._must_skip()
-        if skip:
-            return skip
+        if self._must_skip():
+            return
 
         binding = self._get_binding()
 
         if not force and self._is_uptodate(binding):
-            return _('Already up-to-date.')
+            return _("Already up-to-date.")
 
         # Keep a lock on this import until the transaction is committed
         # The lock is kept since we have detected that the informations
@@ -221,23 +231,23 @@ class OdooImporter(AbstractComponent):
 
 
 class BatchImporter(AbstractComponent):
-    """ The role of a BatchImporter is to search for a list of
+    """The role of a BatchImporter is to search for a list of
     items to import, then it can either import them directly or delay
     the import of each item separately.
     """
 
-    _name = 'odoo.batch.importer'
-    _inherit = ['base.importer', 'base.odoo.connector']
-    _usage = 'batch.importer'
+    _name = "odoo.batch.importer"
+    _inherit = ["base.importer", "base.odoo.connector"]
+    _usage = "batch.importer"
 
     def run(self, filters=None):
-        """ Run the synchronization """
+        """Run the synchronization"""
         record_ids = self.backend_adapter.search(filters)
         for record_id in record_ids:
             self._import_record(record_id)
 
     def _import_record(self, external_id):
-        """ Import a record directly or delay the import of the record.
+        """Import a record directly or delay the import of the record.
 
         Method to implement in sub-classes.
         """
@@ -245,33 +255,23 @@ class BatchImporter(AbstractComponent):
 
 
 class DirectBatchImporter(AbstractComponent):
-    """ Import the records directly, without delaying the jobs. """
+    """Import the records directly, without delaying the jobs."""
 
-    _name = 'odoo.direct.batch.importer'
-    _inherit = 'odoo.batch.importer'
+    _name = "odoo.direct.batch.importer"
+    _inherit = "odoo.batch.importer"
 
     def _import_record(self, external_id):
-        """ Import the record directly """
+        """Import the record directly"""
         self.model.import_record(self.backend_record, external_id)
 
 
 class DelayedBatchImporter(AbstractComponent):
-    """ Delay import of the records """
+    """Delay import of the records"""
 
-    _name = 'odoo.delayed.batch.importer'
-    _inherit = 'odoo.batch.importer'
+    _name = "odoo.delayed.batch.importer"
+    _inherit = "odoo.batch.importer"
 
     def _import_record(self, external_id, job_options=None, **kwargs):
-        """ Delay the import of the records"""
+        """Delay the import of the records"""
         delayable = self.model.with_delay(**job_options or {})
         delayable.import_record(self.backend_record, external_id, **kwargs)
-
-
-class SimpleRecordImporter(Component):
-    """ Import one Odoo Website """
-
-    _name = 'odoo.simple.record.importer'
-    _inherit = 'odoo.importer'
-    _apply_on = [
-        'odoo.res.partner.category',
-    ]

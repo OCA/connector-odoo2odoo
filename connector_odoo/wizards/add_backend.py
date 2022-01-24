@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright <YEAR(S)> <AUTHOR(S)>
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
@@ -8,7 +7,6 @@ from odoo import api, models, fields
 class WizardModel(models.TransientModel):
     _name = "connector_odoo.add_backend.wizard"
 
-    @api.multi
     def get_default_object(self, model):
         
         domain = []
@@ -35,15 +33,12 @@ class WizardModel(models.TransientModel):
             return export     
         
         
-    @api.multi
     def get_default_products(self):
         return self.get_default_object('product.template')
         
-    @api.multi
     def get_default_category(self):
         return self.get_default_object('product.category')
         
-    @api.multi 
     def check_backend_binding(self):                
         active_model = self.env.context.get('active_model', False)
         
@@ -85,7 +80,6 @@ class WizardModel(models.TransientModel):
                                            comodel_name='product.category', default=get_default_category)
     
     
-    @api.multi
     def action_accept(self):
         self.ensure_one()
         self.check_backend_binding()

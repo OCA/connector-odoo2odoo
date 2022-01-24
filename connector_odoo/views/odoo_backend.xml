@@ -7,7 +7,7 @@
                         <field name="model">odoo.backend</field>
                         <field name="arch" type="xml">
                                 <tree string="Odoo Backends">
-                                        <field name="display_name" />
+                                        <field name="name" />
                                         <field name="version" />
                                         <field name="hostname" />
                                         <field name="port" />
@@ -54,24 +54,21 @@
                             class="oe_button_box"
                             name="button_box"
                         >
-                                                        <button
-                                class="oe_stat_button"
-                                type="object"
-                                name="toggle_active"
-                                icon="fa-archive"
-                            >
-                                                                <field
-                                    name="active"
-                                    widget="boolean_button"
-                                    options='{"terminology": "archive"}'
-                                />
-                                                        </button>
+
+            <field name="active" invisible="1" />
+            <widget
+                                name="web_ribbon"
+                                title="Archived"
+                                bg_color="bg-danger"
+                                attrs="{'invisible': [('active', '=', True)]}"
+                            />
+
 
                                                 </div>
-                                                <label for="display_name" />
+                                                <label for="name" />
                                                 <h1>
                                                         <field
-                                name="display_name"
+                                name="name"
                                 class="oe_inline"
                             />
                                                 </h1>
@@ -111,6 +108,10 @@
                                                                         <group
                                         string="Import / Export"
                                     >
+                                    <field
+                                            name="product_main_record"
+                                            help="Select Odoo to your changes direction was Odoo -> Backend"
+                                        />
                                                                                 <field
                                             name="default_import_product"
                                         />
@@ -307,11 +308,18 @@
 
                                                                 </group>
                                                         </page>
-                                                        <page string="Partners">
+                                                        <page
+                                string="Partners"
+                                name="partners"
+                            >
                                                                 <group>
                                                                         <group
                                         string="Import / Export"
                                     >
+                                    <field
+                                            name="partner_main_record"
+                                            help="Select Odoo to your changes direction was Odoo -> Backend"
+                                        />
                                                                                 <field
                                             name="default_import_partner"
                                         />
@@ -331,31 +339,89 @@
                                                                         </group>
                                                                         <group>
                                                                                 <div
-                                    attrs="{'invisible': [('default_import_partner', '!=', True)]}"
-                                >
+                                            attrs="{'invisible': [('default_import_partner', '!=', True)]}"
+                                        >
                                                                                         <button
-                                        name="import_partner"
-                                        type="object"
-                                        string="Import Partner"
-                                        class="oe_highlight oe_inline"
-                                        help="Import Partner"
-                                        nolabel="1"
-                                    />
+                                                name="import_partner"
+                                                type="object"
+                                                string="Import Partner"
+                                                class="oe_highlight oe_inline"
+                                                help="Import Partner"
+                                                nolabel="1"
+                                            />
                                                                                 </div>
                                                                                 <div
-                                    attrs="{'invisible': [('default_import_partner', '!=', True)]}"
-                                >
+                                            attrs="{'invisible': [('default_import_partner', '!=', True)]}"
+                                        >
                                                                                         <field
-                                        name="import_partner_from_date"
-                                        class="oe_inline"
-                                        nolabel="1"
-                                    />
+                                                name="import_partner_from_date"
+                                                class="oe_inline"
+                                                nolabel="1"
+                                            />
                                                                                 </div>
                                                                         </group>
 
                                                                 </group>
                                                         </page>
-                                                        <page string="General">
+                                                        <page
+                                string="Users"
+                                name="users"
+                            >
+                                                            <group>
+                                                                    <group
+                                        string="Import / Export"
+                                    >
+                                    <field
+                                            name="user_main_record"
+                                            help="Select Odoo to your changes direction was Odoo -> Backend"
+                                        />
+                                                                            <field
+                                            name="default_import_user"
+                                        />
+                                                                            <field
+                                            name="default_export_user"
+                                        />
+                                                                    </group>
+                                                                    <group
+                                        string="General "
+                                    >
+                                                                            <field
+                                            name="local_user_domain_filter"
+                                        />
+                                                                            <field
+                                            name="external_user_domain_filter"
+                                        />
+                                                                    </group>
+                                                                    <group>
+                                                                            <div
+                                            attrs="{'invisible': [('default_import_user', '!=', True)]}"
+                                        >
+                                                                                    <button
+                                                name="import_user"
+                                                type="object"
+                                                string="Import User"
+                                                class="oe_highlight oe_inline"
+                                                help="Import User"
+                                                nolabel="1"
+                                            />
+                                                                            </div>
+                                                                            <div
+                                            attrs="{'invisible': [('default_import_user', '!=', True)]}"
+                                        >
+                                                                                    <field
+                                                name="import_user_from_date"
+                                                class="oe_inline"
+                                                nolabel="1"
+                                            />
+                                                                            </div>
+                                                                    </group>
+
+                                                            </group>
+                                                    </page>
+                                                        <page
+                                string="General"
+                                name="general"
+                            >
                                                                 <group>
                                                                         <field
                                         name="default_lang_id"
