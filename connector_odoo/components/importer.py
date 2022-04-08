@@ -243,6 +243,7 @@ class OdooImporter(AbstractComponent):
         _logger.info("Binding")
         self.binder.bind(self.external_id, binding)
 
+        _logger.info("Check if after import process must be executed")
         self._after_import(binding)
         _logger.info("Bye!")
 
