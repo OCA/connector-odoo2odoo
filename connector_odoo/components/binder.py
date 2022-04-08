@@ -29,6 +29,7 @@ class OdooModelBinder(Component):
         "odoo.res.partner",
         "odoo.res.users",
         "odoo.res.partner.category",
+        "odoo.res.partner.address.disappeared"
         # 'odoo.sale.order',
         # 'odoo.sale.order.line',
         # TODO:

@@ -218,88 +218,36 @@ class PartnerImportMapper(Component):
 class PartnerImporter(Component):
     _name = "odoo.res.partner.importer"
     _inherit = "odoo.importer"
+    _inherits = "AbstractModel"
     _apply_on = ["odoo.res.partner"]
-
-    def default_address_contact_values(self, address, main_partner=False):
-        state_country = get_state_from_record(self, address)
-        result = {
-            "type": address.type if address.type != "default" else "contact",
-            "street": address.street,
-            "street2": address.street2,
-            "phone": address.phone,
-            "mobile": address.mobile,
-            "city": address.city,
-            "zip": address.zip,
-            "name": address.name if address.name else main_partner.name,
-        }
-        result = {**state_country, **result}
-        if main_partner:
-            result["parent_id"] = main_partner.id
-        return result
 
     def _import_dependencies(self):
         """Import the dependencies for the record"""
         # import parent
         _logger.info("Importing dependencies for external ID %s", self.external_id)
         if self.odoo_record.parent_id:
+            _logger.info("Importing parent")
             self._import_dependency(self.odoo_record.parent_id.id, "odoo.res.partner")
 
         if self.odoo_record.user_id:
+            _logger.info("Importing user")
             self._import_dependency(self.odoo_record.user_id.id, "odoo.res.users")
 
+        _logger.info("Importing categories")
         for category_id in self.odoo_record.category_id:
             self._import_dependency(category_id.id, "odoo.res.partner.category")
 
-        if self.backend_record.version == "6.1":
-            _logger.info(
-                "OpenERP detected, importing adresses for external ID %s",
-                self.external_id,
-            )
-            address_disappeared = self.env["odoo.res.partner.address.disappeared"]
-            model = self.work.odoo_api.api.get("res.partner.address")
-            address_ids = model.search(
-                [("partner_id", "=", self.odoo_record.id)], order="id"
-            )
-            if address_ids:
-                for address_id in address_ids:
-                    address = model.browse(address_id)
-                    # Importing dependencies of main_partner that currently being processed
-                    main_partner = self.binder.to_internal(self.external_id).odoo_id
-                    payload = self.default_address_contact_values(address, main_partner)
-                    disappeared_link_id = address_disappeared.search(
-                        [("external_id", "=", address_id)]
-                    )
-                    if disappeared_link_id:
-                        disappeared_link_id.partner_id.write(payload)
-                    else:
-                        if not payload["name"]:
-                            payload["name"] = self.odoo_record.name
-                        new_patner_id = (
-                            self.env["res.partner"]
-                            .with_context(connector_no_export=True)
-                            .create(payload)
-                        )
-                        address_disappeared.create(
-                            {
-                                "backend_id": self.backend_record.id,
-                                "external_id": address_id,
-                                "partner_id": new_patner_id.id,
-                                "external_parent_partner_id": self.external_id,
-                            }
-                        )
         result = super()._import_dependencies()
         _logger.info("Dependencies imported for external ID %s", self.external_id)
         return result
 
     def _after_import(self, binding):
         if self.backend_record.version == "6.1":
-            address_ids = self.env["odoo.res.partner.address.disappeared"].search(
-                [("external_parent_partner_id", "=", self.external_id)], order="id"
+            _logger.info(
+                "OpenERP detected, importing adresses for external ID %s",
+                self.external_id,
             )
-            for subpartner_id in address_ids.mapped("partner_id"):
-                if subpartner_id.type == "contact":
-                    binding.odoo_id.write(
-                        self.default_address_contact_values(subpartner_id)
-                    )
-                subpartner_id.parent_id = binding.odoo_id.id
+            self.env["odoo.res.partner.address.disappeared"].with_delay().import_record(
+                self.backend_record, self.external_id
+            )
         return super()._after_import(binding)

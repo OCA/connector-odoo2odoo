@@ -177,6 +177,10 @@ class OdooImporter(AbstractComponent):
         _logger.debug("%d updated from Odoo %s", binding, self.external_id)
         return
 
+    def _init_import(self, binding, external_id):
+        """Hook called at before read data from backend"""
+        return True
+
     def _after_import(self, binding):
         """Hook called at the end of the import"""
         return
@@ -186,13 +190,21 @@ class OdooImporter(AbstractComponent):
 
         :param external_id: identifier of the record on Odoo
         """
-        self.external_id = external_id
         lock_name = "import({}, {}, {}, {})".format(
             self.backend_record._name,
             self.backend_record.id,
             self.work.model_name,
             external_id,
         )
+        _logger.info("Initializating {}".format(lock_name))
+        self.external_id = external_id
+        binding = self._get_binding()
+        must_continue = self._init_import(binding, external_id)
+        if not must_continue:
+            _logger.info("Bye!")
+            return
+
+        _logger.info("Reading data for {}".format(lock_name))
 
         try:
             self.odoo_record = self._get_odoo_data()
@@ -200,22 +212,25 @@ class OdooImporter(AbstractComponent):
             return _("Record does no longer exist in Odoo")
 
         if self._must_skip():
+            _logger.info("It must be skipped")
             return
 
-        binding = self._get_binding()
-
         if not force and self._is_uptodate(binding):
+            _logger.info("Already up-to-date")
             return _("Already up-to-date.")
 
         # Keep a lock on this import until the transaction is committed
         # The lock is kept since we have detected that the informations
         # will be updated into Odoo
         self.advisory_lock_or_retry(lock_name)
+        _logger.info("Resource {} locked".format(lock_name))
         self._before_import()
 
         # import the missing linked resources
+        _logger.info("Importing dependencies")
         self._import_dependencies()
 
+        _logger.info("Mapping data")
         map_record = self._map_data()
 
         if binding:
@@ -225,9 +240,11 @@ class OdooImporter(AbstractComponent):
             record = self._create_data(map_record)
             binding = self._create(record)
 
+        _logger.info("Binding")
         self.binder.bind(self.external_id, binding)
 
         self._after_import(binding)
+        _logger.info("Bye!")
 
 
 class BatchImporter(AbstractComponent):

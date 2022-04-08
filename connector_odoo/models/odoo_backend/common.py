@@ -224,7 +224,9 @@ class OdooBackend(models.Model):
         )
         return lang
 
-    def _check_connection(self):
+    def get_connection(
+        self,
+    ):
         self.ensure_one()
         odoo_location = OdooLocation(
             hostname=self.hostname,
@@ -236,7 +238,10 @@ class OdooBackend(models.Model):
             protocol=self.protocol,
             lang_id=self.get_default_language_code(),
         )
-        odoo_api = OdooAPI(odoo_location)
+        return OdooAPI(odoo_location)
+
+    def _check_connection(self):
+        odoo_api = self.get_connection()
         odoo_api.complete_check()
         self.write({"state": "checked"})
 

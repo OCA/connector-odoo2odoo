@@ -19,22 +19,6 @@ class OdooPartner(models.Model):
     _inherits = {"res.partner": "odoo_id"}
     _description = "External Odoo Partner"
 
-    def _compute_visible_res_partner_address_id(
-        self,
-    ):
-        for partner in self:
-            partner.visible_res_partner_address_id = partner.backend_id.version == "6.1"
-        return True
-
-    res_partner_address_ids = fields.One2many(
-        comodel_name="odoo.res.partner.address.disappeared",
-        inverse_name="odoo_binding_partner_id",
-        string="Addresses (OpenERP)",
-    )
-    visible_res_partner_address_id = fields.Boolean(
-        compute="_compute_visible_res_partner_address_id"
-    )
-
     def name_get(self):
         result = []
         for op in self:
