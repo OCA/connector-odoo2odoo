@@ -17,25 +17,25 @@ class OdooModelBinder(Component):
 
     _name = "odoo.binder"
     _inherit = ["base.binder", "base.odoo.connector"]
-    _apply_on = [
-        "odoo.uom.uom",
-        "odoo.product.attribute",
-        "odoo.product.attribute.value",
-        "odoo.product.category",
-        "odoo.product.product",
-        "odoo.product.template",
-        "odoo.product.pricelist",
-        "odoo.product.pricelist.item",
-        "odoo.res.partner",
-        "odoo.res.users",
-        "odoo.res.partner.category",
-        "odoo.res.partner.address.disappeared"
-        # 'odoo.sale.order',
-        # 'odoo.sale.order.line',
-        # TODO:
-        # 'odoo.stock.picking',
-        # 'odoo.account.invoice',
-    ]
+    # _apply_on = [
+    #     "odoo.uom.uom",
+    #     "odoo.product.attribute",
+    #     "odoo.product.attribute.value",
+    #     "odoo.product.category",
+    #     "odoo.product.product",
+    #     "odoo.product.template",
+    #     "odoo.product.pricelist",
+    #     "odoo.product.pricelist.item",
+    #     "odoo.res.partner",
+    #     "odoo.res.users",
+    #     "odoo.res.partner.category",
+    #     "odoo.res.partner.address.disappeared"
+    #     # 'odoo.sale.order',
+    #     # 'odoo.sale.order.line',
+    #     # TODO:
+    #     # 'odoo.stock.picking',
+    #     # 'odoo.account.invoice',
+    # ]
 
     def wrap_binding(self, regular, browse=False):
         """For a normal record, gives the binding record.

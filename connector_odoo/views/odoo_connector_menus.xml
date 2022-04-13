@@ -61,6 +61,12 @@
         <field name="view_mode">tree,form</field>
     </record>
 
+    <record id="action_odoo_account_account" model="ir.actions.act_window">
+        <field name="name">Odoo Account</field>
+        <field name="res_model">odoo.account.account</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
 
     <!-- TODO: Implement security strategy groups="odoo_base.group_oc_manager" -->
     <menuitem
@@ -132,5 +138,12 @@
         name="External Partners Address (Disapeared)"
         parent="menu_odoo_external_objects"
         action="action_odoo_partners_address_disappeared"
+    />
+
+    <menuitem
+        id="menu_odoo_external_account_account"
+        name="External Account"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_account_account"
     />
 </odoo>

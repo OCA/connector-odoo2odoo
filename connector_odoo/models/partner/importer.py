@@ -214,6 +214,32 @@ class PartnerImportMapper(Component):
             user = binder.to_internal(record.user_id.id, unwrap=True)
             return {"user_id": user.id}
 
+    @mapping
+    def property_account_payable(self, record):
+        if float(self.backend_record.version) >= 9.0:
+            property_account_payable_id = record.property_account_payable_id
+        else:
+            property_account_payable_id = record.property_account_payable
+
+        if property_account_payable_id:
+            binder = self.binder_for("odoo.account.account")
+            account = binder.to_internal(property_account_payable_id.id, unwrap=True)
+            if account:
+                return {"property_account_payable_id": account.id}
+
+    @mapping
+    def property_account_receivable(self, record):
+        if float(self.backend_record.version) >= 9.0:
+            property_account_receivable_id = record.property_account_receivable_id
+        else:
+            property_account_receivable_id = record.property_account_receivable
+
+        if property_account_receivable_id:
+            binder = self.binder_for("odoo.account.account")
+            account = binder.to_internal(property_account_receivable_id.id, unwrap=True)
+            if account:
+                return {"property_account_receivable_id": account.id}
+
 
 class PartnerImporter(Component):
     _name = "odoo.res.partner.importer"
@@ -236,6 +262,19 @@ class PartnerImporter(Component):
         _logger.info("Importing categories")
         for category_id in self.odoo_record.category_id:
             self._import_dependency(category_id.id, "odoo.res.partner.category")
+
+        # Este campo fue renombrado
+        if self.odoo_record.property_account_payable:
+            _logger.info("Importing account payable")
+            self._import_dependency(
+                self.odoo_record.property_account_payable.id, "odoo.account.account"
+            )
+
+        if self.odoo_record.property_account_receivable:
+            _logger.info("Importing account receivable")
+            self._import_dependency(
+                self.odoo_record.property_account_receivable.id, "odoo.account.account"
+            )
 
         result = super()._import_dependencies()
         _logger.info("Dependencies imported for external ID %s", self.external_id)

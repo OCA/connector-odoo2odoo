@@ -41,6 +41,7 @@ class OdooResPartnerAddressReferences(models.Model):
             "mobile": address.mobile,
             "city": address.city,
             "zip": address.zip,
+            "email": address.email,
             "name": address.name if address.name else main_partner.name,
         }
         result = {**state_country, **result}
@@ -77,6 +78,14 @@ class OdooResPartnerAddressReferences(models.Model):
             self.env["odoo.res.partner.address.disappeared"].with_context(
                 connector_no_export=True
             ).create(payload)
+        self.after_import_address(
+            backend_record, address_id, partner_external_id, address
+        )
+
+    def after_import_address(
+        self, backend_record, address_id, partner_external_id, address
+    ):
+        pass
 
 
 class PartnerAddressDissapearedAdapter(Component):

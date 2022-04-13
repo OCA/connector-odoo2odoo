@@ -29,6 +29,7 @@
         "views/product_template.xml",
         "views/partner.xml",
         "views/users.xml",
+        "views/account_account.xml",
         "wizards/add_backend.xml",
     ],
     "demo": [],
