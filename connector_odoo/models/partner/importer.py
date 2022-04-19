@@ -2,11 +2,10 @@
 # © 2016 Sodexis
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
-import ast
 import logging
 
 from odoo.addons.component.core import Component
-from odoo.addons.connector.components.mapper import mapping, only_create
+from odoo.addons.connector.components.mapper import mapping
 
 _logger = logging.getLogger(__name__)
 
@@ -143,24 +142,6 @@ class PartnerImportMapper(Component):
         # in other version of odoo, this field is a direct mapping
         if self.backend_record.version != "6.1":
             return get_state_from_record(self, record)
-
-    @only_create
-    @mapping
-    def odoo_id(self, record):
-        filters = ast.literal_eval(self.backend_record.local_partner_domain_filter)
-        if record.ref or record.email:
-            filters.extend(
-                [
-                    "|",
-                    ("ref", "=", record.ref),
-                    ("email", "=", record.email),
-                ]
-            )
-        partner = self.env["res.partner"].search(filters)
-
-        if len(partner) == 1:
-            return {"odoo_id": partner.id}
-        return {}
 
     @mapping
     def customer(self, record):
