@@ -55,7 +55,7 @@ class PartnerBatchImporter(Component):
     _inherit = "odoo.delayed.batch.importer"
     _apply_on = ["odoo.res.partner"]
 
-    def run(self, filters=None):
+    def run(self, filters=None, force=False):
         """Run the synchronization"""
 
         external_ids = self.backend_adapter.search(filters)
@@ -221,6 +221,25 @@ class PartnerImportMapper(Component):
             if account:
                 return {"property_account_receivable_id": account.id}
 
+    @mapping
+    def property_purchase_currency_id(self, record):
+        property_purchase_currency_id = None
+        if hasattr(record, "property_purchase_currency_id"):
+            property_purchase_currency_id = record.property_purchase_currency_id
+        if not property_purchase_currency_id:
+            if (
+                record.property_product_pricelist_purchase
+                and record.property_product_pricelist_purchase.currency_id
+            ):
+                property_purchase_currency_id = (
+                    record.property_product_pricelist_purchase.currency_id
+                )
+        if property_purchase_currency_id:
+            binder = self.binder_for("odoo.res.currency")
+            currency = binder.to_internal(property_purchase_currency_id.id, unwrap=True)
+            if currency:
+                return {"property_purchase_currency_id": currency.id}
+
 
 class PartnerImporter(Component):
     _name = "odoo.res.partner.importer"
@@ -228,36 +247,67 @@ class PartnerImporter(Component):
     _inherits = "AbstractModel"
     _apply_on = ["odoo.res.partner"]
 
-    def _import_dependencies(self):
+    def _import_dependencies(self, force=False):
         """Import the dependencies for the record"""
         # import parent
         _logger.info("Importing dependencies for external ID %s", self.external_id)
         if self.odoo_record.parent_id:
             _logger.info("Importing parent")
-            self._import_dependency(self.odoo_record.parent_id.id, "odoo.res.partner")
+            self._import_dependency(
+                self.odoo_record.parent_id.id, "odoo.res.partner", force=force
+            )
 
         if self.odoo_record.user_id:
             _logger.info("Importing user")
-            self._import_dependency(self.odoo_record.user_id.id, "odoo.res.users")
+            self._import_dependency(
+                self.odoo_record.user_id.id, "odoo.res.users", force=force
+            )
 
         _logger.info("Importing categories")
         for category_id in self.odoo_record.category_id:
-            self._import_dependency(category_id.id, "odoo.res.partner.category")
+            self._import_dependency(
+                category_id.id, "odoo.res.partner.category", force=force
+            )
 
-        # Este campo fue renombrado
         if self.odoo_record.property_account_payable:
             _logger.info("Importing account payable")
             self._import_dependency(
-                self.odoo_record.property_account_payable.id, "odoo.account.account"
+                self.odoo_record.property_account_payable.id,
+                "odoo.account.account",
+                force=force,
             )
 
         if self.odoo_record.property_account_receivable:
             _logger.info("Importing account receivable")
             self._import_dependency(
-                self.odoo_record.property_account_receivable.id, "odoo.account.account"
+                self.odoo_record.property_account_receivable.id,
+                "odoo.account.account",
+                force=force,
             )
 
-        result = super()._import_dependencies()
+        if (
+            hasattr(self.odoo_record, "property_purchase_currency_id")
+            and self.odoo_record.property_purchase_currency_id
+        ):
+            _logger.info("Importing supplier currency")
+            self._import_dependency(
+                self.odoo_record.property_purchase_currency_id.id,
+                "odoo.res.currency",
+                force=force,
+            )
+
+        if (
+            self.odoo_record.property_product_pricelist_purchase
+            and self.odoo_record.property_product_pricelist_purchase.currency_id
+        ):
+            _logger.info("Importing supplier currency")
+            self._import_dependency(
+                self.odoo_record.property_product_pricelist_purchase.currency_id.id,
+                "odoo.res.currency",
+                force=force,
+            )
+
+        result = super()._import_dependencies(force=force)
         _logger.info("Dependencies imported for external ID %s", self.external_id)
         return result
 

@@ -2,11 +2,10 @@
 # © 2016 Sodexis
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
-import ast
 import logging
 
 from odoo.addons.component.core import Component
-from odoo.addons.connector.components.mapper import mapping, only_create
+from odoo.addons.connector.components.mapper import mapping
 from odoo.addons.connector.exception import MappingError
 
 _logger = logging.getLogger(__name__)
@@ -23,7 +22,7 @@ class ProductTemplateBatchImporter(Component):
     _inherit = "odoo.delayed.batch.importer"
     _apply_on = ["odoo.product.template"]
 
-    def run(self, filters=None):
+    def run(self, filters=None, force=False):
         """Run the synchronization"""
 
         external_ids = self.backend_adapter.search(filters)
@@ -50,18 +49,14 @@ class ProductTemplateImportMapper(Component):
 
     # TODO :     categ, special_price => minimal_price
     direct = [
-        ("name", "name"),
         ("description", "description"),
         ("weight", "weight"),
         ("standard_price", "standard_price"),
         ("barcode", "barcode"),
         ("description_sale", "description_sale"),
         ("description_purchase", "description_purchase"),
-        ("description_sale", "description_sale"),
-        ("is_published", "website_published"),
         ("sale_ok", "sale_ok"),
         ("purchase_ok", "purchase_ok"),
-        ("image", "image"),
     ]
 
     @mapping
@@ -77,47 +72,64 @@ class ProductTemplateImportMapper(Component):
         return {"uom_po_id": uom.id}
 
     @mapping
-    def type(self, record):
-        res = {"type": "service"}
-        if record["type"] == "product":
-            res.update(type="consu")
-        return res
-
-    @mapping
     def price(self, record):
         return {"list_price": record.list_price}
 
     @mapping
     def default_code(self, record):
+        if not hasattr(record, "default_code"):
+            return {}
         code = record["default_code"]
         if not code:
             return {"default_code": "/"}
         return {"default_code": code}
 
-    @only_create
     @mapping
-    def odoo_id(self, record):
-        match_field = u"default_code"
-        if self.backend_record.matching_product_product:
-            match_field = self.backend_record.matching_product_ch
-        filters = ast.literal_eval(self.backend_record.local_product_domain_filter)
-        if record[match_field]:
-            filters.append((match_field, "=", record[match_field]))
-        prod_id = self.env["product.product"].search(filters)
-        if len(prod_id) == 1:
-            return {"odoo_id": prod_id.id}
-        return {}
+    def name(self, record):
+        if not hasattr(record, "name"):
+            return {}
+        name = record["name"]
+        if not name:
+            return {"name": "/"}
+        return {"name": name}
 
     @mapping
     def category(self, record):
         categ_id = record["categ_id"]
         binder = self.binder_for("odoo.product.category")
+
         cat = binder.to_internal(categ_id.id, unwrap=True)
         if not cat:
             raise MappingError(
-                "The product category with " "odoo id %s is not imported." % cat
+                "Can't find external category with odoo_id %s." % categ_id.odoo_id
             )
         return {"categ_id": cat.id}
+
+    @mapping
+    def is_published(self, record):
+        is_published = False
+        if hasattr(record, "website_published"):
+            is_published = record["website_published"]
+        elif hasattr(record, "is_published"):
+            is_published = record["is_published"]
+        else:
+            return {}
+        return {"is_published": is_published}
+
+    @mapping
+    def image(self, record):
+        if self.backend_record.version in (
+            "6.1",
+            "7.0",
+            "8.0",
+            "9.0",
+            "10.0",
+            "11.0",
+            "12.0",
+        ):
+            return {"image_1920": record.image if hasattr(record, "image") else False}
+        else:
+            return {"image_1920": record.image_1920}
 
 
 class ProductTemplateImporter(Component):
@@ -125,30 +137,10 @@ class ProductTemplateImporter(Component):
     _inherit = "odoo.importer"
     _apply_on = ["odoo.product.template"]
 
-    def _import_dependencies(self):
+    def _import_dependencies(self, force=False):
         """Import the dependencies for the record"""
-        # record = self.odoo_record
-        # import related categories
+        uom_id = self.odoo_record.uom_id
+        self._import_dependency(uom_id.id, "odoo.uom.uom", force=force)
+
         categ_id = self.odoo_record.categ_id
-        self._import_dependency(categ_id.id, "odoo.product.category")
-
-    def _must_skip(self):
-        """Hook called right after we read the data from the backend.
-
-        If the method returns a message giving a reason for the
-        skipping, the import will be interrupted and the message
-        recorded in the job (if the import is called directly by the
-        job, not by dependencies).
-
-        If it returns None, the import will continue normally.
-
-        :returns: None | str | unicode
-        """
-
-    def _create(self, data):
-        binding = super(ProductTemplateImporter, self)._create(data)
-        self.backend_record.add_checkpoint(binding)
-        return binding
-
-    def _after_import(self, binding):
-        """Hook called at the end of the import"""
+        self._import_dependency(categ_id.id, "odoo.product.category", force=force)

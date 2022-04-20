@@ -15,7 +15,7 @@ class BatchProductCategoryExporter(Component):
     _apply_on = ["odoo.product.category"]
     _usage = "batch.exporter"
 
-    def run(self, filters=None):
+    def run(self, filters=None, force=False):
         filters += [("backend_id", "=", self.backend_record.id)]
         prod_ids = self.env["odoo.product.category"].search(filters)
         for prod in prod_ids:
@@ -68,9 +68,7 @@ class ProductExportCategoryMapper(Component):
     def get_parent_categ(self, record):
         parent = record["parent_id"]
         parent_ids = parent.bind_ids
-        parent_id = parent_ids.filtered(
-            lambda c: c.backend_id == self.backend_record
-        )
+        parent_id = parent_ids.filtered(lambda c: c.backend_id == self.backend_record)
         binder = self.binder_for("odoo.product.category")
         cat = False
         if parent_id:

@@ -6,7 +6,7 @@ from odoo.exceptions import ValidationError
 
 
 class OdooBinding(models.AbstractModel):
-    """ Abstract Model for the Bindings.
+    """Abstract Model for the Bindings.
 
     All the models used as bindings between Magento and Odoo
     (``magento.res.partner``, ``magento.product.product``, ...) should
@@ -47,10 +47,9 @@ class OdooBinding(models.AbstractModel):
             if count > 0:
                 raise ValidationError(
                     _(
-                        "A binding already exists with the same backend '%s' "
-                        "for the external id %s of the model %s"
-                    )
-                    % (self.backend_id.name, self.external_id, self._name)
+                        "A binding already exists with the same backend '{name}' "
+                        "for the external id {external_id} of the model {_name}"
+                    ).format(self.backend_id.name, self.external_id, self._name)
                 )
 
     def resync(self):
@@ -58,23 +57,23 @@ class OdooBinding(models.AbstractModel):
 
     @api.model
     def import_batch(self, backend, filters=None):
-        """ Prepare the import of records modified on Odoo """
+        """Prepare the import of records modified on Odoo"""
         if filters is None:
             filters = {}
         with backend.work_on(self._name) as work:
             importer = work.component(usage="batch.importer")
-            return importer.run(filters=filters)
+            return importer.run(filters=filters, force=backend.force)
 
     @api.model
     def import_record(self, backend, external_id, force=False):
-        """ Import a Odoo record """
+        """Import a Odoo record"""
         with backend.work_on(self._name) as work:
             importer = work.component(usage="record.importer")
             return importer.run(external_id, force=force)
 
     @api.model
     def export_batch(self, backend, filters=None):
-        """ Prepare the import of records modified on Odoo """
+        """Prepare the import of records modified on Odoo"""
         if filters is None:
             filters = {}
         with backend.work_on(self._name) as work:
@@ -82,14 +81,14 @@ class OdooBinding(models.AbstractModel):
             return exporter.run(filters=filters)
 
     def export_record(self, backend, fields=None):
-        """ Export a record on Odoo """
+        """Export a record on Odoo"""
         self.ensure_one()
         with backend.work_on(self._name) as work:
             exporter = work.component(usage="record.exporter")
             return exporter.run(self)
 
     def export_delete_record(self, backend, external_id):
-        """ Delete a record on Odoo """
+        """Delete a record on Odoo"""
         with backend.work_on(self._name) as work:
             deleter = work.component(usage="record.exporter.deleter")
             return deleter.run(external_id)

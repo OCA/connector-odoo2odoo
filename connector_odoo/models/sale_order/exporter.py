@@ -3,12 +3,11 @@
 
 import logging
 
-from odoo.addons.component.core import Component
-from odoo.addons.connector.components.mapper import (
-    mapping,
-    ExportMapChild,
-)
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
+
+from odoo.addons.component.core import Component
+from odoo.addons.connector.components.mapper import ExportMapChild, mapping
+
 # from odoo.addons.connector.exception import MappingError
 
 _logger = logging.getLogger(__name__)
@@ -21,15 +20,19 @@ class OdooSaleOrderExporter(Component):
 
     def _get_partner(self, record_partner):
         partner_ids = record_partner.bind_ids
-        partner = self.env['odoo.res.partner']
+        partner = self.env["odoo.res.partner"]
         if partner_ids:
             partner = partner_ids.filtered(
-                lambda c: c.backend_id == self.backend_record)
+                lambda c: c.backend_id == self.backend_record
+            )
         if not partner:
-            partner = self.env['odoo.res.partner'].create({
-                'odoo_id': record_partner.id,
-                'external_id': 0,
-                'backend_id': self.backend_record.id})
+            partner = self.env["odoo.res.partner"].create(
+                {
+                    "odoo_id": record_partner.id,
+                    "external_id": 0,
+                    "backend_id": self.backend_record.id,
+                }
+            )
         return partner
 
     def _export_dependencies(self):
@@ -37,9 +40,9 @@ class OdooSaleOrderExporter(Component):
         if not self.binding.partner_id:
             return
         for record_partner in [
-                self.binding.partner_id,
-                self.binding.partner_shipping_id,
-                self.binding.partner_invoice_id,
+            self.binding.partner_id,
+            self.binding.partner_shipping_id,
+            self.binding.partner_invoice_id,
         ]:
             partner = self._get_partner(record_partner)
             bind_partner = self.binder.to_external(partner, wrap=False)
@@ -52,36 +55,33 @@ class SaleOrderExportMapper(Component):
     _inherit = "odoo.export.mapper"
     _apply_on = ["odoo.sale.order"]
 
-    direct = [
-    ]
+    direct = []
 
-    children = [
-        ("order_line", "order_line", "odoo.sale.order.line")
-    ]
+    children = [("order_line", "order_line", "odoo.sale.order.line")]
 
     @mapping
     def date_order(self, record):
         return {
-            'date_order': record.date_order.strftime(
-                DEFAULT_SERVER_DATETIME_FORMAT)}
+            "date_order": record.date_order.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        }
 
     @mapping
     def pricelist_id(self, record):
-        binder = self.binder_for('odoo.product.pricelist')
-        pricelist_id = binder.to_external(
-            record.pricelist_id, wrap=True)
+        binder = self.binder_for("odoo.product.pricelist")
+        pricelist_id = binder.to_external(record.pricelist_id, wrap=True)
         return {"pricelist_id": pricelist_id}
 
     @mapping
     def partner_id(self, record):
-        binder = self.binder_for('odoo.res.partner')
+        binder = self.binder_for("odoo.res.partner")
         return {
-            'partner_id': binder.to_external(
-                record.partner_id, wrap=True),
-            'partner_invoice_id': binder.to_external(
-                record.partner_invoice_id, wrap=True),
-            'partner_shipping_id': binder.to_external(
-                record.partner_shipping_id, wrap=True),
+            "partner_id": binder.to_external(record.partner_id, wrap=True),
+            "partner_invoice_id": binder.to_external(
+                record.partner_invoice_id, wrap=True
+            ),
+            "partner_shipping_id": binder.to_external(
+                record.partner_shipping_id, wrap=True
+            ),
         }
 
     @mapping
@@ -102,15 +102,14 @@ class SaleOrderLineExportMapper(Component):
 
     @mapping
     def product_id(self, record):
-        binder = self.binder_for('odoo.product.product')
+        binder = self.binder_for("odoo.product.product")
         return {
-            'product_id': binder.to_external(
-                record.product_id, wrap=True),
+            "product_id": binder.to_external(record.product_id, wrap=True),
         }
 
 
 class SaleOrderExportMapChild(ExportMapChild):
-    _model_name = 'odoo.sale.order'
+    _model_name = "odoo.sale.order"
 
     def format_items(self, items_values):
         return [(0, 0, item) for item in items_values]

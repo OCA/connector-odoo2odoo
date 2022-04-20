@@ -33,7 +33,9 @@ class OdooPartner(models.Model):
         if self.backend_id.partner_main_record == "odoo":
             return self.with_delay().export_record(self.backend_id)
         else:
-            return self.with_delay().import_record(self.backend_id, self.external_id)
+            return self.with_delay().import_record(
+                self.backend_id, self.external_id, force=True
+            )
 
 
 class Partner(models.Model):

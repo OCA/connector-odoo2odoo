@@ -9,15 +9,18 @@
                 <attribute name="invisible" eval="0" />
             </xpath>
             <xpath expr="//notebook/page[@name='connector']" position="inside">
-                <label for="bind_ids" string="Standard link" />
-                <field name="bind_ids" readonly="1" />
+                <group string="Odoo Bindings">
+                    <field name="bind_ids" readonly="1" nolabel="1" />
+                </group>
             </xpath>
             <xpath expr="//notebook/page[@name='connector']" position="inside">
-                <label
-                    for="bind_address_dissapeared_ids"
-                    string="Partner Address (Disappeared)"
-                />
-                <field name="bind_address_dissapeared_ids" readonly="1" />
+                <group string="Odoo Bindings (Address Dissapeared)">
+                    <field
+                        name="bind_address_dissapeared_ids"
+                        readonly="1"
+                        nolabel="1"
+                    />
+                </group>
             </xpath>
         </field>
     </record>

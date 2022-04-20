@@ -7,6 +7,8 @@ import logging
 from odoo.addons.component.core import Component
 from odoo.addons.connector.components.mapper import mapping, only_create
 from odoo.addons.connector.exception import MappingError
+
+# pylint: disable=odoo-addons-relative-import
 from odoo.addons.connector_odoo.components.mapper import field_by_lang
 
 _logger = logging.getLogger(__name__)
@@ -18,10 +20,8 @@ class BatchProductExporter(Component):
     _apply_on = ["odoo.product.product"]
     _usage = "batch.exporter"
 
-    def run(self, filters=None):
-        loc_filter = ast.literal_eval(
-            self.backend_record.local_product_domain_filter
-        )
+    def run(self, filters=None, force=False):
+        loc_filter = ast.literal_eval(self.backend_record.local_product_domain_filter)
         filters += loc_filter
         prod_ids = self.env["product.product"].search(filters)
         o_ids = self.env["odoo.product.product"].search(
@@ -59,9 +59,7 @@ class OdooProductExporter(Component):
         categ_ids = self.binding.categ_id.bind_ids
         categ_id = self.env["odoo.product.category"]
         if categ_ids:
-            categ_id = categ_ids.filtered(
-                lambda c: c.backend_id == self.backend_record
-            )
+            categ_id = categ_ids.filtered(lambda c: c.backend_id == self.backend_record)
         if not categ_id:
             categ_id = self.env["odoo.product.category"].create(
                 {
@@ -82,10 +80,8 @@ class OdooProductExporter(Component):
             self._export_dependency(categ_id, "odoo.product.category")
 
     def _create_data(self, map_record, fields=None, **kwargs):
-        """ Get the data to pass to :py:meth:`_create` """
-        datas = ast.literal_eval(
-            self.backend_record.default_product_export_dict
-        )
+        """Get the data to pass to :py:meth:`_create`"""
+        datas = ast.literal_eval(self.backend_record.default_product_export_dict)
         cp_datas = map_record.values(for_create=True, fields=fields, **kwargs)
         # Combine default values with the computed ones
         datas.update(cp_datas)
@@ -114,13 +110,11 @@ class ProductExportMapper(Component):
     ]
 
     def get_product_by_match_field(self, record):
-        match_field = u"default_code"
+        match_field = "default_code"
         filters = []
         if self.backend_record.matching_product_product:
             match_field = self.backend_record.matching_product_ch
-        filters = ast.literal_eval(
-            self.backend_record.external_product_domain_filter
-        )
+        filters = ast.literal_eval(self.backend_record.external_product_domain_filter)
         if record[match_field]:
             filters.append((match_field, "=", record[match_field]))
         adapter = self.component(usage="record.exporter").backend_adapter
@@ -162,7 +156,6 @@ class ProductExportMapper(Component):
         cat = binder.wrap_binding(categ_id)
         if not cat:
             raise MappingError(
-                "The product category with odoo id %s is not available."
-                % categ_id
+                "The product category with odoo id %s is not available." % categ_id
             )
         return {"categ_id": cat}

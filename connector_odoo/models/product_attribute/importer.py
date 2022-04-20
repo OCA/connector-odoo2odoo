@@ -10,7 +10,7 @@ _logger = logging.getLogger(__name__)
 
 
 class ProductAttributeImporter(Component):
-    """ Import Odoo UOM """
+    """Import Odoo UOM"""
 
     _name = "odoo.product.attribute.importer"
     _inherit = "odoo.importer"
@@ -28,11 +28,9 @@ class ProductAttributeMapper(Component):
     @mapping
     def check_att_exists(self, record):
         # TODO: Improve and check family, factor etc...
-        domain = [
-            ("name", "=", record.name)
-        ]
-        if hasattr(record, 'create_variant'):
-            filter.append(('create_variant', '=', record.create_variant))
+        domain = [("name", "=", record.name)]
+        if hasattr(record, "create_variant"):
+            filter.append(("create_variant", "=", record.create_variant))
         att_id = self.env["product.attribute"].search(domain)
         res = {}
         if len(att_id) == 1:
@@ -43,6 +41,6 @@ class ProductAttributeMapper(Component):
     @mapping
     def create_variant(self, record):
         res = {"create_variant": "no_variant"}
-        if (hasattr(record, 'create_variant') and (record.create_variant == 'always')):
+        if hasattr(record, "create_variant") and (record.create_variant == "always"):
             res.update(create_variant="always")
         return res

@@ -6,6 +6,7 @@ import logging
 
 from odoo.addons.component.core import Component
 from odoo.addons.connector.components.mapper import mapping, only_create
+
 # from odoo.addons.connector.exception import MappingError
 
 _logger = logging.getLogger(__name__)
@@ -17,10 +18,8 @@ class BatchPartnerExporter(Component):
     _apply_on = ["odoo.res.partner"]
     _usage = "batch.exporter"
 
-    def run(self, filters=None):
-        loc_filter = ast.literal_eval(
-            self.backend_record.local_partner_domain_filter
-        )
+    def run(self, filters=None, force=False):
+        loc_filter = ast.literal_eval(self.backend_record.local_partner_domain_filter)
         filters += loc_filter
         partner_ids = self.env["res.partner"].search(filters)
 
@@ -64,15 +63,13 @@ class OdooPartnerExporter(Component):
         parent = self.env["odoo.res.partner"]
 
         if parents:
-            parent = parents.filtered(
-                lambda c: c.backend_id == self.backend_record
-            )
+            parent = parents.filtered(lambda c: c.backend_id == self.backend_record)
 
             partner = self.binder.to_external(parent, wrap=False)
             self._export_dependency(partner, "odoo.res.partner")
 
     def _create_data(self, map_record, fields=None, **kwargs):
-        """ Get the data to pass to :py:meth:`_create` """
+        """Get the data to pass to :py:meth:`_create`"""
         datas = map_record.values(for_create=True, fields=fields, **kwargs)
         return datas
 
@@ -100,9 +97,7 @@ class PartnerExportMapper(Component):
         if self.backend_record.matching_customer:
             match_field = self.backend_record.matching_customer_ch
 
-        filters = ast.literal_eval(
-            self.backend_record.external_partner_domain_filter
-        )
+        filters = ast.literal_eval(self.backend_record.external_partner_domain_filter)
         if record[match_field]:
             filters.append((match_field, "=", record[match_field]))
         filters.append("|")

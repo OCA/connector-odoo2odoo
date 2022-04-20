@@ -23,11 +23,11 @@ class ProductPricelistBatchImporter(Component):
     _inherit = "odoo.delayed.batch.importer"
     _apply_on = ["odoo.product.pricelist"]
 
-    def _import_record(self, external_id, job_options=None):
+    def _import_record(self, external_id, job_options=None, force=False):
         """Delay a job for the import"""
-        return super()._import_record(external_id, job_options=job_options)
+        return super()._import_record(external_id, job_options=job_options, force=force)
 
-    def run(self, filters=None):
+    def run(self, filters=None, force=False):
         """Run the synchronization"""
 
         updated_ids = self.backend_adapter.search(filters)
@@ -50,7 +50,7 @@ class ProductPricelistImporter(Component):
     _inherit = "odoo.importer"
     _apply_on = ["odoo.product.pricelist"]
 
-    def _import_dependencies(self):
+    def _import_dependencies(self, force=False):
         """Import the dependencies for the record"""
 
 
@@ -103,11 +103,11 @@ class ProductPricelistItemBatchImporter(Component):
     _inherit = "odoo.delayed.batch.importer"
     _apply_on = ["odoo.product.pricelist.item"]
 
-    def _import_record(self, external_id, job_options=None):
+    def _import_record(self, external_id, job_options=None, force=False):
         """Delay a job for the import"""
-        return super()._import_record(external_id, job_options=job_options)
+        return super()._import_record(external_id, job_options=job_options, force=force)
 
-    def run(self, filters=None):
+    def run(self, filters=None, force=False):
         """Run the synchronization"""
 
         updated_ids = self.backend_adapter.search(filters)
@@ -129,25 +129,33 @@ class ProductPricelistItemImporter(Component):
     _inherit = "odoo.importer"
     _apply_on = ["odoo.product.pricelist.item"]
 
-    def _import_dependencies(self):
+    def _import_dependencies(self, force=False):
         """Import the dependencies for the record"""
         record = self.odoo_record
-        self._import_dependency(record.pricelist_id.id, "odoo.product.pricelist")
+        self._import_dependency(
+            record.pricelist_id.id, "odoo.product.pricelist", force=force
+        )
         if record.product_id:
-            self._import_dependency(record.product_id.id, "odoo.product.product")
+            self._import_dependency(
+                record.product_id.id, "odoo.product.product", force=force
+            )
         if record.product_tmpl_id:
-            self._import_dependency(record.product_tmpl_id.id, "odoo.product.template")
+            self._import_dependency(
+                record.product_tmpl_id.id, "odoo.product.template", force=force
+            )
         if record.categ_id:
-            self._import_dependency(record.categ_id.id, "odoo.product.category")
+            self._import_dependency(
+                record.categ_id.id, "odoo.product.category", force=force
+            )
         if record.base_pricelist_id:
             self._import_dependency(
-                record.base_pricelist_id.id, "odoo.product.pricelist"
+                record.base_pricelist_id.id, "odoo.product.pricelist", force=force
             )
             filters = [
                 ("pricelist_id", "=", record.id),
             ]
             self.env["odoo.product.pricelist.item"].with_delay().import_batch(
-                self.backend_record, filters
+                self.backend_record, filters, force=force
             )
 
 

@@ -23,11 +23,11 @@ class SaleOrderBatchImporter(Component):
     _apply_on = ["odoo.sale.order"]
     _usage = "batch.importer"
 
-    def _import_record(self, external_id, job_options=None):
+    def _import_record(self, external_id, job_options=None, force=False):
         """Delay a job for the import"""
-        return super()._import_record(external_id, job_options=job_options)
+        return super()._import_record(external_id, job_options=job_options, force=force)
 
-    def run(self, filters=None):
+    def run(self, filters=None, force=False):
         """Run the synchronization"""
 
         updated_ids = self.backend_adapter.search(filters)
@@ -50,7 +50,7 @@ class SaleOrderImporter(Component):
     _inherit = "odoo.importer"
     _apply_on = ["odoo.sale.order"]
 
-    def _import_dependencies(self):
+    def _import_dependencies(self, force=False):
         """Import the dependencies for the record"""
         for record_partner in [
             self.odoo_record.partner_id,
@@ -60,7 +60,7 @@ class SaleOrderImporter(Component):
             partner = self._get_partner(record_partner)
             bind_partner = self.binder.to_internal(partner, wrap=False)
             if not bind_partner:
-                self._import_dependency(partner, "odoo.res.partner")
+                self._import_dependency(partner, "odoo.res.partner", force=force)
 
 
 class SaleOrderImportMapper(Component):
@@ -109,11 +109,11 @@ class SaleOrderLineBatchImporter(Component):
     _inherit = "odoo.delayed.batch.importer"
     _apply_on = ["odoo.sale.order.item"]
 
-    def _import_record(self, external_id, job_options=None):
+    def _import_record(self, external_id, job_options=None, force=False):
         """Delay a job for the import"""
-        return super()._import_record(external_id, job_options=job_options)
+        return super()._import_record(external_id, job_options=job_options, force=force)
 
-    def run(self, filters=None):
+    def run(self, filters=None, force=False):
         """Run the synchronization"""
 
         updated_ids = self.backend_adapter.search(filters)

@@ -214,6 +214,7 @@ class OdooBackend(models.Model):
             ("backend", "Backend"),
         ]
     )
+    force = fields.Boolean(help="Execute import/export even if no changes in backend")
 
     def get_default_language_code(self):
         lang = (

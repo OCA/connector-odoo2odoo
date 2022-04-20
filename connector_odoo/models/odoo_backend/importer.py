@@ -5,7 +5,7 @@ from odoo.addons.component.core import Component
 
 
 class MetadataBatchImporter(Component):
-    """ Import the records directly, without delaying the jobs.
+    """Import the records directly, without delaying the jobs.
 
     Import the Odoo Minimal Datas :
     * UOM

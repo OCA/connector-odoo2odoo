@@ -218,7 +218,7 @@ class GenericAdapter(AbstractComponent):
         """Returns the information of a record
         :rtype: dict
         """
-        arguments = [int(id)]
+        arguments = int(id)
         ext_model = model or self._odoo_model
         if attributes:
             # Avoid to pass Null values in attributes. Workaround for

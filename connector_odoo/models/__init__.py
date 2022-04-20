@@ -1,8 +1,10 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 # flake8: noqa
 from . import odoo_binding  # Keep this order for inheritance
-
 from . import odoo_backend
+
+from . import res_currency_rate
+from . import res_currency
 from . import disappeared
 from . import partner_category
 from . import partner

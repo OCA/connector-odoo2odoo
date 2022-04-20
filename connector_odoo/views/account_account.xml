@@ -7,7 +7,9 @@
         <field name="arch" type="xml">
             <xpath expr="//notebook/page[@name='accounting']" position="after">
                 <page name="connector" string="Connector">
-                    <field name="bind_ids" readonly="1" />
+                    <group string="Odoo Bindings">
+                        <field name="bind_ids" readonly="1" nolabel="1" />
+                    </group>
                 </page>
             </xpath>
         </field>

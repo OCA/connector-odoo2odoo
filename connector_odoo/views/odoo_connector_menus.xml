@@ -67,6 +67,11 @@
         <field name="view_mode">tree,form</field>
     </record>
 
+    <record id="action_odoo_res_currency" model="ir.actions.act_window">
+        <field name="name">Odoo Currency</field>
+        <field name="res_model">odoo.res.currency</field>
+        <field name="view_mode">tree,form</field>
+    </record>
 
     <!-- TODO: Implement security strategy groups="odoo_base.group_oc_manager" -->
     <menuitem
@@ -145,5 +150,12 @@
         name="External Account"
         parent="menu_odoo_external_objects"
         action="action_odoo_account_account"
+    />
+
+    <menuitem
+        id="menu_odoo_external_res_currency"
+        name="External Currency"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_res_currency"
     />
 </odoo>

@@ -16,7 +16,7 @@ class OdooProductUOM(models.Model):
     _description = "Odoo Product UOM"
 
     """
-    Product UOM are not fully managed with dependecies etc.
+    Product UOM are not fully managed with dependencies etc.
     User has the responsability to check the names are the same in
     both instances
     """
@@ -25,7 +25,9 @@ class OdooProductUOM(models.Model):
         if self.backend_id.product_main_record == "odoo":
             return self.with_delay().export_record(self.backend_id)
         else:
-            return self.with_delay().import_record(self.backend_id, self.external_id)
+            return self.with_delay().import_record(
+                self.backend_id, self.external_id, force=True
+            )
 
 
 class ProductUoM(models.Model):

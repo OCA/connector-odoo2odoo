@@ -39,10 +39,7 @@ class OdooImporter(AbstractComponent):
 
     def _get_odoo_data(self):
         """Return the raw Odoo data for ``self.external_id``"""
-        res = self.backend_adapter.read(self.external_id)
-        if self.work.odoo_api.api.version in ("6.1",):
-            res = res.model.browse(res.ids[0])
-        return res
+        return self.backend_adapter.read(self.external_id)
 
     def _before_import(self):
         """Hook called before the import, when we have the Odoo
@@ -74,7 +71,7 @@ class OdooImporter(AbstractComponent):
         return odoo_date < sync_date
 
     def _import_dependency(
-        self, external_id, binding_model, importer=None, always=False
+        self, external_id, binding_model, importer=None, force=False
     ):
         """Import a dependency.
 
@@ -87,17 +84,17 @@ class OdooImporter(AbstractComponent):
         :param importer_component: component to use for import
                                    By default: 'importer'
         :type importer_component: Component
-        :param always: if True, the record is updated even if it already
+        :param force: if True, the record is updated even if it already
                        exists, note that it is still skipped if it has
                        not been modified on Odoo since the last
                        update. When False, it will import it only when
                        it does not yet exist.
-        :type always: boolean
+        :type force: boolean
         """
         if not external_id:
             return
         binder = self.binder_for(binding_model)
-        if always or not binder.to_internal(external_id):
+        if force or not binder.to_internal(external_id):
             if importer is None:
                 importer = self.component(
                     usage="record.importer", model_name=binding_model
@@ -111,7 +108,7 @@ class OdooImporter(AbstractComponent):
                     external_id,
                 )
 
-    def _import_dependencies(self):
+    def _import_dependencies(self, force=False):
         """Import the dependencies for the record
 
         Import of dependencies can be done manually or by calling
@@ -201,7 +198,11 @@ class OdooImporter(AbstractComponent):
         binding = self._get_binding()
         must_continue = self._init_import(binding, external_id)
         if not must_continue:
-            _logger.info("Bye!")
+            _logger.info(
+                "({}: {}) must no be imported!".format(
+                    self.work.model_name, external_id
+                )
+            )
             return
 
         _logger.info("Reading data for {}".format(lock_name))
@@ -212,7 +213,9 @@ class OdooImporter(AbstractComponent):
             return _("Record does no longer exist in Odoo")
 
         if self._must_skip():
-            _logger.info("It must be skipped")
+            _logger.info(
+                "({}: {}) It must be skipped".format(self.work.model_name, external_id)
+            )
             return
 
         if not force and self._is_uptodate(binding):
@@ -227,10 +230,12 @@ class OdooImporter(AbstractComponent):
         self._before_import()
 
         # import the missing linked resources
-        _logger.info("Importing dependencies")
-        self._import_dependencies()
+        _logger.info(
+            "Importing dependencies ({}: {})".format(self.work.model_name, external_id)
+        )
+        self._import_dependencies(force=force)
 
-        _logger.info("Mapping data")
+        _logger.info("Mapping data ({}: {})".format(self.work.model_name, external_id))
         map_record = self._map_data()
 
         if binding:
@@ -240,12 +245,16 @@ class OdooImporter(AbstractComponent):
             record = self._create_data(map_record)
             binding = self._create(record)
 
-        _logger.info("Binding")
+        _logger.info("Binding ({}: {})".format(self.work.model_name, external_id))
         self.binder.bind(self.external_id, binding)
 
-        _logger.info("Check if after import process must be executed")
+        _logger.info(
+            "Check if after import process must be executed ({}: {})".format(
+                self.work.model_name, external_id
+            )
+        )
         self._after_import(binding)
-        _logger.info("Bye!")
+        _logger.info("Finished ({}: {})!".format(self.work.model_name, external_id))
 
 
 class BatchImporter(AbstractComponent):
@@ -258,13 +267,13 @@ class BatchImporter(AbstractComponent):
     _inherit = ["base.importer", "base.odoo.connector"]
     _usage = "batch.importer"
 
-    def run(self, filters=None):
+    def run(self, filters=None, force=False):
         """Run the synchronization"""
         record_ids = self.backend_adapter.search(filters)
         for record_id in record_ids:
             self._import_record(record_id)
 
-    def _import_record(self, external_id):
+    def _import_record(self, external_id, force=False):
         """Import a record directly or delay the import of the record.
 
         Method to implement in sub-classes.
@@ -278,9 +287,9 @@ class DirectBatchImporter(AbstractComponent):
     _name = "odoo.direct.batch.importer"
     _inherit = "odoo.batch.importer"
 
-    def _import_record(self, external_id):
+    def _import_record(self, external_id, force=False):
         """Import the record directly"""
-        self.model.import_record(self.backend_record, external_id)
+        self.model.import_record(self.backend_record, external_id, force)
 
 
 class DelayedBatchImporter(AbstractComponent):

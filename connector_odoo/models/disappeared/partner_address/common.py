@@ -1,3 +1,5 @@
+# Copyright 2022 Greenice, S.L.
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 import logging
 
 from odoo import fields, models
@@ -28,7 +30,10 @@ class OdooResPartnerAddressReferences(models.Model):
             raise NotImplementedError
         else:
             return self.with_delay().import_address(
-                self.backend_id, self.external_id, self.external_parent_partner_id
+                self.backend_id,
+                self.external_id,
+                self.external_parent_partner_id,
+                force=True,
             )
 
     def default_address_contact_values(self, address, main_partner=False):

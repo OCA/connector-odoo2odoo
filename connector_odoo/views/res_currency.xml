@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
-    <record id="view_odoo_uom_bind_ids" model="ir.ui.view">
-      <field name="name">odoo.uom.uom</field>
-      <field name="model">uom.uom</field>
-      <field name="inherit_id" ref="uom.product_uom_form_view" />
+    <record id="view_res_currency_bind_ids" model="ir.ui.view">
+      <field name="name">odoo.res.currency</field>
+      <field name="model">res.currency</field>
+      <field name="inherit_id" ref="base.view_currency_form" />
       <field name="arch" type="xml">
-        <form position="inside">
-            <group string="Odoo Bindings">
-                <field name="bind_ids" readonly="1" nolabel="1" />
-            </group>
-        </form>
+        <xpath expr="//notebook" position="inside">
+            <page string="Connectors">
+                <group string="Odoo Bindings">
+                    <field name="bind_ids" readonly="1" nolabel="1" />
+                </group>
+            </page>
+        </xpath>
       </field>
     </record>
 
 
-    <record id="view_odoo_uom_tree" model="ir.ui.view">
-      <field name="name">odoo.uom.uom</field>
-      <field name="model">odoo.uom.uom</field>
+    <record id="view_res_currency_tree" model="ir.ui.view">
+      <field name="name">odoo.res.currency</field>
+      <field name="model">odoo.res.currency</field>
       <field name="arch" type="xml">
         <tree>
           <field name="name" />
@@ -28,9 +30,9 @@
       </field>
     </record>
 
-    <record id="view_odoo_uom_form" model="ir.ui.view">
-      <field name="name">odoo.uom.uom.form</field>
-      <field name="model">odoo.uom.uom</field>
+    <record id="view_res_currency_form" model="ir.ui.view">
+      <field name="name">odoo.res.currency.form</field>
+      <field name="model">odoo.res.currency</field>
       <field name="arch" type="xml">
         <form>
           <sheet>

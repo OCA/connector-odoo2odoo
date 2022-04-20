@@ -5,31 +5,27 @@
 import logging
 from contextlib import contextmanager
 
-import odoo
 import psycopg2
+
+import odoo
 from odoo import _
+
 from odoo.addons.component.core import AbstractComponent
-from odoo.addons.connector.exception import (IDMissingInBackend,
-                                             RetryableJobError)
+from odoo.addons.connector.exception import IDMissingInBackend, RetryableJobError
 
 _logger = logging.getLogger(__name__)
 
+# Exporters for Odoo.
 
-"""
+# In addition to its export job, an exporter has to:
 
-Exporters for Odoo.
-
-In addition to its export job, an exporter has to:
-
-* check in Odoo if the record has been updated more recently than the
-  last sync date and if yes, delay an import
-* call the ``bind`` method of the binder to update the last sync date
-
-"""
+# * check in Odoo if the record has been updated more recently than the
+#   last sync date and if yes, delay an import
+# * call the ``bind`` method of the binder to update the last sync date
 
 
 class OdooBaseExporter(AbstractComponent):
-    """ Base exporter for Odoo """
+    """Base exporter for Odoo"""
 
     _name = "odoo.base.exporter"
     _inherit = ["base.exporter", "base.odoo.connector"]
@@ -41,7 +37,7 @@ class OdooBaseExporter(AbstractComponent):
         self.external_id = None
 
     def _delay_import(self):
-        """ Schedule an import of the record.
+        """Schedule an import of the record.
 
         Adapt in the sub-classes when the model is not imported
         using ``import_record``.
@@ -54,7 +50,7 @@ class OdooBaseExporter(AbstractComponent):
         )
 
     def _should_import(self):
-        """ Before the export, compare the update date
+        """Before the export, compare the update date
         in Odoo and the last sync date in Odoo,
         if the former is more recent, schedule an import
         to not miss changes done in Odoo.
@@ -74,13 +70,12 @@ class OdooBaseExporter(AbstractComponent):
         return sync_date < odoo_date
 
     def run(self, binding, *args, **kwargs):
-        """ Run the synchronization
+        """Run the synchronization
         :param binding: binding record to export
         """
         self.binding = binding
 
-        self.external_id = self.binder.to_external(
-            self.binding, wrap=True)
+        self.external_id = self.binder.to_external(self.binding, wrap=True)
         try:
             should_import = self._should_import()
         except IDMissingInBackend:
@@ -96,20 +91,16 @@ class OdooBaseExporter(AbstractComponent):
         # The commit will also release the lock acquired on the binding
         # record
         if not odoo.tools.config["test_enable"]:
-            self.env.cr.commit()  # noqa
+            self.env.cr.commit()  # pylint: disable=invalid-commit
         self._after_export()
         return result
 
-    #     def _run(self):
-    #         raise NotImplementedError
-
     def _after_export(self):
-        """ Can do several actions after exporting a record on odoo """
-        pass
+        """Can do several actions after exporting a record on odoo"""
 
 
 class BatchExporter(AbstractComponent):
-    """ The role of a BatchExporter is to search for a list of
+    """The role of a BatchExporter is to search for a list of
     items to export, then it can either export them directly or delay
     the export of each item separately.
     """
@@ -118,38 +109,38 @@ class BatchExporter(AbstractComponent):
     _inherit = ["base.exporter", "base.odoo.connector"]
     _usage = "batch.exporter"
 
-    def run(self, filters=None):
-        """ Run the synchronization """
+    def run(self, filters=None, force=False):
+        """Run the synchronization"""
         record_ids = self.backend_adapter.search(filters)
         for record_id in record_ids:
             self._export_record(record_id)
 
 
 class DelayedBatchExporter(AbstractComponent):
-    """ Delay import of the records """
+    """Delay import of the records"""
 
     _name = "odoo.delayed.batch.exporter"
     _inherit = "odoo.batch.exporter"
 
     def _export_record(self, external_id, job_options=None, **kwargs):
-        """ Delay the import of the records"""
+        """Delay the import of the records"""
         delayable = external_id.with_delay(**job_options or {})
         delayable.export_record(self.backend_record, **kwargs)
 
 
 class DirectBatchExporter(AbstractComponent):
-    """ Import the records directly, without delaying the jobs. """
+    """Import the records directly, without delaying the jobs."""
 
     _name = "odoo.direct.batch.exporter"
     _inherit = "odoo.batch.exporter"
 
     def _export_record(self, external_id):
-        """ Import the record directly """
+        """Import the record directly"""
         self.model.export_record(self.backend_record, external_id)
 
 
 class OdooExporter(AbstractComponent):
-    """ A common flow for the exports to Odoo """
+    """A common flow for the exports to Odoo"""
 
     _name = "odoo.exporter"
     _inherit = "odoo.base.exporter"
@@ -159,7 +150,7 @@ class OdooExporter(AbstractComponent):
         self.binding = None
 
     def _lock(self):
-        """ Lock the binding record.
+        """Lock the binding record.
         Lock the binding record so we are sure that only one export
         job is running for this record if concurrent jobs have to export the
         same record.
@@ -170,32 +161,29 @@ class OdooExporter(AbstractComponent):
         with :meth:`_export_dependencies`. Each level will set its own lock
         on the binding record it has to export.
         """
-        sql = (
-            "SELECT id FROM %s WHERE ID = %%s FOR UPDATE NOWAIT"
-            % self.model._table
-        )
+        sql = "SELECT id FROM %s WHERE ID = %%s FOR UPDATE NOWAIT" % self.model._table
         try:
             self.env.cr.execute(sql, (self.binding.id,), log_exceptions=False)
-        except psycopg2.OperationalError:
+        except psycopg2.OperationalError as err:
             _logger.info(
                 "A concurrent job is already exporting the same "
                 "record (%s with id %s). Job delayed later.",
                 self.model._name,
                 self.binding.id,
             )
-            raise RetryableJobError(
+            raise RetryableJobError from err(
                 "A concurrent job is already exporting the same record "
                 "(%s with id %s). The job will be retried later."
                 % (self.model._name, self.binding.id)
             )
 
     def _has_to_skip(self):
-        """ Return True if the export can be skipped """
+        """Return True if the export can be skipped"""
         return False
 
     @contextmanager
     def _retry_unique_violation(self):
-        """ Context manager: catch Unique constraint error and retry the
+        """Context manager: catch Unique constraint error and retry the
         job later.
 
         When we execute several jobs workers concurrently, it happens
@@ -216,14 +204,14 @@ class OdooExporter(AbstractComponent):
             yield
         except psycopg2.IntegrityError as err:
             if err.pgcode == psycopg2.errorcodes.UNIQUE_VIOLATION:
-                raise RetryableJobError(
+                raise RetryableJobError from err(
                     "A database error caused the failure of the job:\n"
                     "%s\n\n"
                     "Likely due to 2 concurrent jobs wanting to create "
                     "the same record. The job will be retried later." % err
                 )
             else:
-                raise
+                raise Exception from err
 
     def _export_dependency(
         self,
@@ -284,8 +272,7 @@ class OdooExporter(AbstractComponent):
             binding = self.env[binding_model].search(domain)
             if binding:
                 assert len(binding) == 1, (
-                    "only 1 binding for a backend is "
-                    "supported in _export_dependency"
+                    "only 1 binding for a backend is " "supported in _export_dependency"
                 )
             # we are working with a unwrapped record (e.g.
             # product.category) and the binding does not exist yet.
@@ -316,7 +303,7 @@ class OdooExporter(AbstractComponent):
                     # the same binding. It will be caught and
                     # raise a RetryableJobError.
                     if not odoo.tools.config["test_enable"]:
-                        self.env.cr.commit()  # noqa
+                        self.env.cr.commit()  # pylint: disable=invalid-commit
         else:
             # If odoo_bind_ids does not exist we are typically in a
             # "direct" binding (the binding record is the same record).
@@ -324,23 +311,21 @@ class OdooExporter(AbstractComponent):
             binding = relation
 
         if not rel_binder.to_external(binding, wrap=wrap):
-            exporter = self.component(
-                usage=component_usage, model_name=binding_model
-            )
+            exporter = self.component(usage=component_usage, model_name=binding_model)
             exporter.run(binding)
 
     def _export_dependencies(self):
-        """ Export the dependencies for the record"""
+        """Export the dependencies for the record"""
         return
 
     def _map_data(self):
-        """ Returns an instance of
+        """Returns an instance of
         :py:class:`~odoo.addons.connector.components.mapper.MapRecord`
         """
         return self.mapper.map_record(self.binding)
 
     def _validate_create_data(self, data):
-        """ Check if the values to import are correct
+        """Check if the values to import are correct
         Pro-actively check before the ``Model.create`` if some fields
         are missing or invalid
 
@@ -349,7 +334,7 @@ class OdooExporter(AbstractComponent):
         return
 
     def _validate_update_data(self, data):
-        """ Check if the values to import are correct
+        """Check if the values to import are correct
 
         Pro-actively check before the ``Model.update`` if some fields
         are missing or invalid
@@ -359,7 +344,7 @@ class OdooExporter(AbstractComponent):
         return
 
     def _create_data(self, map_record, fields=None, **kwargs):
-        """ Get the data to pass to :py:meth:`_create` """
+        """Get the data to pass to :py:meth:`_create`"""
         # datas = ast.literal_eval(
         #  self.backend_record.default_product_export_dict)
         cp_datas = map_record.values(for_create=True, fields=fields, **kwargs)
@@ -368,24 +353,24 @@ class OdooExporter(AbstractComponent):
         return cp_datas
 
     def _create(self, data):
-        """ Create the Odoo record """
+        """Create the Odoo record"""
         # special check on data before export
         self._validate_create_data(data)
         return self.backend_adapter.create(data)
 
     def _update_data(self, map_record, fields=None, **kwargs):
-        """ Get the data to pass to :py:meth:`_update` """
+        """Get the data to pass to :py:meth:`_update`"""
         return map_record.values(fields=fields, **kwargs)
 
     def _update(self, data):
-        """ Update an Odoo record """
+        """Update an Odoo record"""
         assert self.external_id
         # special check on data before export
         self._validate_update_data(data)
         self.backend_adapter.write(self.external_id, data)
 
     def _run(self, fields=None):
-        """ Flow of the synchronization, implemented in inherited classes"""
+        """Flow of the synchronization, implemented in inherited classes"""
         assert self.binding
 
         if not self.external_id:
