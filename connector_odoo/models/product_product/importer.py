@@ -146,8 +146,4 @@ class ProductImporter(Component):
         self._import_dependency(uom_id.id, "odoo.uom.uom", force=force)
 
         categ_id = self.odoo_record.categ_id
-        # TODO: Avoid duplicate items
-        # (same external_id binded to two or more models) in all odoo.model*
-        if len(categ_id) > 1:
-            categ_id = categ_id[0]
         self._import_dependency(categ_id.id, "odoo.product.category", force=force)
