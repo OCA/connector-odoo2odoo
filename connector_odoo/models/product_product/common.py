@@ -18,6 +18,14 @@ class OdooProductProduct(models.Model):
     _inherits = {"product.product": "odoo_id"}
     _description = "External Odoo Product"
 
+    _sql_constraints = [
+        (
+            "external_id",
+            "UNIQUE(external_id)",
+            "External ID (external_id) must be unique!",
+        ),
+    ]
+
     def name_get(self):
         result = []
         for op in self:

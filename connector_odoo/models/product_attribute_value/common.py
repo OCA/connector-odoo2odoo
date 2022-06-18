@@ -13,6 +13,14 @@ class OdooProductAttributeValue(models.Model):
     _inherits = {"product.attribute.value": "odoo_id"}
     _description = "Odoo Product Attribute Value"
 
+    _sql_constraints = [
+        (
+            "external_id",
+            "UNIQUE(external_id)",
+            "External ID (external_id) must be unique!",
+        ),
+    ]
+
     bind_ids = fields.One2many(
         comodel_name="odoo.product.attribute.value",
         inverse_name="odoo_id",

@@ -15,6 +15,14 @@ class OdooProductUOM(models.Model):
     _inherits = {"uom.uom": "odoo_id"}
     _description = "Odoo Product UOM"
 
+    _sql_constraints = [
+        (
+            "external_id",
+            "UNIQUE(external_id)",
+            "External ID (external_id) must be unique!",
+        ),
+    ]
+
     """
     Product UOM are not fully managed with dependencies etc.
     User has the responsability to check the names are the same in

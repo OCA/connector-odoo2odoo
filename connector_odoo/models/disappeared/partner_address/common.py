@@ -15,8 +15,15 @@ _logger = logging.getLogger(__name__)
 class OdooResPartnerAddressReferences(models.Model):
     _name = "odoo.res.partner.address.disappeared"
     _inherit = "odoo.binding"
-
     _inherits = {"res.partner": "odoo_id"}
+
+    _sql_constraints = [
+        (
+            "external_id",
+            "UNIQUE(external_id)",
+            "External ID (external_id) must be unique!",
+        ),
+    ]
 
     odoo_id = fields.Many2one(
         comodel_name="res.partner", string="Partner", ondelete="cascade"

@@ -14,6 +14,14 @@ class OdooResCurrency(models.Model):
     _inherits = {"res.currency": "odoo_id"}
     _description = "Odoo Currency"
 
+    _sql_constraints = [
+        (
+            "external_id",
+            "UNIQUE(external_id)",
+            "External ID (external_id) must be unique!",
+        ),
+    ]
+
     def resync(self):
         if self.backend_id.product_main_record == "odoo":
             raise NotImplementedError

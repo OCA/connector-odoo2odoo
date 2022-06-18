@@ -30,9 +30,9 @@ class OdooProductCategory(models.Model):
 
     _sql_constraints = [
         (
-            "odoo_id",
-            "UNIQUE(odoo_id)",
-            "External ID (odoo_id) must be unique!",
+            "external_id",
+            "UNIQUE(external_id)",
+            "External ID (external_id) must be unique!",
         ),
     ]
 

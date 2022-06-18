@@ -14,6 +14,14 @@ class OdooAccountAccount(models.Model):
     _inherits = {"account.account": "odoo_id"}
     _description = "External Odoo Account Account"
 
+    _sql_constraints = [
+        (
+            "external_id",
+            "UNIQUE(external_id)",
+            "External ID (external_id) must be unique!",
+        ),
+    ]
+
     def resync(self):
         if self.backend_id.partner_main_record == "odoo":
             return self.with_delay().export_record(self.backend_id)
