@@ -180,7 +180,7 @@ class OdooBackend(models.Model):
         help="Filter in the Odoo Destination",
     )
     default_import_product = fields.Boolean("Import products")
-    import_products_from_date = fields.Datetime()
+    import_product_from_date = fields.Datetime()
     import_partner_from_date = fields.Datetime()
     import_user_from_date = fields.Datetime()
     import_categories_from_date = fields.Datetime()
@@ -318,13 +318,13 @@ class OdooBackend(models.Model):
     def import_product_product(self):
         if not self.default_import_product:
             return False
-        self._import_from_date("odoo.product.product", "import_products_from_date")
+        self._import_from_date("odoo.product.product", "import_product_from_date")
         return True
 
     def import_product_template(self):
         if not self.default_import_product:
             return False
-        self._import_from_date("odoo.product.template", "import_products_from_date")
+        self._import_from_date("odoo.product.template", "import_product_from_date")
         return True
 
     def import_partner(self):

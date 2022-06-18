@@ -166,7 +166,7 @@
                                             attrs="{'invisible': [('default_import_product', '!=', True)]}"
                                         >
                         <field
-                                                name="import_products_from_date"
+                                                name="import_product_from_date"
                                                 class="oe_inline"
                                                 nolabel="1"
                                             />
