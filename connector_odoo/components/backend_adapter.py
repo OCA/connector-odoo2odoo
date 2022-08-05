@@ -189,7 +189,7 @@ class GenericAdapter(AbstractComponent):
     # _odoo_model = None
     # _admin_path = None
 
-    def search(self, filters=None, model=None):
+    def search(self, filters=None, model=None, offset=0, limit=None, order=None):
         """Search records according to some criterias
         and returns a list of ids
         :rtype: list
@@ -211,7 +211,7 @@ class GenericAdapter(AbstractComponent):
             if odoo_api.version != "6.1"
             else odoo_api.get(ext_model)
         )
-        return model.search(filters if filters else [])
+        return model.search(filters if filters else [], offset, limit, order)
 
     # pylint: disable=W8106,W0622
     def read(self, id, attributes=None, model=None, context=None):
