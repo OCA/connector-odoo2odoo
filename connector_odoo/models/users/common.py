@@ -61,7 +61,7 @@ class UserAdapter(Component):
 
     _odoo_model = "res.users"
 
-    def search(self, filters=None, model=None):
+    def search(self, filters=None, model=None, offset=0, limit=None, order=None):
         """Search records according to some criteria
         and returns a list of ids
 
@@ -73,7 +73,9 @@ class UserAdapter(Component):
             str(self.backend_record.external_user_domain_filter)
         )
         filters += ext_filter or []
-        return super(UserAdapter, self).search(filters=filters, model=model)
+        return super(UserAdapter, self).search(
+            filters=filters, model=model, offset=offset, limit=limit, order=order
+        )
 
 
 class UserListener(Component):

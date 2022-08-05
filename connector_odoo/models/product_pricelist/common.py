@@ -83,7 +83,7 @@ class ProductPricelistItemAdapter(Component):
     _apply_on = "odoo.product.pricelist.item"
     _odoo_model = "product.pricelist.item"
 
-    def search(self, filters=None, model=None):
+    def search(self, filters=None, model=None, offset=0, limit=None, order=None):
         """Search records according to some criteria
         and returns a list of ids
 
@@ -96,5 +96,5 @@ class ProductPricelistItemAdapter(Component):
         )
         filters += ext_filter
         return super(ProductPricelistItemAdapter, self).search(
-            filters=filters, model=model
+            filters=filters, model=model, offset=offset, limit=limit, order=order
         )

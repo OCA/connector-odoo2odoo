@@ -63,7 +63,7 @@ class PartnerAdapter(Component):
 
     _odoo_model = "res.partner"
 
-    def search(self, filters=None, model=None):
+    def search(self, filters=None, model=None, offset=0, limit=None, order=None):
         """Search records according to some criteria
         and returns a list of ids
 
@@ -75,7 +75,9 @@ class PartnerAdapter(Component):
             str(self.backend_record.external_partner_domain_filter)
         )
         filters += ext_filter or []
-        return super(PartnerAdapter, self).search(filters=filters, model=model)
+        return super(PartnerAdapter, self).search(
+            filters=filters, model=model, offset=offset, limit=limit, order=order
+        )
 
 
 class PartnerListener(Component):
