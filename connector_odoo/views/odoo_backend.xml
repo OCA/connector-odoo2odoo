@@ -276,7 +276,7 @@
                     <field name="local_partner_domain_filter" />
                     <field name="external_partner_domain_filter" />
                   </group>
-                  <group>
+                  <group name="partner_import_operations" string="Import Operations">
                     <div
                                         attrs="{'invisible': [('default_import_partner', '!=', True)]}"
                                     >

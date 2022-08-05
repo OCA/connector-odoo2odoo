@@ -104,8 +104,8 @@ class OdooBackend(models.Model):
     PARTNER SYNC OPTIONS
     """
 
-    default_export_partner = fields.Boolean()
-    default_import_partner = fields.Boolean()
+    default_export_partner = fields.Boolean("Export partner")
+    default_import_partner = fields.Boolean("Import partner")
 
     local_partner_domain_filter = fields.Char(default="[]")
 
