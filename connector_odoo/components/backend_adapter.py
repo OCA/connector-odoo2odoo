@@ -211,7 +211,9 @@ class GenericAdapter(AbstractComponent):
             if odoo_api.version != "6.1"
             else odoo_api.get(ext_model)
         )
-        return model.search(filters if filters else [], offset, limit, order)
+        return model.search(
+            filters if filters else [], offset=offset, limit=limit, order=order
+        )
 
     # pylint: disable=W8106,W0622
     def read(self, id, attributes=None, model=None, context=None):
