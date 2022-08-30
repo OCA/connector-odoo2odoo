@@ -60,6 +60,10 @@ class ProductTemplateImportMapper(Component):
     ]
 
     @mapping
+    def company_id(self, record):
+        return {"company_id": self.env.user.company_id.id}
+
+    @mapping
     def uom_id(self, record):
         binder = self.binder_for("odoo.uom.uom")
         uom = binder.to_internal(record.uom_id.id, unwrap=True)
@@ -144,3 +148,8 @@ class ProductTemplateImporter(Component):
 
         categ_id = self.odoo_record.categ_id
         self._import_dependency(categ_id.id, "odoo.product.category", force=force)
+        return super()._import_dependencies(force=force)
+
+    def _get_context(self, data):
+        """Context for the creation"""
+        return {"create_product_product": True}

@@ -28,6 +28,7 @@
         "views/users.xml",
         "views/account_account.xml",
         "views/ir_attachment.xml",
+        "views/ir_translation.xml",
         "views/res_currency.xml",
         "wizards/add_backend.xml",
     ],

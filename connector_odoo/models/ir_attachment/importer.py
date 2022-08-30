@@ -64,13 +64,13 @@ class IrAttachmentImportMapper(Component):
 
     @mapping
     def company_id(self, record):
-        return {"company_id": record.company_id.id}
+        return {"company_id": self.env.user.company_id.id}
 
     @mapping
     def res_id(self, record):
-        binder = self.binder_for("odoo.product.product")
-        partner_id = binder.to_internal(record.res_id, unwrap=True)
-        return {"res_id": partner_id.id}
+        binder = self.binder_for("odoo.{}".format(record.res_model))
+        res_id = binder.to_internal(record.res_id, unwrap=True)
+        return {"res_id": res_id.id}
 
 
 class IrAttachmentImporter(Component):

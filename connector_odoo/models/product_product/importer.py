@@ -43,7 +43,6 @@ class ProductImportMapper(Component):
     _inherit = "odoo.import.mapper"
     _apply_on = ["odoo.product.product"]
 
-    # TODO :     categ, special_price => minimal_price
     direct = [
         ("description", "description"),
         ("weight", "weight"),
@@ -55,6 +54,10 @@ class ProductImportMapper(Component):
         ("sale_ok", "sale_ok"),
         ("purchase_ok", "purchase_ok"),
     ]
+
+    @mapping
+    def company_id(self, record):
+        return {"company_id": self.env.user.company_id.id}
 
     @mapping
     def uom_id(self, record):
@@ -135,6 +138,15 @@ class ProductImportMapper(Component):
             barcode = record["ean13"]
         return {"barcode": barcode}
 
+    @mapping
+    def product_tmpl_id(self, record):
+        if self.backend_record.work_with_variants and record.product_tmpl_id:
+            binder = self.binder_for("odoo.product.template")
+            template_id = binder.to_internal(record.product_tmpl_id.id, unwrap=True)
+            if template_id:
+                return {"product_tmpl_id": template_id.id}
+        return {}
+
 
 class ProductImporter(Component):
     _name = "odoo.product.product.importer"
@@ -142,12 +154,24 @@ class ProductImporter(Component):
     _apply_on = ["odoo.product.product"]
 
     def _import_dependencies(self, force=False):
+        if self.backend_record.work_with_variants:
+            product_tmpl_id = self.odoo_record.product_tmpl_id
+            binder = self.binder_for("odoo.product.template")
+            odoo_product_tmpl_id = binder.to_internal(product_tmpl_id.id, unwrap=True)
+            if not odoo_product_tmpl_id:
+                self._import_dependency(
+                    product_tmpl_id.id, "odoo.product.template", force=force
+                )
+
         uom_id = self.odoo_record.uom_id
         self._import_dependency(uom_id.id, "odoo.uom.uom", force=force)
 
         categ_id = self.odoo_record.categ_id
         self._import_dependency(categ_id.id, "odoo.product.category", force=force)
 
+        return super()._import_dependencies(force=force)
+
+    def _after_import(self, binding):
         attachment_model = self.work.odoo_api.api.get("ir.attachment")
         attachment_ids = attachment_model.search(
             [
@@ -163,4 +187,37 @@ class ProductImporter(Component):
             )
         )
         for attachment_id in attachment_ids:
-            self._import_dependency(attachment_id, "odoo.ir.attachment", force=force)
+            self.env["odoo.ir.attachment"].with_delay().import_record(
+                self.backend_record, attachment_id
+            )
+        return super()._after_import(binding)
+
+    def _enqueue_translations(self, binding):
+        if (
+            self.model._name == "odoo.ir.translation"
+            or self.backend_record.ignore_translations
+        ):
+            return
+        super()._enqueue_translations(binding)
+        translation_model = self.work.odoo_api.api.get("ir.translation")
+
+        # Enqueue product.template specific translations
+        translation_ids = translation_model.search(
+            [
+                ("name", "like", "product.template,"),
+                ("type", "=", "model"),
+                ("res_id", "=", self.odoo_record.product_tmpl_id.id),
+            ],
+            order="id",
+        )
+        total = len(translation_ids)
+        _logger.info(
+            "{} Specific Template Translation found for {} id {}".format(
+                total, self.model._name, self.odoo_record.product_tmpl_id.id
+            )
+        )
+        for translation_id in translation_ids:
+            self.env["odoo.ir.translation"].with_delay().import_record(
+                self.backend_record, translation_id
+            )
+        return True

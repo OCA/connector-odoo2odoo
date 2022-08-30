@@ -150,6 +150,7 @@ class OdooImporter(AbstractComponent):
     def _get_binding(self):
         return self.binder.to_internal(self.external_id)
 
+    # pylint: disable=W8121
     def _create_data(self, map_record, **kwargs):
         return map_record.values(for_create=True, **kwargs)
 
@@ -157,11 +158,15 @@ class OdooImporter(AbstractComponent):
         """Create the Odoo record"""
         # special check on data before import
         self._validate_data(data)
-        model = self.model.with_context(connector_no_export=True)
+        context = {**{"connector_no_export": True}, **self._get_context(data)}
+        model = self.model.with_context(context)
 
         binding = model.create(data)
         _logger.debug("%d created from Odoo %s", binding, self.external_id)
         return binding
+
+    def _get_context(self, data):
+        return {}
 
     def _update_data(self, map_record, **kwargs):
         return map_record.values(**kwargs)
@@ -179,8 +184,49 @@ class OdooImporter(AbstractComponent):
         return True
 
     def _after_import(self, binding):
-        """Hook called at the end of the import"""
-        return
+        """Hook called at the end of the import
+
+        Put here all processed that must be delayed with jobs
+        """
+
+        self._enqueue_translations(binding)
+        return True
+
+    def _enqueue_translations(self, binding):
+        if (
+            self.model._name == "odoo.ir.translation"
+            or self.backend_record.ignore_translations
+        ):
+            return
+        translation_model = self.work.odoo_api.api.get("ir.translation")
+        translation_ids = translation_model.search(
+            [
+                ("name", "like", self.model._name.replace("odoo.", "")),
+                ("type", "=", "model"),
+                ("res_id", "=", self.odoo_record.id),
+            ],
+            order="id",
+        )
+        total = len(translation_ids)
+        _logger.info(
+            "{} Translation found for {} id {}".format(
+                total, self.model._name, self.odoo_record.id
+            )
+        )
+        for translation_id in translation_ids:
+            self.env["odoo.ir.translation"].with_delay().import_record(
+                self.backend_record, translation_id
+            )
+        return True
+
+    def _get_binding_odoo_id_changed(self, binding):
+        # It is possible that OpenERP/Odoo deletes and creates records
+        # instead of editing the information.
+        #
+        # e.g. In OpenERP it happens with ir.translation.
+        #
+        # This method will get the binding if needed
+        return binding
 
     def run(self, external_id, force=False):
         """Run the synchronization
@@ -227,6 +273,8 @@ class OdooImporter(AbstractComponent):
         # will be updated into Odoo
         self.advisory_lock_or_retry(lock_name)
         _logger.info("Resource {} locked".format(lock_name))
+        if not binding:
+            binding = self._get_binding_odoo_id_changed(binding)
         self._before_import()
 
         # import the missing linked resources

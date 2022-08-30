@@ -24,25 +24,6 @@ class ProductAttributeValueImporter(Component):
         )
 
 
-#     def _create(self, data):
-#         binding = super(ProductUoMImporter, self)._create(data)
-#         self.backend_record.add_checkpoint(binding)
-#         return binding
-
-# class ProductUoM(Component):
-#     _name = 'odoo.product.uom.batch.importer'
-#     _inherit = 'odoo.batch.importer'
-#     _apply_on = ['odoo.product.uom']
-#
-#     def _import_record(self, external_id, job_options=None):
-#         """ Delay a job for the import """
-#         super(ProductCategoryBatchImporter, self)._import_record(
-#             external_id, job_options=job_options
-#         )
-
-#     def run(self, filters=None, force=False):
-
-
 class ProductAttributeValueMapper(Component):
     _name = "odoo.product.attribute.value.mapper"
     _inherit = "odoo.import.mapper"

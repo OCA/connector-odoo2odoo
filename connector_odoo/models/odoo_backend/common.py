@@ -114,6 +114,12 @@ class OdooBackend(models.Model):
         help="""Filter in the Odoo Destination
         """,
     )
+    partner_main_record = fields.Selection(
+        [
+            ("odoo", "Odoo"),
+            ("backend", "Backend"),
+        ]
+    )
 
     """
     USER SYNC OPTIONS
@@ -129,6 +135,16 @@ class OdooBackend(models.Model):
         help="""Filter in the Odoo Destination
         """,
     )
+    user_main_record = fields.Selection(
+        [
+            ("odoo", "Odoo"),
+            ("backend", "Backend"),
+        ]
+    )
+
+    """
+    PRODUCT SYNC OPTIONS
+    """
 
     matching_product_product = fields.Boolean(string="Match product", default=True)
     matching_product_ch = fields.Selection(
@@ -179,6 +195,9 @@ class OdooBackend(models.Model):
         default="[]",
         help="Filter in the Odoo Destination",
     )
+    work_with_variants = fields.Boolean(
+        help="If not work with variants, when import product does not try to import template",
+    )
     default_import_product = fields.Boolean("Import products")
     import_product_from_date = fields.Datetime()
     import_partner_from_date = fields.Datetime()
@@ -202,19 +221,8 @@ class OdooBackend(models.Model):
             ("backend", "Backend"),
         ]
     )
-    partner_main_record = fields.Selection(
-        [
-            ("odoo", "Odoo"),
-            ("backend", "Backend"),
-        ]
-    )
-    user_main_record = fields.Selection(
-        [
-            ("odoo", "Odoo"),
-            ("backend", "Backend"),
-        ]
-    )
     force = fields.Boolean(help="Execute import/export even if no changes in backend")
+    ignore_translations = fields.Boolean()
 
     def get_default_language_code(self):
         lang = (

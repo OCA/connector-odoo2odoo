@@ -76,6 +76,7 @@
                 <field name="password" password="1" />
                 <field name="pricelist_id" />
         <field name="force" />
+        <field name="ignore_translations" />
               </group>
             </group>
             <notebook>
@@ -86,6 +87,7 @@
                                         name="product_main_record"
                                         help="Select Odoo to your changes direction was Odoo -> Backend"
                                     />
+                                    <field name="work_with_variants" />
                     <field name="default_import_product" />
                     <field name="default_export_product" />
 
@@ -354,7 +356,7 @@
         id="menu_odoo_root"
         name="Odoo"
         parent="connector.menu_connector_root"
-        sequence="10"
+        sequence="5"
     />
     <!-- TODO: Implement security strategy groups="odoo_base.group_oc_manager" -->
     <menuitem

@@ -5,7 +5,7 @@
 import ast
 import logging
 
-from odoo import fields, models
+from odoo import api, fields, models
 
 from odoo.addons.component.core import Component
 
@@ -63,6 +63,28 @@ class ProductTemplate(models.Model):
         inverse_name="odoo_id",
         string="Odoo Bindings",
     )
+
+    product_bind_ids = fields.Many2many(
+        comodel_name="odoo.product.product",
+        compute="_compute_product_bind_ids",
+        store=True,
+    )
+
+    @api.depends("product_variant_ids")
+    def _compute_product_bind_ids(self):
+        for record in self:
+            record.product_bind_ids = record.product_variant_ids.mapped("bind_ids")
+
+    def unlink(self):
+        """Clean translations unneeded."""
+        self.env["ir.translation"].search(
+            [
+                ("type", "=", "model"),
+                ("name", "like", "product.template,%"),
+                ("res_id", "in", self.ids),
+            ]
+        ).unlink()
+        return super().unlink()
 
 
 class ProductTemplateAdapter(Component):

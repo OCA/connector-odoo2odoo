@@ -36,6 +36,16 @@ class OdooProductAttributeValue(models.Model):
             )
 
 
+class ProductAttributeValue(models.Model):
+    _inherit = "product.attribute.value"
+
+    bind_ids = fields.One2many(
+        comodel_name="odoo.product.attribute.value",
+        inverse_name="odoo_id",
+        string="Odoo Bindings",
+    )
+
+
 class OdooProductAttributeAdapter(Component):
     _name = "odoo.product.attribute.value.adapter"
     _inherit = "odoo.adapter"

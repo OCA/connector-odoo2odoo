@@ -13,6 +13,10 @@
             <group string="Odoo Bindings">
                 <field name="bind_ids" readonly="1" nolabel="1" />
             </group>
+
+            <group string="Child Odoo Bindings">
+                <field name="product_bind_ids" readonly="1" nolabel="1" />
+            </group>
         </xpath>
       </field>
     </record>

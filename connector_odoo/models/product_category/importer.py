@@ -55,6 +55,7 @@ class ProductCategoryImporter(Component):
     def _after_import(self, binding):
         """Hook called at the end of the import"""
         binding._parent_store_compute()
+        return super()._after_import(binding)
 
 
 class ProductCategoryImportMapper(Component):

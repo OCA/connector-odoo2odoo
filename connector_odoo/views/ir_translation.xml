@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="odoo_ir_translation_tree_view" model="ir.ui.view">
+        <field name="name">odoo.ir.translation.tree</field>
+        <field name="model">odoo.ir.translation</field>
+
+        <field name="arch" type="xml">
+            <tree>
+                <field name="display_name" />
+                <field name="odoo_id" />
+                <field name="backend_id" />
+                <field name="external_id" />
+                <button name="resync" type="object" string="Resync" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="odoo_ir_translation_form_view" model="ir.ui.view">
+        <field name="name">odoo.ir.translation.form</field>
+        <field name="model">odoo.ir.translation</field>
+
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="resync" type="object" string="Resync" />
+                </header>
+                <sheet>
+
+                    <div class="oe_title">
+
+                        <h1>
+                            <field name="name" readonly="1" />
+                        </h1>
+                        <group>
+                            <field name="odoo_id" readonly="0" />
+                            <field name="backend_id" readonly="1" />
+                            <field name="external_id" readonly="0" />
+                        </group>
+                    </div>
+                </sheet>
+
+            </form>
+        </field>
+    </record>
+
+</odoo>

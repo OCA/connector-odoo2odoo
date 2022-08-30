@@ -28,6 +28,13 @@ class OdooImportMapper(AbstractComponent):
     _usage = "import.mapper"
 
     @mapping
+    def odoo_id(self, record):
+        """Value is assigned to odoo_id so as not to duplicate records already imported"""
+        binder = self.binder_for()
+        res_id = binder.to_internal(record.id, unwrap=True)
+        return {"odoo_id": res_id.id if res_id else None}
+
+    @mapping
     def backend_id(self, record):
         return {"backend_id": self.backend_record.id}
 

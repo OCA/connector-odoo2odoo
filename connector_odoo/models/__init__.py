@@ -19,3 +19,4 @@ from . import uom_uom
 from . import account_account
 from . import sale_order
 from . import ir_attachment
+from . import ir_translation
