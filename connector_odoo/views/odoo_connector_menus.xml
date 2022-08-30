@@ -73,6 +73,12 @@
         <field name="view_mode">tree,form</field>
     </record>
 
+    <record id="action_odoo_ir_attachment" model="ir.actions.act_window">
+        <field name="name">Odoo Attachment</field>
+        <field name="res_model">odoo.ir.attachment</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
     <!-- TODO: Implement security strategy groups="odoo_base.group_oc_manager" -->
     <menuitem
         id="menu_odoo_external_objects"
@@ -157,5 +163,12 @@
         name="External Currency"
         parent="menu_odoo_external_objects"
         action="action_odoo_res_currency"
+    />
+
+    <menuitem
+        id="menu_odoo_external_ir_attachment"
+        name="External Attachment"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_ir_attachment"
     />
 </odoo>

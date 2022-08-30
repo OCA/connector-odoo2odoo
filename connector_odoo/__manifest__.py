@@ -27,6 +27,7 @@
         "views/partner_category.xml",
         "views/users.xml",
         "views/account_account.xml",
+        "views/ir_attachment.xml",
         "views/res_currency.xml",
         "wizards/add_backend.xml",
     ],

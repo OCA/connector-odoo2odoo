@@ -147,3 +147,20 @@ class ProductImporter(Component):
 
         categ_id = self.odoo_record.categ_id
         self._import_dependency(categ_id.id, "odoo.product.category", force=force)
+
+        attachment_model = self.work.odoo_api.api.get("ir.attachment")
+        attachment_ids = attachment_model.search(
+            [
+                ("res_model", "=", "product.product"),
+                ("res_id", "=", self.odoo_record.id),
+            ],
+            order="id",
+        )
+        total = len(attachment_ids)
+        _logger.info(
+            "{} Attachment found for external product {}".format(
+                total, self.odoo_record.id
+            )
+        )
+        for attachment_id in attachment_ids:
+            self._import_dependency(attachment_id, "odoo.ir.attachment", force=force)
