@@ -105,7 +105,7 @@ class SaleOrderLineBatchImporter(Component):
     For every pricelist item in the list, a delayed job is created.
     """
 
-    _name = "odoo.sale.order.batch.importer"
+    _name = "odoo.sale.order.line.batch.importer"
     _inherit = "odoo.delayed.batch.importer"
     _apply_on = ["odoo.sale.order.item"]
 

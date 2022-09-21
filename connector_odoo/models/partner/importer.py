@@ -311,7 +311,7 @@ class PartnerImporter(Component):
         _logger.info("Dependencies imported for external ID %s", self.external_id)
         return result
 
-    def _after_import(self, binding):
+    def _after_import(self, binding, force=False):
         if self.backend_record.version == "6.1":
             _logger.info(
                 "OpenERP detected, importing adresses for external ID %s",
@@ -320,4 +320,4 @@ class PartnerImporter(Component):
             self.env["odoo.res.partner.address.disappeared"].with_delay().import_record(
                 self.backend_record, self.external_id
             )
-        return super()._after_import(binding)
+        return super()._after_import(binding, force)

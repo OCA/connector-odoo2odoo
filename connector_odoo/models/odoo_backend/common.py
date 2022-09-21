@@ -224,6 +224,41 @@ class OdooBackend(models.Model):
     force = fields.Boolean(help="Execute import/export even if no changes in backend")
     ignore_translations = fields.Boolean()
 
+    """
+    Logistic SYNC OPTIONS
+    """
+
+    def _get_picking_in(self):
+        pick_in = self.env.ref("stock.picking_type_in", raise_if_not_found=False)
+        company = self.env.company
+        if (
+            not pick_in
+            or not pick_in.sudo().active
+            or pick_in.sudo().warehouse_id.company_id.id != company.id
+        ):
+            pick_in = self.env["stock.picking.type"].search(
+                [
+                    ("warehouse_id.company_id", "=", company.id),
+                    ("code", "=", "incoming"),
+                ],
+                limit=1,
+            )
+        return pick_in
+
+    read_operation_from = fields.Selection(
+        [("backend", "Backend"), ("odoo", "Odoo")], default="backend", required=True
+    )
+    default_purchase_picking_type_id = fields.Many2one(
+        "stock.picking.type",
+        required=True,
+        default=_get_picking_in,
+        domain="['|',"
+        + "('warehouse_id', '=', False),"
+        + "('warehouse_id.company_id', '=', company_id)]",
+    )
+    default_import_purchase_order = fields.Boolean("Import purchase orders")
+    import_purchase_order_from_date = fields.Datetime()
+
     def get_default_language_code(self):
         lang = (
             self.default_lang_id.code
@@ -359,6 +394,12 @@ class OdooBackend(models.Model):
         if not self.default_import_product:
             return False
         self._import_from_date("odoo.product.category", "import_categories_from_date")
+        return True
+
+    def import_purchase_orders(self):
+        if not self.default_import_product:
+            return False
+        self._import_from_date("odoo.purchase.order", "import_purchase_order_from_date")
         return True
 
     def _import_from_date(self, model, from_date_field):

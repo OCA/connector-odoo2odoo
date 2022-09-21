@@ -340,6 +340,39 @@
 
                 </group>
               </page>
+              <page string="Logistic" name="logistic">
+
+                  <group string="General">
+                    <field name="read_operation_from" />
+                </group>
+                <group string="Options">
+                    <group>
+                        <field name="default_import_purchase_order" />
+                      </group>
+                      <group>
+                        <div
+                                        attrs="{'invisible': [('default_import_purchase_order', '!=', True)]}"
+                                    >
+                      <button
+                                            name="import_purchase_orders"
+                                            type="object"
+                                            string="Import Purchase Order"
+                                            class="oe_highlight oe_inline"
+                                            nolabel="1"
+                                        />
+                    </div>
+                    <div
+                                        attrs="{'invisible': [('default_import_purchase_order', '!=', True)]}"
+                                    >
+                                    <field
+                                            name="import_purchase_order_from_date"
+                                            nolabel="1"
+                                        />
+                    </div>
+
+                      </group>
+                </group>
+              </page>
             </notebook>
           </sheet>
         </form>

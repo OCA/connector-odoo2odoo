@@ -71,7 +71,7 @@ class CurrencyImporter(Component):
     _inherit = "odoo.importer"
     _apply_on = "odoo.res.currency"
 
-    def _after_import(self, binding):
+    def _after_import(self, binding, force=False):
         _logger.info(
             "Importing Currency rates for external ID %s",
             self.external_id,
@@ -79,4 +79,4 @@ class CurrencyImporter(Component):
         self.env["odoo.res.currency.rate"].with_delay().import_record(
             self.backend_record, self.external_id
         )
-        return super()._after_import(binding)
+        return super()._after_import(binding, force)

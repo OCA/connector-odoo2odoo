@@ -85,6 +85,12 @@
         <field name="view_mode">tree,form</field>
     </record>
 
+    <record id="action_odoo_purchase_order" model="ir.actions.act_window">
+        <field name="name">Odoo Purchase Order</field>
+        <field name="res_model">odoo.purchase.order</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
     <!-- TODO: Implement security strategy groups="odoo_base.group_oc_manager" -->
     <menuitem
         id="menu_odoo_external_objects"
@@ -183,5 +189,12 @@
         name="External Translations"
         parent="menu_odoo_external_objects"
         action="action_odoo_ir_translation"
+    />
+
+    <menuitem
+        id="menu_odoo_external_purchase_order"
+        name="External Purchase Order"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_purchase_order"
     />
 </odoo>

@@ -15,6 +15,7 @@
     "external_dependencies": {"python": ["odoorpc", "OERPLib-py3"], "bin": []},
     "depends": ["base", "product", "connector", "connector_base_product", "sale"],
     "data": [
+        "data/cron.xml",
         "security/connector_odoo_base_security.xml",
         "security/ir.model.access.csv",
         "views/odoo_backend.xml",
@@ -30,6 +31,7 @@
         "views/ir_attachment.xml",
         "views/ir_translation.xml",
         "views/res_currency.xml",
+        "views/purchase_order.xml",
         "wizards/add_backend.xml",
     ],
     "demo": [],

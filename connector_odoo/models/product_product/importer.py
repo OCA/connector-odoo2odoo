@@ -171,7 +171,7 @@ class ProductImporter(Component):
 
         return super()._import_dependencies(force=force)
 
-    def _after_import(self, binding):
+    def _after_import(self, binding, force=False):
         attachment_model = self.work.odoo_api.api.get("ir.attachment")
         attachment_ids = attachment_model.search(
             [
@@ -190,7 +190,7 @@ class ProductImporter(Component):
             self.env["odoo.ir.attachment"].with_delay().import_record(
                 self.backend_record, attachment_id
             )
-        return super()._after_import(binding)
+        return super()._after_import(binding, force)
 
     def _enqueue_translations(self, binding):
         if (

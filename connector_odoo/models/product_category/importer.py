@@ -52,10 +52,10 @@ class ProductCategoryImporter(Component):
         if record.parent_id:
             self._import_dependency(record.parent_id.id, self.model, force=False)
 
-    def _after_import(self, binding):
+    def _after_import(self, binding, force=False):
         """Hook called at the end of the import"""
         binding._parent_store_compute()
-        return super()._after_import(binding)
+        return super()._after_import(binding, force)
 
 
 class ProductCategoryImportMapper(Component):

@@ -143,7 +143,8 @@ class IrTranslationImporter(Component):
             skip = not res_id
         return skip
 
-    def _after_import(self, binding):
+    def _after_import(self, binding, force=False):
+        res = super()._after_import(binding, force=force)
         if (
             "product.product," in binding.name
             and not self.backend_record.work_with_variants
@@ -181,3 +182,4 @@ class IrTranslationImporter(Component):
                         "value": binding.odoo_id.value,
                     }
                 )
+        return res

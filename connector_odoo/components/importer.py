@@ -183,7 +183,7 @@ class OdooImporter(AbstractComponent):
         """Hook called at before read data from backend"""
         return True
 
-    def _after_import(self, binding):
+    def _after_import(self, binding, force=False):
         """Hook called at the end of the import
 
         Put here all processed that must be delayed with jobs
@@ -301,7 +301,7 @@ class OdooImporter(AbstractComponent):
                 self.work.model_name, external_id
             )
         )
-        self._after_import(binding)
+        self._after_import(binding, force)
         _logger.info("Finished ({}: {})!".format(self.work.model_name, external_id))
 
 
