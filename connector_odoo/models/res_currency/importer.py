@@ -42,7 +42,6 @@ class UomMapper(Component):
         ("currency_subunit_label", "currency_subunit_label"),
         ("symbol", "symbol"),
         ("position", "position"),
-        ("decimal_places", "decimal_places"),
         ("position", "position"),
     ]
 
@@ -62,6 +61,12 @@ class UomMapper(Component):
         if len(currency_id) == 1:
             res.update({"odoo_id": currency_id.id})
         return res
+
+    @mapping
+    def decimal_places(self, record):
+        if self.backend_record.version == "6.1":
+            return {"decimal_places": record.accuracy}
+        return {"decimal_places": record.decimal_places}
 
 
 class CurrencyImporter(Component):

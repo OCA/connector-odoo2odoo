@@ -258,6 +258,9 @@ class OdooBackend(models.Model):
     )
     default_import_purchase_order = fields.Boolean("Import purchase orders")
     import_purchase_order_from_date = fields.Datetime()
+    delayed_import_lines = fields.Boolean(
+        help="Import lines after import order on delayed jobs"
+    )
 
     def get_default_language_code(self):
         lang = (
@@ -423,6 +426,10 @@ class OdooBackend(models.Model):
         next_time = import_start_time - timedelta(seconds=IMPORT_DELTA_BUFFER)
         next_time = fields.Datetime.to_string(next_time)
         self.write({from_date_field: next_time})
+
+    def import_external_id(self, model, external_id, force):
+        for backend in self:
+            self.env[model].with_delay().import_record(backend, external_id, force)
 
     def export_product_categories(self):
         if not self.default_export_product:

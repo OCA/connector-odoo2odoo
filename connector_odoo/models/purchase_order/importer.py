@@ -73,7 +73,10 @@ class PurchaseOrderImporter(Component):
         super()._after_import(binding, force)
         if self.odoo_record.order_line:
             for line_id in self.odoo_record.order_line:
-                self.env["odoo.purchase.order.line"].with_delay().import_record(
+                purchase_order_line_model = self.env["odoo.purchase.order.line"]
+                if self.backend_record.delayed_import_lines:
+                    purchase_order_line_model = purchase_order_line_model.with_delay()
+                purchase_order_line_model.import_record(
                     self.backend_record, line_id.id, force=True
                 )
         return True
@@ -90,6 +93,14 @@ class PurchaseOrderImportMapper(Component):
         ("origin", "origin"),
         ("date_order", "date_order"),
     ]
+
+    @mapping
+    def backend_amount_total(self, record):
+        return {"backend_amount_total": record.amount_total}
+
+    @mapping
+    def backend_amount_tax(self, record):
+        return {"backend_amount_tax": record.amount_tax}
 
     @only_create
     @mapping
@@ -110,6 +121,11 @@ class PurchaseOrderImportMapper(Component):
         if self.backend_record.version != "6.1" and record.currency_id:
             binder = self.binder_for("odoo.res.currency")
             currency_id = binder.to_internal(record.currency_id.id, unwrap=True)
+        elif self.backend_record.version == "6.1" and record.pricelist_id:
+            binder = self.binder_for("odoo.res.currency")
+            currency_id = binder.to_internal(
+                record.pricelist_id.currency_id.id, unwrap=True
+            )
         return {"currency_id": currency_id.id}
 
     @mapping
@@ -175,9 +191,6 @@ class PurchaseOrderLineImporter(Component):
 
     def _import_dependencies(self, force):
         """Import the dependencies for the record"""
-        self._import_dependency(
-            self.odoo_record.order_id.id, "odoo.purchase.order", force=force
-        )
         self._import_dependency(
             self.odoo_record.product_id.id, "odoo.product.product", force=force
         )

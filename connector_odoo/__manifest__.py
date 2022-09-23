@@ -33,6 +33,8 @@
         "views/res_currency.xml",
         "views/purchase_order.xml",
         "wizards/add_backend.xml",
+        "wizards/import_external_id.xml",
+        "wizards/wizards_menu.xml",
     ],
     "demo": [],
     "qweb": [],

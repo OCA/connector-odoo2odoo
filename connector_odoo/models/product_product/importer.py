@@ -5,7 +5,7 @@
 import logging
 
 from odoo.addons.component.core import Component
-from odoo.addons.connector.components.mapper import mapping
+from odoo.addons.connector.components.mapper import mapping, only_create
 from odoo.addons.connector.exception import MappingError
 
 _logger = logging.getLogger(__name__)
@@ -54,6 +54,25 @@ class ProductImportMapper(Component):
         ("sale_ok", "sale_ok"),
         ("purchase_ok", "purchase_ok"),
     ]
+
+    @only_create
+    @mapping
+    def odoo_id(self, record):
+        # If product was imported or created yet (manually or by another connector)
+        binder = self.binder_for("odoo.product.product")
+        if binder.to_internal(record.id, unwrap=True):
+            return {"odoo_id": record.id}
+        product_id = self.env["product.product"].search(
+            [("default_code", "=", record.default_code)]
+        )
+        if product_id:
+            return {"odoo_id": product_id.id}
+        barcode = self.barcode(record)["barcode"]
+        if barcode:
+            product_id = self.env["product.product"].search([("barcode", "=", barcode)])
+            if product_id:
+                return {"odoo_id": product_id.id}
+        return {}
 
     @mapping
     def company_id(self, record):

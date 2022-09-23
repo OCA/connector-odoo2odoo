@@ -17,6 +17,9 @@ class OdooPurchaseOrder(models.Model):
     _inherits = {"purchase.order": "odoo_id"}
     _description = "External Odoo Purchase Order"
 
+    backend_amount_total = fields.Float()
+    backend_amount_tax = fields.Float()
+
     _sql_constraints = [
         (
             "external_id",

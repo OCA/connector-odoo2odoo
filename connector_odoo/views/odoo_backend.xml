@@ -371,6 +371,12 @@
                     </div>
 
                       </group>
+                      <group>
+                        <field
+                                        name="delayed_import_lines"
+                                        attrs="{'invisible': [('default_import_purchase_order', '!=', True)]}"
+                                    />
+                      </group>
                 </group>
               </page>
             </notebook>

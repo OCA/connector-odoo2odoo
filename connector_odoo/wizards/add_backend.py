@@ -5,7 +5,7 @@ from odoo import fields, models
 
 
 class WizardModel(models.TransientModel):
-    _name = "connector_odoo.add_backend.wizard"
+    _name = "add.backend.wizard"
 
     def get_default_object(self, model):
 

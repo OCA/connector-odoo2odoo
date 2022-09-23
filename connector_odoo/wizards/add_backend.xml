@@ -4,7 +4,7 @@
 
         <record id="wizard_add_backend_view_form" model="ir.ui.view">
             <field name="name">Bind a product to a backend</field>
-            <field name="model">connector_odoo.add_backend.wizard</field>
+            <field name="model">add.backend.wizard</field>
             <field name="arch" type="xml">
                 <form string="Select event to register">
                     <p>Choose the backend you want to bind the product to</p>
@@ -27,7 +27,7 @@
 
         <record id="wizard_add_backend_action" model="ir.actions.act_window">
             <field name="name">Add product to Backend</field>
-            <field name="res_model">connector_odoo.add_backend.wizard</field>
+            <field name="res_model">add.backend.wizard</field>
             <field name="view_mode">form</field>
             <field name="target">new</field>
         </record>
@@ -36,7 +36,7 @@
         <record id="product_add_backend_action" model="ir.actions.act_window">
                 <field name="name">Add Backend Wizard</field>
                 <field name="binding_model_id" ref="model_product_product" />
-                <field name="res_model">connector_odoo.add_backend.wizard</field>
+                <field name="res_model">add.backend.wizard</field>
                 <field name="target">new</field>
                 <field name="view_mode">form</field>
         </record>
@@ -44,7 +44,7 @@
         <record id="product_template_add_backend_action" model="ir.actions.act_window">
                 <field name="name">Add Backend Wizard</field>
                 <field name="binding_model_id" ref="model_product_template" />
-                <field name="res_model">connector_odoo.add_backend.wizard</field>
+                <field name="res_model">add.backend.wizard</field>
                 <field name="target">new</field>
                 <field name="view_mode">form</field>
         </record>
@@ -52,7 +52,7 @@
         <record id="category_add_backend_action" model="ir.actions.act_window">
                 <field name="name">Add Backend Wizard</field>
                 <field name="binding_model_id" ref="model_product_category" />
-                <field name="res_model">connector_odoo.add_backend.wizard</field>
+                <field name="res_model">add.backend.wizard</field>
                 <field name="target">new</field>
                 <field name="view_mode">form</field>
         </record>

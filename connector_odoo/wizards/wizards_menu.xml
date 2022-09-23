@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <menuitem id="menu_odoo_wizards" name="Wizards" parent="menu_odoo_root" />
+
+    <menuitem
+        id="menu_import_external_id"
+        name="Import external ID"
+        parent="menu_odoo_wizards"
+        action="wizard_import_external_id_action"
+    />
+
+    <menuitem
+        id="menu_wizard_add_backend"
+        name="Add backend"
+        parent="menu_odoo_wizards"
+        action="wizard_add_backend_action"
+    />
+
+    <menuitem
+        id="menu_product_add_backend"
+        name="Add backend product"
+        parent="menu_odoo_wizards"
+        action="product_add_backend_action"
+    />
+
+    <menuitem
+        id="menu_product_template_add_backend"
+        name="Add backend product template"
+        parent="menu_odoo_wizards"
+        action="product_template_add_backend_action"
+    />
+
+    <menuitem
+        id="menu_category_add_backend"
+        name="Add backend category"
+        parent="menu_odoo_wizards"
+        action="category_add_backend_action"
+    />
+
+</odoo>
