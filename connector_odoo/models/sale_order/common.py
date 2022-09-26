@@ -75,20 +75,7 @@ class SaleOrderListener(Component):
 
     @skip_if(lambda self, record, **kwargs: self.no_connector_export(record))
     def on_sale_order_confirm(self, record):
-        # FIXME: do the proper way
-        bind_model = self.env["odoo.sale.order"]
-        backend = self.env["odoo.backend"].search([])
-        if backend:
-            binding = bind_model.create(
-                {
-                    "backend_id": backend[0].id,
-                    "odoo_id": record.id,
-                    "external_id": 0,
-                }
-            )
-            binding.with_delay().export_record(backend)
-        else:
-            _logger.info("No backend found for sale order %s", record.id)
+        _logger.info("Not implemented yet. Ignoring on_sale_order_confirm  %s", record)
 
 
 class OdooSaleOrderLine(models.Model):
