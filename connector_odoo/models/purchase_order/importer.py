@@ -70,16 +70,25 @@ class PurchaseOrderImporter(Component):
             )
 
     def _after_import(self, binding, force=False):
-        super()._after_import(binding, force)
+        res = super()._after_import(binding, force)
         if self.odoo_record.order_line:
+            delayed_line_ids = []
             for line_id in self.odoo_record.order_line:
                 purchase_order_line_model = self.env["odoo.purchase.order.line"]
                 if self.backend_record.delayed_import_lines:
                     purchase_order_line_model = purchase_order_line_model.with_delay()
-                purchase_order_line_model.import_record(
+                delayed_line_id = purchase_order_line_model.import_record(
                     self.backend_record, line_id.id, force=True
                 )
-        return True
+                delayed_line_id = self.env["queue.job"].search(
+                    [("uuid", "=", delayed_line_id.uuid)]
+                )
+                delayed_line_ids.append(delayed_line_id.id)
+            if self.backend_record.delayed_import_lines:
+                binding.queue_job_ids = [
+                    (6, 0, (delayed_line_ids + binding.queue_job_ids.ids))
+                ]
+        return res
 
 
 class PurchaseOrderImportMapper(Component):
@@ -197,6 +206,28 @@ class PurchaseOrderLineImporter(Component):
         self._import_dependency(
             self.odoo_record.product_uom.id, "odoo.uom.uom", force=force
         )
+
+    def _after_import(self, binding, force=False):
+        res = super()._after_import(binding, force)
+        if binding.order_id.queue_job_ids:
+            pending = binding.order_id.queue_job_ids.filtered(
+                lambda x: x.state != "done" and x.args[1] != self.odoo_record.id
+            )
+            if not pending and binding.order_id.bind_ids:
+                change_job_id = (
+                    binding.order_id.bind_ids.filtered(
+                        lambda x: x.backend_id.id == self.backend_record.id
+                    )
+                    .with_delay()
+                    .change_state()
+                )
+                job_id = self.env["queue.job"].search(
+                    [("uuid", "=", change_job_id.uuid)]
+                )
+                binding.order_id.queue_job_ids = [
+                    (6, 0, binding.order_id.queue_job_ids.ids + [job_id.id])
+                ]
+        return res
 
 
 class PurchaseOrderLineImportMapper(Component):

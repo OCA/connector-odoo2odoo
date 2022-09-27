@@ -77,6 +77,23 @@
                             </tree>
                         </field>
                     </group>
+                    <group string="Delayed jobs">
+                        <field
+                            name="queue_job_ids"
+                            readonly="1"
+                            nolabel="1"
+                            attrs="{'invisible': [('queue_job_ids', '=', False)]}"
+                        >
+                            <tree>
+                                <field name="uuid" />
+                                <field name="state" />
+                                <field name="date_created" />
+                                <field name="date_started" />
+                                <field name="date_done" />
+                                <field name="exc_info" />
+                            </tree>
+                        </field>
+                    </group>
                 </page>
             </xpath>
         </field>

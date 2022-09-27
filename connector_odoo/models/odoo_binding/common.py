@@ -26,40 +26,6 @@ class OdooBinding(models.AbstractModel):
     )
     external_id = fields.Integer(string="ID on Ext Odoo", default=-1)
 
-    def _compute_import_state(self):
-        for order_id in self:
-            waiting = self.env["queue.job"].search_count(
-                [
-                    ("model_name", "=", "odoo.purchase.order.line"),
-                    ("state", "in", ("pending", "enqueued", "started")),
-                ]
-            )
-            error = self.env["queue.job"].search_count(
-                [
-                    ("model_name", "=", "odoo.purchase.order.line"),
-                    ("state", "=", "failed"),
-                ]
-            )
-            if waiting:
-                order_id.import_state = "waiting"
-            elif error:
-                order_id.import_state = "error_sync"
-            elif order_id.backend_amount_total != order_id.amount_total:
-                order_id.import_state = "error_amount"
-            else:
-                order_id.import_state = "done"
-
-    import_state = fields.Selection(
-        [
-            ("waiting", "Waiting"),
-            ("error_sync", "Sync Error"),
-            ("error_amount", "Amounts Error"),
-            ("done", "Done"),
-        ],
-        default="waiting",
-        compute=_compute_import_state,
-    )
-
     _sql_constraints = [
         (
             "odoo_backend_odoo_uniq",

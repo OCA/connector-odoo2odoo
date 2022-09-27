@@ -421,6 +421,10 @@ class OdooBackend(models.Model):
                 )
             else:
                 from_date = None
+            if self.version == "6.1":
+                self.env[model].with_delay().import_batch(
+                    backend, [("write_date", "=", False)]
+                )
             self.env[model].with_delay().import_batch(backend, filters)
 
         next_time = import_start_time - timedelta(seconds=IMPORT_DELTA_BUFFER)

@@ -19,6 +19,35 @@ class OdooPurchaseOrder(models.Model):
 
     backend_amount_total = fields.Float()
     backend_amount_tax = fields.Float()
+    backend_state = fields.Char()
+
+    def _compute_import_state(self):
+        for order_id in self:
+            waiting = len(
+                order_id.queue_job_ids.filtered(
+                    lambda j: j.state in ("pending", "enqueued", "started")
+                )
+            )
+            error = len(order_id.queue_job_ids.filtered(lambda j: j.state == "failed"))
+            if waiting:
+                order_id.import_state = "waiting"
+            elif error:
+                order_id.import_state = "error_sync"
+            elif order_id.backend_amount_total != order_id.amount_total:
+                order_id.import_state = "error_amount"
+            else:
+                order_id.import_state = "done"
+
+    import_state = fields.Selection(
+        [
+            ("waiting", "Waiting"),
+            ("error_sync", "Sync Error"),
+            ("error_amount", "Amounts Error"),
+            ("done", "Done"),
+        ],
+        default="waiting",
+        compute=_compute_import_state,
+    )
 
     _sql_constraints = [
         (
@@ -42,9 +71,11 @@ class OdooPurchaseOrder(models.Model):
         if self.backend_id.product_main_record == "odoo":
             return self.with_delay().export_record(self.backend_id)
         else:
-            return self.with_delay().import_record(
+            job_info = self.with_delay().import_record(
                 self.backend_id, self.external_id, force=True
             )
+            job_id = self.env["queue.job"].search([("uuid", "=", job_info.uuid)])
+            self.queue_job_ids = [(6, 0, [job_id.id])]
 
 
 class PurchaseOrder(models.Model):
@@ -54,6 +85,10 @@ class PurchaseOrder(models.Model):
         comodel_name="odoo.purchase.order",
         inverse_name="odoo_id",
         string="Odoo Bindings",
+    )
+
+    queue_job_ids = fields.Many2many(
+        comodel_name="queue.job",
     )
 
     def button_confirm(self):
