@@ -83,10 +83,7 @@
               <page string="Product" name="product_page">
                 <group name="prod_import_export_options">
                   <group string="Import / Export">
-          <field
-                                        name="product_main_record"
-                                        help="Select Odoo to your changes direction was Odoo -> Backend"
-                                    />
+
                                     <field name="work_with_variants" />
                     <field name="default_import_product" />
                     <field name="default_export_product" />
@@ -267,10 +264,6 @@
               <page string="Partners" name="partners">
                 <group>
                   <group string="Import / Export">
-          <field
-                                        name="partner_main_record"
-                                        help="Select Odoo to your changes direction was Odoo -> Backend"
-                                    />
                     <field name="default_import_partner" />
                     <field name="default_export_partner" />
                   </group>
@@ -307,10 +300,6 @@
               <page string="Users" name="users">
                 <group>
                   <group string="Import / Export">
-          <field
-                                        name="user_main_record"
-                                        help="Select Odoo to your changes direction was Odoo -> Backend"
-                                    />
                     <field name="default_import_user" />
                     <field name="default_export_user" />
                   </group>
@@ -343,9 +332,10 @@
               <page string="Logistic" name="logistic">
 
                   <group string="General">
+                    <field name="main_record" />
                     <field name="read_operation_from" />
                 </group>
-                <group string="Options">
+                <group string="Purchases">
                     <group>
                         <field name="default_import_purchase_order" />
                       </group>
@@ -377,6 +367,33 @@
                                         attrs="{'invisible': [('default_import_purchase_order', '!=', True)]}"
                                     />
                       </group>
+                </group>
+                <group string="Stock" name="stock">
+                    <group>
+                        <field name="default_import_stock" />
+                    </group>
+                    <group>
+                        <div
+                                        attrs="{'invisible': [('default_import_stock', '!=', True)]}"
+                                    >
+                            <button
+                                            name="import_locations"
+                                            type="object"
+                                            string="Import Locations"
+                                            class="oe_highlight oe_inline"
+                                            nolabel="1"
+                                        />
+                        </div>
+                        <div
+                                        attrs="{'invisible': [('default_import_stock', '!=', True)]}"
+                                    >
+                                        <field
+                                            name="import_stock_from_date"
+                                            nolabel="1"
+                                        />
+                        </div>
+
+                    </group>
                 </group>
               </page>
             </notebook>

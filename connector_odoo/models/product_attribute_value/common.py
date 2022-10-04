@@ -28,7 +28,7 @@ class OdooProductAttributeValue(models.Model):
     )
 
     def resync(self):
-        if self.backend_id.product_main_record == "odoo":
+        if self.backend_id.main_record == "odoo":
             return self.with_delay().export_record(self.backend_id)
         else:
             return self.with_delay().import_record(

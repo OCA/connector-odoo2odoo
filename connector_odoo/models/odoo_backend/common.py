@@ -114,12 +114,6 @@ class OdooBackend(models.Model):
         help="""Filter in the Odoo Destination
         """,
     )
-    partner_main_record = fields.Selection(
-        [
-            ("odoo", "Odoo"),
-            ("backend", "Backend"),
-        ]
-    )
 
     """
     USER SYNC OPTIONS
@@ -134,12 +128,6 @@ class OdooBackend(models.Model):
         default="[]",
         help="""Filter in the Odoo Destination
         """,
-    )
-    user_main_record = fields.Selection(
-        [
-            ("odoo", "Odoo"),
-            ("backend", "Backend"),
-        ]
     )
 
     """
@@ -215,11 +203,12 @@ class OdooBackend(models.Model):
         default="{'default_code': '/', 'active': False}",
     )
     pricelist_id = fields.Many2one("product.pricelist", "Pricelist", required=True)
-    product_main_record = fields.Selection(
+    main_record = fields.Selection(
         [
-            ("odoo", "Odoo"),
-            ("backend", "Backend"),
-        ]
+            ("odoo", "Odoo -> Backend"),
+            ("backend", "Backend -> Odoo"),
+        ],
+        help="Direction of master data synchronization. Read from X write to Y (X -> Y)",
     )
     force = fields.Boolean(help="Execute import/export even if no changes in backend")
     ignore_translations = fields.Boolean()
@@ -261,6 +250,9 @@ class OdooBackend(models.Model):
     delayed_import_lines = fields.Boolean(
         help="Import lines after import order on delayed jobs"
     )
+
+    default_import_stock = fields.Boolean("Import Stock")
+    import_stock_from_date = fields.Datetime()
 
     def get_default_language_code(self):
         lang = (
@@ -403,6 +395,12 @@ class OdooBackend(models.Model):
         if not self.default_import_product:
             return False
         self._import_from_date("odoo.purchase.order", "import_purchase_order_from_date")
+        return True
+
+    def import_locations(self):
+        if not self.default_import_stock:
+            return False
+        self._import_from_date("odoo.stock.location", "import_stock_from_date")
         return True
 
     def _import_from_date(self, model, from_date_field):

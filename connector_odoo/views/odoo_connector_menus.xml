@@ -91,6 +91,18 @@
         <field name="view_mode">tree,form</field>
     </record>
 
+    <record id="action_odoo_warehouse" model="ir.actions.act_window">
+        <field name="name">Odoo Warehouse</field>
+        <field name="res_model">odoo.stock.warehouse</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="action_odoo_location" model="ir.actions.act_window">
+        <field name="name">Odoo Location</field>
+        <field name="res_model">odoo.stock.location</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
     <!-- TODO: Implement security strategy groups="odoo_base.group_oc_manager" -->
     <menuitem
         id="menu_odoo_external_objects"
@@ -196,5 +208,19 @@
         name="External Purchase Order"
         parent="menu_odoo_external_objects"
         action="action_odoo_purchase_order"
+    />
+
+    <menuitem
+        id="menu_odoo_external_warehouse"
+        name="External Warehouse"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_warehouse"
+    />
+
+    <menuitem
+        id="menu_odoo_external_location"
+        name="External Location"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_location"
     />
 </odoo>

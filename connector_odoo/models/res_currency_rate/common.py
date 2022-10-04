@@ -27,7 +27,7 @@ class OdooResCurrencyRate(models.Model):
     ]
 
     def resync(self):
-        if self.backend_id.product_main_record == "odoo":
+        if self.backend_id.main_record == "odoo":
             raise NotImplementedError
         else:
             return self.with_delay().import_record(

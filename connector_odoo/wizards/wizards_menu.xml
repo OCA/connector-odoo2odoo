@@ -10,32 +10,4 @@
         action="wizard_import_external_id_action"
     />
 
-    <menuitem
-        id="menu_wizard_add_backend"
-        name="Add backend"
-        parent="menu_odoo_wizards"
-        action="wizard_add_backend_action"
-    />
-
-    <menuitem
-        id="menu_product_add_backend"
-        name="Add backend product"
-        parent="menu_odoo_wizards"
-        action="product_add_backend_action"
-    />
-
-    <menuitem
-        id="menu_product_template_add_backend"
-        name="Add backend product template"
-        parent="menu_odoo_wizards"
-        action="product_template_add_backend_action"
-    />
-
-    <menuitem
-        id="menu_category_add_backend"
-        name="Add backend category"
-        parent="menu_odoo_wizards"
-        action="category_add_backend_action"
-    />
-
 </odoo>
