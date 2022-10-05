@@ -103,10 +103,22 @@
         <field name="view_mode">tree,form</field>
     </record>
 
+    <record id="action_openerp_picking_type_mappings" model="ir.actions.act_window">
+        <field name="name">OpenERP Picking type mapping</field>
+        <field name="res_model">openerp.picking.type</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
     <!-- TODO: Implement security strategy groups="odoo_base.group_oc_manager" -->
     <menuitem
         id="menu_odoo_external_objects"
         name="External Objects"
+        parent="connector_odoo.menu_odoo_root"
+    />
+
+    <menuitem
+        id="menu_odoo_mappings"
+        name="External mappings"
         parent="connector_odoo.menu_odoo_root"
     />
 
@@ -222,5 +234,12 @@
         name="External Location"
         parent="menu_odoo_external_objects"
         action="action_odoo_location"
+    />
+
+    <menuitem
+        id="menu_openerp_picking_type_mappings"
+        name="OpenERP Picking type mapping"
+        parent="menu_odoo_mappings"
+        action="action_openerp_picking_type_mappings"
     />
 </odoo>

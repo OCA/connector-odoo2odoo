@@ -23,3 +23,4 @@ from . import ir_translation
 from . import purchase_order
 from . import stock_warehouse
 from . import stock_location
+from . import mapping_models

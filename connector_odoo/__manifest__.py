@@ -42,6 +42,7 @@
         "views/purchase_order.xml",
         "views/stock_warehouse.xml",
         "views/stock_location.xml",
+        "views/openerp_picking_type.xml",
         "wizards/import_external_id.xml",
         "wizards/wizards_menu.xml",
     ],
