@@ -33,7 +33,7 @@ class OdooResPartnerAddressReferences(models.Model):
     external_parent_partner_id = fields.Integer()
 
     def resync(self):
-        if self.backend_id.partner_main_record == "odoo":
+        if self.backend_id.main_record == "odoo":
             raise NotImplementedError
         else:
             return self.with_delay().import_address(
