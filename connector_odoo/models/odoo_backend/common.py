@@ -429,9 +429,12 @@ class OdooBackend(models.Model):
         next_time = fields.Datetime.to_string(next_time)
         self.write({from_date_field: next_time})
 
-    def import_external_id(self, model, external_id, force):
+    def import_external_id(self, model, external_id, force, inmediate=False):
+        model = self.env[model]
+        if not inmediate:
+            model = model.with_delay()
         for backend in self:
-            self.env[model].with_delay().import_record(backend, external_id, force)
+            model.import_record(backend, external_id, force)
 
     def export_product_categories(self):
         if not self.default_export_product:
