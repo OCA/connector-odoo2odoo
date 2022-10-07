@@ -334,6 +334,7 @@
                   <group string="General">
                     <field name="main_record" />
                     <field name="read_operation_from" />
+                    <field name="delayed_import_lines" />
                 </group>
                 <group string="Purchases">
                     <group>
@@ -361,12 +362,6 @@
                     </div>
 
                       </group>
-                      <group>
-                        <field
-                                        name="delayed_import_lines"
-                                        attrs="{'invisible': [('default_import_purchase_order', '!=', True)]}"
-                                    />
-                      </group>
                 </group>
                 <group string="Stock" name="stock">
                     <group>
@@ -393,6 +388,18 @@
                                         />
                         </div>
 
+                        <div
+                                        attrs="{'invisible': [('default_import_stock', '!=', True)]}"
+                                    >
+                            <button
+                                            name="import_pickings"
+                                            type="object"
+                                            string="Import Pickings"
+                                            class="oe_highlight oe_inline"
+                                            nolabel="1"
+                                        />
+                        </div>
+
                     </group>
                 </group>
               </page>
@@ -412,7 +419,7 @@
         id="menu_odoo_root"
         name="Odoo"
         parent="connector.menu_connector_root"
-        sequence="5"
+        sequence="1"
     />
     <!-- TODO: Implement security strategy groups="odoo_base.group_oc_manager" -->
     <menuitem
@@ -420,6 +427,7 @@
         name="Backends"
         parent="menu_odoo_root"
         action="action_odoo_backend"
+        sequence="1"
     />
 
 </odoo>

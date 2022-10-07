@@ -37,7 +37,7 @@ class OdooSaleOrder(models.Model):
         return result
 
     def resync(self):
-        if self.backend_id.main_record == "odoo":
+        if self.backend_id.read_operation_from == "odoo":
             return self.with_delay().export_record(self.backend_id)
         else:
             return self.with_delay().import_record(

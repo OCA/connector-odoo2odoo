@@ -8,6 +8,8 @@
         <tree>
           <field name="warehouse_id" />
           <field name="type" />
+          <field name="origin_location_usage" />
+          <field name="dest_location_usage" />
           <field name="picking_type_id" />
         </tree>
       </field>
@@ -21,11 +23,14 @@
           <sheet>
             <div class="oe_title">
               <h1>
-                <field name="type" placeholder="incoming" />
+                <label for="type" />
+                <field name="type" placeholder="in" />
               </h1>
             </div>
             <group>
                 <field name="warehouse_id" />
+                <field name="origin_location_usage" />
+                <field name="dest_location_usage" />
                 <field name="picking_type_id" />
             </group>
           </sheet>

@@ -62,10 +62,18 @@ class StockLocationImportMapper(Component):
     ]
 
     @mapping
+    def usage(self, record):
+        usage = record.usage
+        if usage == "external":
+            usage = "internal"
+        return {"usage": usage}
+
+    @mapping
     def odoo_id(self, record):
         odoo_id = False
         binder = self.binder_for("odoo.stock.location")
         location_id = binder.to_internal(record.id, unwrap=True)
+        parent_location_id = False
         if location_id:
             odoo_id = location_id.id
         else:
@@ -75,12 +83,16 @@ class StockLocationImportMapper(Component):
                 )
             location_id = self.env["stock.location"].search(
                 [
-                    ("name", "=", record.location_id.name),
-                    ("location_id", "=", parent_location_id.id),
+                    ("name", "=", record.name),
+                    (
+                        "location_id",
+                        "=",
+                        parent_location_id.id if parent_location_id else False,
+                    ),
                 ]
             )
             if location_id:
-                odoo_id = location_id.id
+                odoo_id = location_id[0].id
         return {"odoo_id": odoo_id}
 
     @mapping

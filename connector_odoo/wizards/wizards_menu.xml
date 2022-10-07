@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
-    <menuitem id="menu_odoo_wizards" name="Wizards" parent="menu_odoo_root" />
+    <menuitem
+        id="menu_odoo_wizards"
+        name="Wizards"
+        parent="menu_odoo_root"
+        sequence="5"
+    />
 
     <menuitem
         id="menu_import_external_id"

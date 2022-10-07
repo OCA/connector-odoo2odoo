@@ -403,6 +403,12 @@ class OdooBackend(models.Model):
         self._import_from_date("odoo.stock.location", "import_stock_from_date")
         return True
 
+    def import_pickings(self):
+        if not self.default_import_stock:
+            return False
+        self._import_from_date("odoo.stock.picking", "import_stock_from_date")
+        return True
+
     def _import_from_date(self, model, from_date_field):
         import_start_time = datetime.now()
         filters = [("write_date", "<", fields.Datetime.to_string(import_start_time))]

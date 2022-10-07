@@ -55,10 +55,17 @@ class StockWarehouseImporter(Component):
         self._import_dependency(output_location_id, "odoo.stock.location", force=force)
 
         if self.backend_record.version == "6.1":
-            pack_location_id = record.lot_reception_id.id
+            pack_location_id = (
+                record.lot_reception_id.id if record.lot_reception_id else False
+            )
         else:
-            pack_location_id = record.wh_pack_stock_loc_id.id
-        self._import_dependency(pack_location_id, "odoo.stock.location", force=force)
+            pack_location_id = (
+                record.wh_pack_stock_loc_id.id if record.wh_pack_stock_loc_id else False
+            )
+        if pack_location_id:
+            self._import_dependency(
+                pack_location_id, "odoo.stock.location", force=force
+            )
         lot_stock_id = record.lot_stock_id.id
         self._import_dependency(lot_stock_id, "odoo.stock.location", force=force)
 
@@ -133,14 +140,16 @@ class WarehouseMapper(Component):
     @mapping
     def wh_pack_stock_loc_id(self, record):
         binder = self.binder_for("odoo.stock.location")
+        location_id = False
         if self.backend_record.version == "6.1":
-            location_id = binder.to_internal(record.lot_reception_id.id)
+            if record.lot_reception_id:
+                location_id = binder.to_internal(record.lot_reception_id.id)
         else:
-            location_id = binder.to_internal(record.wh_pack_stock_loc_id.id)
-        if location_id:
-            return {"wh_pack_stock_loc_id": location_id.odoo_id.id}
-        else:
-            return {}
+            if record.wh_pack_stock_loc_id:
+                location_id = binder.to_internal(record.wh_pack_stock_loc_id.id)
+        return {
+            "wh_pack_stock_loc_id": location_id.odoo_id.id if location_id else False
+        }
 
     @mapping
     def lot_stock_id(self, record):

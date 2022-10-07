@@ -80,10 +80,11 @@ class PurchaseOrderImporter(Component):
                 delayed_line_id = purchase_order_line_model.import_record(
                     self.backend_record, line_id.id, force=True
                 )
-                delayed_line_id = self.env["queue.job"].search(
-                    [("uuid", "=", delayed_line_id.uuid)]
-                )
-                delayed_line_ids.append(delayed_line_id.id)
+                if self.backend_record.delayed_import_lines:
+                    delayed_line_id = self.env["queue.job"].search(
+                        [("uuid", "=", delayed_line_id.uuid)]
+                    )
+                    delayed_line_ids.append(delayed_line_id.id)
             if self.backend_record.delayed_import_lines:
                 binding.queue_job_ids = [
                     (6, 0, (delayed_line_ids + binding.queue_job_ids.ids))
@@ -171,10 +172,6 @@ class PurchaseOrderLineBatchImporter(Component):
     _name = "odoo.purchase.order.line.batch.importer"
     _inherit = "odoo.delayed.batch.importer"
     _apply_on = ["odoo.purchase.order.item"]
-
-    def _import_record(self, external_id, job_options=None, force=False):
-        """Delay a job for the import"""
-        return super()._import_record(external_id, job_options=job_options, force=force)
 
     def run(self, filters=None, force=False):
         """Run the synchronization"""
