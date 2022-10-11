@@ -78,7 +78,7 @@ class PurchaseOrderImporter(Component):
                 if self.backend_record.delayed_import_lines:
                     purchase_order_line_model = purchase_order_line_model.with_delay()
                 delayed_line_id = purchase_order_line_model.import_record(
-                    self.backend_record, line_id.id, force=True
+                    self.backend_record, line_id.id, force
                 )
                 if self.backend_record.delayed_import_lines:
                     delayed_line_id = self.env["queue.job"].search(
@@ -89,6 +89,10 @@ class PurchaseOrderImporter(Component):
                 binding.queue_job_ids = [
                     (6, 0, (delayed_line_ids + binding.queue_job_ids.ids))
                 ]
+            else:
+                self.env["odoo.stock.picking"].with_delay().import_batch(
+                    self.backend_record, [("purchase_id", "=", self.odoo_record.id)]
+                )
         return res
 
 
@@ -211,19 +215,10 @@ class PurchaseOrderLineImporter(Component):
                 lambda x: x.state != "done" and x.args[1] != self.odoo_record.id
             )
             if not pending and binding.order_id.bind_ids:
-                change_job_id = (
-                    binding.order_id.bind_ids.filtered(
-                        lambda x: x.backend_id.id == self.backend_record.id
-                    )
-                    .with_delay()
-                    .change_state()
+                self.env["odoo.stock.picking"].with_delay().import_batch(
+                    self.backend_record,
+                    [("purchase_id", "=", self.odoo_record.order_id.id)],
                 )
-                job_id = self.env["queue.job"].search(
-                    [("uuid", "=", change_job_id.uuid)]
-                )
-                binding.order_id.queue_job_ids = [
-                    (6, 0, binding.order_id.queue_job_ids.ids + [job_id.id])
-                ]
         return res
 
 

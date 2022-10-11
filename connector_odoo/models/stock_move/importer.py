@@ -60,19 +60,13 @@ class StockMoveImporter(Component):
                 lambda x: x.state != "done" and x.args[1] != self.odoo_record.id
             )
             if not pending and binding.picking_id.bind_ids:
-                change_job_id = (
-                    binding.picking_id.bind_ids.filtered(
-                        lambda x: x.backend_id.id == self.backend_record.id
-                    )
-                    .with_delay()
-                    .change_state()
-                )
-                job_id = self.env["queue.job"].search(
-                    [("uuid", "=", change_job_id.uuid)]
-                )
-                binding.picking_id.queue_job_ids = [
-                    (6, 0, binding.picking_id.queue_job_ids.ids + [job_id.id])
-                ]
+                if (
+                    binding.picking_id.purchase_id
+                    and binding.picking_id.purchase_id.bind_ids
+                    and binding.picking_id.purchase_id.bind_ids[0].backend_state
+                    == "done"
+                ):
+                    binding.picking_id.purchase_id.button_confirm()
         return res
 
 
@@ -119,4 +113,13 @@ class StockMoveImportMapper(Component):
         binder = self.binder_for("odoo.uom.uom")
         return {
             "product_uom": binder.to_internal(record.product_uom.id, unwrap=True).id
+        }
+
+    @mapping
+    def purchase_line_id(self, record):
+        binder = self.binder_for("odoo.purchase.order.line")
+        return {
+            "purchase_line_id": binder.to_internal(
+                record.purchase_line_id.id, unwrap=True
+            ).id
         }

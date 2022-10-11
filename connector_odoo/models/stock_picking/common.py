@@ -59,11 +59,6 @@ class OdooStockPicking(models.Model):
                 self.backend_id, self.external_id, force=True
             )
 
-    def set_destination_pending_pickings(
-        self,
-    ):
-        pass
-
 
 class StockPicking(models.Model):
     _inherit = "stock.picking"

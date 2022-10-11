@@ -81,9 +81,13 @@ class StockLocationImportMapper(Component):
                 parent_location_id = binder.to_internal(
                     record.location_id.id, unwrap=True
                 )
+            warehouse_id = (
+                location_id.warehouse_id.id if location_id.warehouse_id else False
+            )
             location_id = self.env["stock.location"].search(
                 [
                     ("name", "=", record.name),
+                    ("warehouse_id", "=", warehouse_id),
                     (
                         "location_id",
                         "=",

@@ -82,6 +82,14 @@ class StockPickingImporter(Component):
                 binding.queue_job_ids = [
                     (6, 0, (delayed_line_ids + binding.queue_job_ids.ids))
                 ]
+        if (
+            not self.backend_record.delayed_import_lines
+            and self.odoo_record["purchase_id"]
+        ):
+            binder = self.binder_for("odoo.purchase.order")
+            purchase_id = binder.to_internal(self.odoo_record["purchase_id"].id)
+            if purchase_id.backend_state == "done":
+                purchase_id.odoo_id.button_confirm()
         return res
 
 
