@@ -35,6 +35,12 @@ class StockMoveImporter(Component):
     _inherit = "odoo.importer"
     _apply_on = ["odoo.stock.move"]
 
+    def _must_skip(self):
+        binding = self._get_binding()
+        if binding and binding.state in ["done", "cancel"]:
+            return True
+        return super()._must_skip()
+
     def _import_dependencies(self, force):
         """Import the dependencies for the record"""
         self._import_dependency(
@@ -55,18 +61,34 @@ class StockMoveImporter(Component):
 
     def _after_import(self, binding, force=False):
         res = super()._after_import(binding, force)
-        if binding.picking_id.queue_job_ids:
+        if self.backend_record.delayed_import_lines:
             pending = binding.picking_id.queue_job_ids.filtered(
                 lambda x: x.state != "done" and x.args[1] != self.odoo_record.id
             )
-            if not pending and binding.picking_id.bind_ids:
-                if (
-                    binding.picking_id.purchase_id
-                    and binding.picking_id.purchase_id.bind_ids
-                    and binding.picking_id.purchase_id.bind_ids[0].backend_state
-                    == "done"
-                ):
-                    binding.picking_id.purchase_id.button_confirm()
+            # The last stock move of the last picking of purchase
+            if (
+                not pending
+                and binding.picking_id.purchase_id
+                and binding.picking_id.purchase_id.bind_ids
+                and binding.picking_id.purchase_id.bind_ids[0].backend_picking_count
+                == len(binding.picking_id.purchase_id.picking_ids)
+            ):
+                purchase_binding = self.env["odoo.purchase.order"].search(
+                    [
+                        ("odoo_id", "=", binding.picking_id.purchase_id.id),
+                        ("backend_id", "=", self.backend_record.id),
+                    ]
+                )
+                purchase_binding.with_delay()._set_state()
+            # The last stock move of the last picking of picking
+            elif not pending:
+                picking_binding = self.env["odoo.stock.picking"].search(
+                    [
+                        ("odoo_id", "=", binding.picking_id.id),
+                        ("backend_id", "=", self.backend_record.id),
+                    ]
+                )
+                picking_binding.with_delay()._set_state()
         return res
 
 
@@ -117,9 +139,10 @@ class StockMoveImportMapper(Component):
 
     @mapping
     def purchase_line_id(self, record):
-        binder = self.binder_for("odoo.purchase.order.line")
-        return {
-            "purchase_line_id": binder.to_internal(
-                record.purchase_line_id.id, unwrap=True
-            ).id
-        }
+        if record.purchase_line_id:
+            binder = self.binder_for("odoo.purchase.order.line")
+            return {
+                "purchase_line_id": binder.to_internal(
+                    record.purchase_line_id.id, unwrap=True
+                ).id
+            }

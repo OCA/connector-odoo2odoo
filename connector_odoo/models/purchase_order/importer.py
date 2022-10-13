@@ -90,9 +90,10 @@ class PurchaseOrderImporter(Component):
                     (6, 0, (delayed_line_ids + binding.queue_job_ids.ids))
                 ]
             else:
-                self.env["odoo.stock.picking"].with_delay().import_batch(
+                self.env["odoo.stock.picking"].import_batch(
                     self.backend_record, [("purchase_id", "=", self.odoo_record.id)]
                 )
+                binding.with_delay()._set_state()
         return res
 
 
@@ -106,6 +107,7 @@ class PurchaseOrderImportMapper(Component):
         ("partner_ref", "partner_ref"),
         ("origin", "origin"),
         ("date_order", "date_order"),
+        ("state", "backend_state"),
     ]
 
     @mapping
@@ -115,6 +117,10 @@ class PurchaseOrderImportMapper(Component):
     @mapping
     def backend_amount_tax(self, record):
         return {"backend_amount_tax": record.amount_tax}
+
+    @mapping
+    def backend_picking_count(self, record):
+        return {"backend_picking_count": len(record.picking_ids)}
 
     @only_create
     @mapping
@@ -210,11 +216,16 @@ class PurchaseOrderLineImporter(Component):
 
     def _after_import(self, binding, force=False):
         res = super()._after_import(binding, force)
-        if binding.order_id.queue_job_ids:
+        if self.backend_record.delayed_import_lines:
             pending = binding.order_id.queue_job_ids.filtered(
                 lambda x: x.state != "done" and x.args[1] != self.odoo_record.id
             )
-            if not pending and binding.order_id.bind_ids:
+            if not pending:
+                binding = self.env["odoo.purchase.order"].search(
+                    [("odoo_id", "=", binding.order_id.id)]
+                )
+                if not binding.backend_picking_count:
+                    binding.with_delay()._set_state()
                 self.env["odoo.stock.picking"].with_delay().import_batch(
                     self.backend_record,
                     [("purchase_id", "=", self.odoo_record.order_id.id)],

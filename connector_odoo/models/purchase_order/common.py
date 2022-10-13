@@ -20,6 +20,7 @@ class OdooPurchaseOrder(models.Model):
     backend_amount_total = fields.Float()
     backend_amount_tax = fields.Float()
     backend_state = fields.Char()
+    backend_picking_count = fields.Integer()
 
     def _compute_import_state(self):
         for order_id in self:
@@ -33,8 +34,12 @@ class OdooPurchaseOrder(models.Model):
                 order_id.import_state = "waiting"
             elif error:
                 order_id.import_state = "error_sync"
-            elif order_id.backend_amount_total != order_id.amount_total:
+            elif round(order_id.backend_amount_total, 2) != round(
+                order_id.amount_total, 2
+            ):
                 order_id.import_state = "error_amount"
+            elif order_id.backend_picking_count != len(order_id.picking_ids):
+                order_id.import_state = "error_sync"
             else:
                 order_id.import_state = "done"
 
@@ -77,6 +82,39 @@ class OdooPurchaseOrder(models.Model):
             job_id = self.env["queue.job"].search([("uuid", "=", job_info.uuid)])
             self.queue_job_ids = [(6, 0, [job_id.id])]
 
+    def _set_state(self):
+        _logger.info("Setting state for %s", self)
+        # All data was imported. Solve the state problem and all is done
+        self._set_pickings_state()
+        self._set_purchase_state()
+
+    def _set_pickings_state(self):
+        for picking_id in self.picking_ids:
+            binding_picking = self.env["odoo.stock.picking"].search(
+                [("odoo_id", "=", picking_id.id)]
+            )
+            binding_picking.with_delay()._set_state()
+
+    def _set_purchase_state(self):
+        if self.backend_state == self.odoo_id.state:
+            return
+
+        if self.backend_state == "waiting":
+            self.odoo_id.button_confirm()
+        elif self.backend_state == "confirmed":
+            self.odoo_id.button_confirm()
+        elif self.backend_state == "approved":
+            self.odoo_id.button_confirm()
+        elif self.backend_state == "done":
+            self.odoo_id.button_confirm()
+        elif "except" in self.backend_state:
+            self.odoo_id.button_done()
+        elif self.backend_state == "cancel":
+            if not self.odoo_id.picking_ids.filtered(lambda x: x.state == "done"):
+                self.odoo_id.button_cancel()
+            else:
+                self.odoo_id.button_done()
+
 
 class PurchaseOrder(models.Model):
     _inherit = "purchase.order"
@@ -95,6 +133,11 @@ class PurchaseOrder(models.Model):
         res = super(PurchaseOrder, self).button_confirm()
         self._event("on_purchase_order_confirm").notify(self)
         return res
+
+    def button_unlock(self):
+        for order_id in self:
+            order_id.ignore_exception = True
+        return super().button_unlock()
 
 
 class PurchaseOrderAdapter(Component):

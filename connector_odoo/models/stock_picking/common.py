@@ -3,7 +3,8 @@
 
 import logging
 
-from odoo import fields, models
+from odoo import _, fields, models
+from odoo.exceptions import ValidationError
 
 from odoo.addons.component.core import Component
 
@@ -18,6 +19,8 @@ class OdooStockPicking(models.Model):
     _inherits = {"stock.picking": "odoo_id"}
     _description = "Odoo Picking"
 
+    backend_state = fields.Char()
+
     _sql_constraints = [
         (
             "external_id",
@@ -27,19 +30,21 @@ class OdooStockPicking(models.Model):
     ]
 
     def _compute_import_state(self):
-        for move_id in self:
+        for picking_id in self:
             waiting = len(
-                move_id.queue_job_ids.filtered(
+                picking_id.queue_job_ids.filtered(
                     lambda j: j.state in ("pending", "enqueued", "started")
                 )
             )
-            error = len(move_id.queue_job_ids.filtered(lambda j: j.state == "failed"))
+            error = len(
+                picking_id.queue_job_ids.filtered(lambda j: j.state == "failed")
+            )
             if waiting:
-                move_id.import_state = "waiting"
+                picking_id.import_state = "waiting"
             elif error:
-                move_id.import_state = "error_sync"
+                picking_id.import_state = "error_sync"
             else:
-                move_id.import_state = "done"
+                picking_id.import_state = "done"
 
     import_state = fields.Selection(
         [
@@ -58,6 +63,35 @@ class OdooStockPicking(models.Model):
             return self.with_delay().import_record(
                 self.backend_id, self.external_id, force=True
             )
+
+    def _set_state(self):
+        STATE_ERROR = ValidationError(
+            _('Can not set state to "{}" for picking "{}"').format(
+                self.backend_state, self.name
+            )
+        )
+        if self.backend_state == self.odoo_id.state:
+            return
+
+        if self.backend_state == "done":
+            if self.state != "assigned":
+                self.odoo_id.action_confirm()
+            if self.state != "assigned":
+                raise STATE_ERROR
+            else:
+                for move_id in self.move_lines:
+                    move_id.quantity_done = move_id.product_uom_qty
+                self.odoo_id.button_validate()
+                if self.state != "done":
+                    raise STATE_ERROR
+        elif self.backend_state == "auto":
+            self.odoo_id.action_confirm()
+        elif self.backend_state == "cancel":
+            self.odoo_id.action_cancel()
+        elif self.backend_state == "confirmed":
+            self.odoo_id.action_confirm()
+        elif self.backend_state == "approved":
+            self.odoo_id.action_approve()
 
 
 class StockPicking(models.Model):

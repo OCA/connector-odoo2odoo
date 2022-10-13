@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<odoo noupdate="1">
+<odoo noupdate="0">
 
     <record id="excep_purchase_order_wrong_total_amount" model="exception.rule">
         <field name="name">Total Amount differs from Backend</field>
@@ -16,7 +16,7 @@ Check your taxes and fiscal positions configuration and correct them if necessar
         <field name="model">purchase.order</field>
         <field
             name="code"
-        >if self.bind_ids and abs(self.amount_total - self.bind_ids[0].backend_amount_total) >= 0.001:
+        >if self.state not in ('done', 'cancel') and self.bind_ids and abs(self.amount_total - self.bind_ids[0].backend_amount_total) >= 0.001:
     failed = True</field>
         <field name="active" eval="True" />
     </record>
@@ -37,7 +37,7 @@ Check your taxes and fiscal positions configuration and correct them if necessar
         <field
             name="code"
         ># By default, a cent of difference for the tax amount is allowed, feel free to customise it in your own module
-if self.bind_ids:
+if self.state not in ('done', 'cancel') and self.bind_ids:
     ps_amount = self.bind_ids[0].backend_amount_tax
     odoo_amount = self.amount_tax
     if (ps_amount == 0.0 and odoo_amount != 0.0) or (ps_amount and abs(1 - odoo_amount / ps_amount) > 0.02):

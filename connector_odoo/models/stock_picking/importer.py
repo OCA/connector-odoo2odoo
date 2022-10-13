@@ -44,7 +44,13 @@ class StockPickingImporter(Component):
     ):
         if self.backend_record.version != "6.1":
             raise ValidationError(_("Only OpenERP 6.1 is supported"))
-        return len(self.odoo_record["move_lines"]) <= 0
+        have_lines = len(self.odoo_record["move_lines"]) > 0
+        if not have_lines:
+            return True
+        binding = self._get_binding()
+        if binding and binding.state in ["done", "cancel"]:
+            return True
+        return False
 
     def _import_dependencies(self, force=False):
         """Import the dependencies for the record"""
@@ -82,14 +88,8 @@ class StockPickingImporter(Component):
                 binding.queue_job_ids = [
                     (6, 0, (delayed_line_ids + binding.queue_job_ids.ids))
                 ]
-        if (
-            not self.backend_record.delayed_import_lines
-            and self.odoo_record["purchase_id"]
-        ):
-            binder = self.binder_for("odoo.purchase.order")
-            purchase_id = binder.to_internal(self.odoo_record["purchase_id"].id)
-            if purchase_id.backend_state == "done":
-                purchase_id.odoo_id.button_confirm()
+            else:
+                self.with_delay()._set_state()
         return res
 
 
@@ -98,13 +98,13 @@ class OdooPickingMapper(Component):
     _inherit = "odoo.import.mapper"
     _apply_on = "odoo.stock.picking"
 
-    direct = [
-        ("name", "name"),
-        ("origin", "origin"),
-    ]
+    direct = [("name", "name"), ("origin", "origin"), ("state", "backend_state")]
 
     @mapping
     def picking_type_id(self, record):
+        picking_binder = self.binder_for("odoo.stock.picking").to_internal(record["id"])
+        if picking_binder:
+            return {}
         if len(record["move_lines"]) <= 0:
             return {}
         for move in record["move_lines"]:
@@ -165,6 +165,7 @@ class OdooPickingMapper(Component):
 
     @mapping
     def partner_id(self, record):
-        binder = self.binder_for("odoo.res.partner")
-        partner_id = binder.to_internal(record["partner_id"].id, unwrap=True)
-        return {"partner_id": partner_id.id if partner_id else False}
+        if record["partner_id"]:
+            binder = self.binder_for("odoo.res.partner")
+            partner_id = binder.to_internal(record["partner_id"].id, unwrap=True)
+            return {"partner_id": partner_id.id if partner_id else False}
