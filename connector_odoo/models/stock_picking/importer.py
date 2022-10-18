@@ -89,8 +89,37 @@ class StockPickingImporter(Component):
                     (6, 0, (delayed_line_ids + binding.queue_job_ids.ids))
                 ]
             else:
-                self.with_delay()._set_state()
+                binding.with_delay()._set_state()
         return res
+
+    def _get_binding_odoo_id_changed(self, binding):
+        if binding:
+            return binding
+        record = self.odoo_record
+        if record.sale_id and record.move_lines:
+            # If picking is created when changing state importing of sale order
+            binder = self.binder_for("odoo.sale.order")
+            sale_id = binder.to_internal(record.sale_id.id, unwrap=True)
+            move_id = False
+            for move in record.move_lines:
+                move_id = move
+                break
+            mapper = self.component(usage="import.mapper")
+            picking_type_id = mapper.get_picking_type_from_external_locations(
+                "picking", record, move_id.location_id, move_id.location_dest_id
+            )
+            existing_picking_id = sale_id.picking_ids.filtered(
+                lambda x: x.picking_type_id == picking_type_id
+            )
+            if existing_picking_id:
+                return self.env["odoo.stock.picking"].create(
+                    {
+                        "odoo_id": existing_picking_id.id,
+                        "backend_id": self.backend_record.id,
+                        "external_id": record.id,
+                    }
+                )
+        return binding
 
 
 class OdooPickingMapper(Component):
@@ -99,6 +128,31 @@ class OdooPickingMapper(Component):
     _apply_on = "odoo.stock.picking"
 
     direct = [("name", "name"), ("origin", "origin"), ("state", "backend_state")]
+
+    @mapping
+    def odoo_id(self, record):
+        if record.sale_id and record.move_lines:
+            binder = self.binder_for("odoo.stock.picking")
+            picking_id = binder.to_internal(record.id, unwrap=True)
+            if picking_id:
+                return {"odoo_id": picking_id.id}
+            else:
+                # If picking is created when changing state importing sale order
+                binder = self.binder_for("odoo.sale.order")
+                sale_id = binder.to_internal(record.sale_id.id, unwrap=True)
+                move_id = False
+                for move in record.move_lines:
+                    move_id = move
+                    break
+                picking_type_id = self.get_picking_type_from_external_locations(
+                    "picking", record, move_id.location_id, move_id.location_dest_id
+                )
+                existing_picking_id = sale_id.picking_ids.filtered(
+                    lambda x: x.picking_type_id == picking_type_id
+                )
+                if existing_picking_id:
+                    return {"odoo_id": existing_picking_id.id}
+        return {}
 
     def get_picking_type_from_external_locations(
         self, model_label, record, location_id, location_dest_id

@@ -247,8 +247,11 @@ class OdooBackend(models.Model):
     )
     default_import_purchase_order = fields.Boolean("Import purchase orders")
     import_purchase_order_from_date = fields.Datetime()
+    default_import_sale_order = fields.Boolean("Import Sale orders")
+    import_sale_order_from_date = fields.Datetime()
     delayed_import_lines = fields.Boolean(
-        help="Import lines after import order on delayed jobs"
+        help="Import lines after import header document "
+        "(sale, purchase or picking) on delayed jobs"
     )
 
     default_import_stock = fields.Boolean("Import Stock")
@@ -395,6 +398,12 @@ class OdooBackend(models.Model):
         if not self.default_import_product:
             return False
         self._import_from_date("odoo.purchase.order", "import_purchase_order_from_date")
+        return True
+
+    def import_sale_orders(self):
+        if not self.default_import_product:
+            return False
+        self._import_from_date("odoo.sale.order", "import_sale_order_from_date")
         return True
 
     def import_locations(self):

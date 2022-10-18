@@ -18,6 +18,11 @@ class OdooSaleOrder(models.Model):
     _inherits = {"sale.order": "odoo_id"}
     _description = "External Odoo Sale Order"
 
+    backend_amount_total = fields.Float()
+    backend_amount_tax = fields.Float()
+    backend_state = fields.Char()
+    backend_picking_count = fields.Integer()
+
     _sql_constraints = [
         (
             "external_id",
@@ -25,6 +30,38 @@ class OdooSaleOrder(models.Model):
             "External ID (external_id) must be unique!",
         ),
     ]
+
+    def _compute_import_state(self):
+        for order_id in self:
+            waiting = len(
+                order_id.queue_job_ids.filtered(
+                    lambda j: j.state in ("pending", "enqueued", "started")
+                )
+            )
+            error = len(order_id.queue_job_ids.filtered(lambda j: j.state == "failed"))
+            if waiting:
+                order_id.import_state = "waiting"
+            elif error:
+                order_id.import_state = "error_sync"
+            elif round(order_id.backend_amount_total, 2) != round(
+                order_id.amount_total, 2
+            ):
+                order_id.import_state = "error_amount"
+            elif order_id.backend_picking_count != len(order_id.picking_ids):
+                order_id.import_state = "error_sync"
+            else:
+                order_id.import_state = "done"
+
+    import_state = fields.Selection(
+        [
+            ("waiting", "Waiting"),
+            ("error_sync", "Sync Error"),
+            ("error_amount", "Amounts Error"),
+            ("done", "Done"),
+        ],
+        default="waiting",
+        compute=_compute_import_state,
+    )
 
     def name_get(self):
         result = []
@@ -44,6 +81,42 @@ class OdooSaleOrder(models.Model):
                 self.backend_id, self.external_id, force=True
             )
 
+    def _set_state(self):
+        _logger.info("Setting state for %s", self)
+        # All data was imported. Solve the state problem and all is done
+        self._set_pickings_state()
+        self._set_sale_state()
+
+    def _set_pickings_state(self):
+        for picking_id in self.picking_ids:
+            binding_picking = self.env["odoo.stock.picking"].search(
+                [("odoo_id", "=", picking_id.id)]
+            )
+            binding_picking.with_delay()._set_state()
+
+    def _set_sale_state(self):
+        if self.backend_state == self.odoo_id.state:
+            return
+
+        if self.backend_state == "done" and self.odoo_id.state == "sale":
+            return
+
+        if self.backend_state == "waiting":
+            self.odoo_id.action_confirm()
+        elif self.backend_state == "confirmed":
+            self.odoo_id.action_confirm()
+        elif self.backend_state == "approved":
+            self.odoo_id.action_confirm()
+        elif self.backend_state == "done":
+            self.odoo_id.action_confirm()
+        elif "except" in self.backend_state:
+            self.odoo_id.action_done()
+        elif self.backend_state == "cancel":
+            if not self.odoo_id.picking_ids.filtered(lambda x: x.state == "done"):
+                self.odoo_id.action_cancel()
+            else:
+                self.odoo_id.action_done()
+
 
 class SaleOrder(models.Model):
     _inherit = "sale.order"
@@ -52,6 +125,10 @@ class SaleOrder(models.Model):
         comodel_name="odoo.sale.order",
         inverse_name="odoo_id",
         string="Odoo Bindings",
+    )
+
+    queue_job_ids = fields.Many2many(
+        comodel_name="queue.job",
     )
 
     def action_confirm(self):
@@ -101,3 +178,10 @@ class SaleOrderLine(models.Model):
         inverse_name="odoo_id",
         string="Odoo Bindings",
     )
+
+
+class SaleOrderLineAdapter(Component):
+    _name = "odoo.sale.order.line.adapter"
+    _inherit = "odoo.adapter"
+    _apply_on = "odoo.sale.order.line"
+    _odoo_model = "sale.order.line"

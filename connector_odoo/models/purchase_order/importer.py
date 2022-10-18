@@ -224,7 +224,7 @@ class PurchaseOrderLineImporter(Component):
                 binding = self.env["odoo.purchase.order"].search(
                     [("odoo_id", "=", binding.order_id.id)]
                 )
-                if not binding.backend_picking_count:
+                if not len(binding.picking_ids):
                     binding.with_delay()._set_state()
                 self.env["odoo.stock.picking"].with_delay().import_batch(
                     self.backend_record,
@@ -245,7 +245,6 @@ class PurchaseOrderLineImportMapper(Component):
         ("product_qty", "product_qty"),
         ("date_planned", "date_planned"),
         ("display_type", "display_type"),
-        ("date_planned", "date_planned"),
     ]
 
     @mapping

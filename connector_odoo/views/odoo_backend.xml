@@ -347,7 +347,7 @@
                       <button
                                             name="import_purchase_orders"
                                             type="object"
-                                            string="Import Purchase Order"
+                                            string="Import Purchase Orders"
                                             class="oe_highlight oe_inline"
                                             nolabel="1"
                                         />
@@ -357,6 +357,33 @@
                                     >
                                     <field
                                             name="import_purchase_order_from_date"
+                                            nolabel="1"
+                                        />
+                    </div>
+
+                      </group>
+                </group>
+                <group string="Sales">
+                    <group>
+                        <field name="default_import_sale_order" />
+                      </group>
+                      <group>
+                        <div
+                                        attrs="{'invisible': [('default_import_sale_order', '!=', True)]}"
+                                    >
+                      <button
+                                            name="import_sale_orders"
+                                            type="object"
+                                            string="Import Sale Orders"
+                                            class="oe_highlight oe_inline"
+                                            nolabel="1"
+                                        />
+                    </div>
+                    <div
+                                        attrs="{'invisible': [('default_import_sale_order', '!=', True)]}"
+                                    >
+                                    <field
+                                            name="import_sale_order_from_date"
                                             nolabel="1"
                                         />
                     </div>

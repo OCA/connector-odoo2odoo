@@ -53,6 +53,7 @@ class ProductImportMapper(Component):
         ("description_sale", "description_sale"),
         ("sale_ok", "sale_ok"),
         ("purchase_ok", "purchase_ok"),
+        ("type", "detailed_type"),
     ]
 
     @only_create

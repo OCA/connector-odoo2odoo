@@ -23,10 +23,6 @@ class ProductPricelistBatchImporter(Component):
     _inherit = "odoo.delayed.batch.importer"
     _apply_on = ["odoo.product.pricelist"]
 
-    def _import_record(self, external_id, job_options=None, force=False):
-        """Delay a job for the import"""
-        return super()._import_record(external_id, job_options=job_options, force=force)
-
     def run(self, filters=None, force=False):
         """Run the synchronization"""
 
@@ -62,7 +58,6 @@ class ProductPricelistImportMapper(Component):
     direct = [
         ("active", "active"),
         ("code", "code"),
-        ("discount_policy", "discount_policy"),
         ("name", "name"),
         ("selectable", "selectable"),
         ("sequence", "sequence"),
@@ -78,6 +73,12 @@ class ProductPricelistImportMapper(Component):
         _logger.debug("found pricelist %s for record %s" % (pricelist.name, record))
         if len(pricelist) == 1:
             return {"odoo_id": pricelist.id}
+        return {}
+
+    @mapping
+    def discount_policy(self, record):
+        if hasattr(record, "discount_policy"):
+            return {"discount_policy": record.discount_policy}
         return {}
 
     @mapping

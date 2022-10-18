@@ -57,6 +57,7 @@ class ProductTemplateImportMapper(Component):
         ("description_purchase", "description_purchase"),
         ("sale_ok", "sale_ok"),
         ("purchase_ok", "purchase_ok"),
+        ("type", "detailed_type"),
     ]
 
     @mapping
