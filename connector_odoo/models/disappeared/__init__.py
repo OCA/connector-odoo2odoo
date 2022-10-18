@@ -1,1 +1,2 @@
-from .partner_address import common
+from . import partner_address
+from . import stock_inventory

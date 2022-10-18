@@ -261,4 +261,17 @@
         action="action_odoo_stock_picking"
     />
 
+    <record id="action_odoo_stock_inventory_disappeared" model="ir.actions.act_window">
+        <field name="name">Odoo Inventory</field>
+        <field name="res_model">odoo.stock.inventory.disappeared</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_stock_inventory_disappeared"
+        name="External Inventory"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_stock_inventory_disappeared"
+    />
+
 </odoo>

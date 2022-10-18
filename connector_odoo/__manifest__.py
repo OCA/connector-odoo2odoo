@@ -46,6 +46,7 @@
         "views/stock_location.xml",
         "views/openerp_picking_type.xml",
         "views/stock_picking.xml",
+        "views/stock_inventory.xml",
     ],
     "demo": [],
     "qweb": [],

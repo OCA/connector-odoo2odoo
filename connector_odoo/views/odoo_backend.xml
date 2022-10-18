@@ -371,6 +371,16 @@
                         <div
                                         attrs="{'invisible': [('default_import_stock', '!=', True)]}"
                                     >
+                                        <field
+                                            name="import_stock_from_date"
+                                            nolabel="1"
+                                        />
+                        </div>
+                    </group>
+                    <group>
+                        <div
+                                        attrs="{'invisible': [('default_import_stock', '!=', True)]}"
+                                    >
                             <button
                                             name="import_locations"
                                             type="object"
@@ -379,27 +389,28 @@
                                             nolabel="1"
                                         />
                         </div>
-                        <div
+                    </group>
+                    <group />
+                    <group>
+                        <button
+                                        name="import_pickings"
                                         attrs="{'invisible': [('default_import_stock', '!=', True)]}"
-                                    >
-                                        <field
-                                            name="import_stock_from_date"
-                                            nolabel="1"
-                                        />
-                        </div>
-
-                        <div
+                                        type="object"
+                                        string="Import Pickings"
+                                        class="oe_highlight oe_inline"
+                                        nolabel="1"
+                                    />
+                    </group>
+                    <group />
+                    <group>
+                        <button
+                                        name="import_stock_inventories"
+                                        type="object"
                                         attrs="{'invisible': [('default_import_stock', '!=', True)]}"
-                                    >
-                            <button
-                                            name="import_pickings"
-                                            type="object"
-                                            string="Import Pickings"
-                                            class="oe_highlight oe_inline"
-                                            nolabel="1"
-                                        />
-                        </div>
-
+                                        string="Import Inventory Adjustments"
+                                        class="oe_highlight oe_inline"
+                                        nolabel="1"
+                                    />
                     </group>
                 </group>
               </page>

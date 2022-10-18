@@ -73,22 +73,21 @@ class StockMoveImporter(Component):
                 and binding.picking_id.purchase_id.bind_ids[0].backend_picking_count
                 == len(binding.picking_id.purchase_id.picking_ids)
             ):
-                purchase_binding = self.env["odoo.purchase.order"].search(
-                    [
-                        ("odoo_id", "=", binding.picking_id.purchase_id.id),
-                        ("backend_id", "=", self.backend_record.id),
-                    ]
-                )
+                binder = self.binder_for("odoo.purchase.order")
+                purchase_binding = binder.to_internal(binding.picking_id.purchase_id.id)
                 purchase_binding.with_delay()._set_state()
             # The last stock move of the last picking of picking
             elif not pending:
-                picking_binding = self.env["odoo.stock.picking"].search(
-                    [
-                        ("odoo_id", "=", binding.picking_id.id),
-                        ("backend_id", "=", self.backend_record.id),
-                    ]
-                )
-                picking_binding.with_delay()._set_state()
+                binder = self.binder_for("odoo.stock.picking")
+                picking_binding = binder.to_internal(binding.picking_id.id)
+                if picking_binding:
+                    picking_binding.with_delay()._set_state()
+                else:
+                    inventory_binding = self.env[
+                        "odoo.stock.inventory.disappeared"
+                    ].search([("odoo_id", "=", binding.picking_id.id)])
+                    inventory_binding.with_delay()._set_inventory_state()
+
         return res
 
 
@@ -107,7 +106,12 @@ class StockMoveImportMapper(Component):
     @mapping
     def picking_id(self, record):
         binder = self.binder_for("odoo.stock.picking")
-        return {"picking_id": binder.to_internal(record.picking_id.id, unwrap=True).id}
+        if not record.picking_id:
+            picking = self.backend_record._context.get("picking_id")
+        else:
+            picking = binder.to_internal(record.picking_id.id, unwrap=True).id
+
+        return {"picking_id": picking}
 
     @mapping
     def product_id(self, record):

@@ -100,21 +100,14 @@ class OdooPickingMapper(Component):
 
     direct = [("name", "name"), ("origin", "origin"), ("state", "backend_state")]
 
-    @mapping
-    def picking_type_id(self, record):
-        picking_binder = self.binder_for("odoo.stock.picking").to_internal(record["id"])
-        if picking_binder:
-            return {}
-        if len(record["move_lines"]) <= 0:
-            return {}
-        for move in record["move_lines"]:
-            move_id = move
-            break
+    def get_picking_type_from_external_locations(
+        self, model_label, record, location_id, location_dest_id
+    ):
         binder = self.binder_for("odoo.stock.location")
-        location_id = binder.to_internal(move_id.location_id.id, unwrap=True)
+        location_id = binder.to_internal(location_id.id, unwrap=True)
         warehouse_id = location_id.warehouse_id
         if not warehouse_id:
-            location_id = binder.to_internal(move_id.location_dest_id.id, unwrap=True)
+            location_id = binder.to_internal(location_dest_id.id, unwrap=True)
             warehouse_id = location_id.warehouse_id
 
         picking_type_mapping_id = self.env["openerp.picking.type"].search(
@@ -127,26 +120,42 @@ class OdooPickingMapper(Component):
             raise ValidationError(
                 _(
                     "No picking type found for warehouse {}-{} "
-                    "and type {} from picking {}-{}. "
+                    "and type {} from {} {}-{}. "
                     "Please go to configuration connector picking type mapping "
                     "and include warehouse and type char field value"
                 ).format(
                     warehouse_id.id,
                     warehouse_id.name,
-                    record.type,
+                    record["type"],
+                    model_label,
                     record["id"],
                     record["name"],
                 )
             )
         if len(picking_type_mapping_id) != 1:
             picking_type_mapping_id = picking_type_mapping_id.filtered(
-                lambda x: x.origin_location_usage == move_id.location_id.usage
+                lambda x: x.origin_location_usage == location_id.usage
             )
             if len(picking_type_mapping_id) != 1:
                 picking_type_mapping_id = picking_type_mapping_id.filtered(
-                    lambda x: x.dest_location_usage == move_id.location_dest_id.usage
+                    lambda x: x.dest_location_usage == location_dest_id.usage
                 )
-        return {"picking_type_id": picking_type_mapping_id.picking_type_id.id}
+        return picking_type_mapping_id.picking_type_id
+
+    @mapping
+    def picking_type_id(self, record):
+        picking_binder = self.binder_for("odoo.stock.picking").to_internal(record["id"])
+        if picking_binder:
+            return {}
+        if len(record["move_lines"]) <= 0:
+            return {}
+        for move in record["move_lines"]:
+            move_id = move
+            break
+        picking_type_id = self.get_picking_type_from_external_locations(
+            "picking", record, move_id.location_id, move_id.location_dest_id
+        )
+        return {"picking_type_id": picking_type_id.id}
 
     @mapping
     def location_id(self, record):

@@ -20,6 +20,21 @@
                         </tree>
                     </field>
                 </group>
+                <group string="Odoo Bindings (Inventory Dissapeared)">
+                    <field
+                            name="bind_stock_inventory_dissapeared_ids"
+                            readonly="1"
+                            nolabel="1"
+                        >
+                    <tree>
+                        <field name="backend_id" />
+                        <field name="odoo_id" />
+                        <field name="external_id" />
+                        <field name="backend_state" />
+                        <button name="resync" type="object" string="Resync" />
+                    </tree>
+                </field>
+                </group>
             </page>
         </xpath>
       </field>
