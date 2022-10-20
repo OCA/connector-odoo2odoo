@@ -17,6 +17,7 @@
                 <field name="backend_amount_total" readonly="1" />
                 <field name="backend_amount_tax" readonly="1" />
                 <field name="backend_picking_count" readonly="1" />
+                <field name="backend_date_order" readonly="1" />
                 <field name="import_state" readonly="1" />
                 <button name="resync" type="object" string="Resync" />
             </tree>
@@ -47,6 +48,7 @@
                             <field name="backend_amount_total" readonly="1" />
                             <field name="backend_amount_tax" readonly="1" />
                             <field name="backend_picking_count" readonly="1" />
+                            <field name="backend_date_order" readonly="1" />
                             <field
                                 name="import_state"
                                 decoration-danger="import_state in ('error_sync', 'error_amount')"
@@ -83,6 +85,7 @@
                         <field name="backend_amount_total" readonly="1" />
                         <field name="backend_amount_tax" readonly="1" />
                         <field name="backend_picking_count" readonly="1" />
+                        <field name="backend_date_order" readonly="1" />
                         <field
                             name="import_state"
                             decoration-danger="import_state in ('error_sync', 'error_amount')"

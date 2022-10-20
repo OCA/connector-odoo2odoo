@@ -395,13 +395,13 @@ class OdooBackend(models.Model):
         return True
 
     def import_purchase_orders(self):
-        if not self.default_import_product:
+        if not self.default_import_purchase_order:
             return False
         self._import_from_date("odoo.purchase.order", "import_purchase_order_from_date")
         return True
 
     def import_sale_orders(self):
-        if not self.default_import_product:
+        if not self.default_import_sale_order:
             return False
         self._import_from_date("odoo.sale.order", "import_sale_order_from_date")
         return True

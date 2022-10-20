@@ -22,6 +22,7 @@ class OdooSaleOrder(models.Model):
     backend_amount_tax = fields.Float()
     backend_state = fields.Char()
     backend_picking_count = fields.Integer()
+    backend_date_order = fields.Datetime()
 
     _sql_constraints = [
         (
@@ -100,7 +101,6 @@ class OdooSaleOrder(models.Model):
 
         if self.backend_state == "done" and self.odoo_id.state == "sale":
             return
-
         if self.backend_state == "waiting":
             self.odoo_id.action_confirm()
         elif self.backend_state == "confirmed":
@@ -116,6 +116,7 @@ class OdooSaleOrder(models.Model):
                 self.odoo_id.action_cancel()
             else:
                 self.odoo_id.action_done()
+        self.date_order = self.backend_date_order
 
 
 class SaleOrder(models.Model):

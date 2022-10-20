@@ -106,7 +106,7 @@ class SaleOrderImportMapper(Component):
     _apply_on = "odoo.sale.order"
 
     direct = [
-        ("date_order", "date_order"),
+        ("date_order", "backend_date_order"),
         ("name", "name"),
         ("state", "backend_state"),
     ]
