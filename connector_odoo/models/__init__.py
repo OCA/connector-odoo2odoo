@@ -19,7 +19,6 @@ from . import uom_uom
 from . import account_account
 from . import sale_order
 from . import ir_attachment
-from . import ir_translation
 from . import purchase_order
 from . import stock_warehouse
 from . import stock_location

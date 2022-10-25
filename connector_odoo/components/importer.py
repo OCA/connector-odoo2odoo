@@ -188,35 +188,6 @@ class OdooImporter(AbstractComponent):
 
         Put here all processed that must be delayed with jobs
         """
-
-        self._enqueue_translations(binding)
-        return True
-
-    def _enqueue_translations(self, binding):
-        if (
-            self.model._name == "odoo.ir.translation"
-            or self.backend_record.ignore_translations
-        ):
-            return
-        translation_model = self.work.odoo_api.api.get("ir.translation")
-        translation_ids = translation_model.search(
-            [
-                ("name", "like", self.model._name.replace("odoo.", "")),
-                ("type", "=", "model"),
-                ("res_id", "=", self.odoo_record.id),
-            ],
-            order="id",
-        )
-        total = len(translation_ids)
-        _logger.info(
-            "{} Translation found for {} id {}".format(
-                total, self.model._name, self.odoo_record.id
-            )
-        )
-        for translation_id in translation_ids:
-            self.env["odoo.ir.translation"].with_delay().import_record(
-                self.backend_record, translation_id
-            )
         return True
 
     def _get_binding_odoo_id_changed(self, binding):

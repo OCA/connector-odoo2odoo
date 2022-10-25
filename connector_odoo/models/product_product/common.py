@@ -82,17 +82,6 @@ class ProductProduct(models.Model):
                 ).qty_available
         return res
 
-    def unlink(self):
-        """Clean translations unneeded."""
-        self.env["ir.translation"].search(
-            [
-                ("type", "=", "model"),
-                ("name", "like", "product.product,%"),
-                ("res_id", "in", self.ids),
-            ]
-        ).unlink()
-        return super().unlink()
-
 
 class ProductProductAdapter(Component):
     _name = "odoo.product.product.adapter"

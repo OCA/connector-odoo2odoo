@@ -75,17 +75,6 @@ class ProductTemplate(models.Model):
         for record in self:
             record.product_bind_ids = record.product_variant_ids.mapped("bind_ids")
 
-    def unlink(self):
-        """Clean translations unneeded."""
-        self.env["ir.translation"].search(
-            [
-                ("type", "=", "model"),
-                ("name", "like", "product.template,%"),
-                ("res_id", "in", self.ids),
-            ]
-        ).unlink()
-        return super().unlink()
-
 
 class ProductTemplateAdapter(Component):
     _name = "odoo.product.template.adapter"

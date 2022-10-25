@@ -211,33 +211,3 @@ class ProductImporter(Component):
                 self.backend_record, attachment_id
             )
         return super()._after_import(binding, force)
-
-    def _enqueue_translations(self, binding):
-        if (
-            self.model._name == "odoo.ir.translation"
-            or self.backend_record.ignore_translations
-        ):
-            return
-        super()._enqueue_translations(binding)
-        translation_model = self.work.odoo_api.api.get("ir.translation")
-
-        # Enqueue product.template specific translations
-        translation_ids = translation_model.search(
-            [
-                ("name", "like", "product.template,"),
-                ("type", "=", "model"),
-                ("res_id", "=", self.odoo_record.product_tmpl_id.id),
-            ],
-            order="id",
-        )
-        total = len(translation_ids)
-        _logger.info(
-            "{} Specific Template Translation found for {} id {}".format(
-                total, self.model._name, self.odoo_record.product_tmpl_id.id
-            )
-        )
-        for translation_id in translation_ids:
-            self.env["odoo.ir.translation"].with_delay().import_record(
-                self.backend_record, translation_id
-            )
-        return True
