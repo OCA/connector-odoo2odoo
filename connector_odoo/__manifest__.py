@@ -6,7 +6,7 @@
     "summary": """
         Base connector for Odoo To Odoo scenarios""",
     "version": "15.0.1.0.0",
-    "website": "https://github.com/OCA/l10n-spain",
+    "website": "https://github.com/OCA/connector-odoo2odoo",
     "category": "Connector",
     "license": "AGPL-3",
     "author": "Florent THOMAS (Mind And Go), Odoo Community Association (OCA)",
