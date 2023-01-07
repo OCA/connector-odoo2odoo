@@ -19,7 +19,7 @@
         "connector",
         "connector_base_product",
         "sale",
-        "purchase"
+        "purchase",
     ],
     "data": [
         "data/cron.xml",
@@ -33,6 +33,7 @@
         "views/product_category.xml",
         "views/product.xml",
         "views/product_template.xml",
+        "views/product_attribute_value.xml",
         "views/partner.xml",
         "views/partner_category.xml",
         "views/users.xml",
