@@ -10,7 +10,7 @@
             </xpath>
             <xpath expr="//notebook/page[@name='connector']" position="inside">
                 <group string="Odoo Bindings">
-                    <field name="bind_ids" readonly="1" nolabel="1" />
+                    <field name="bind_ids" readonly="1" nolabel="1" colspan="2"/>
                 </group>
             </xpath>
             <xpath expr="//notebook/page[@name='connector']" position="inside">
@@ -19,6 +19,7 @@
                         name="bind_address_dissapeared_ids"
                         readonly="1"
                         nolabel="1"
+                        colspan="2"
                     />
                 </group>
             </xpath>
