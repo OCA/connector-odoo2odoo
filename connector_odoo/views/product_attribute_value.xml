@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="view_odoo_product_attribute_value_tree" model="ir.ui.view">
+      <field name="name">odoo.product.attribute</field>
+      <field name="model">odoo.product.attribute</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name" />
+          <field name="backend_id" />
+          <field name="odoo_id" />
+          <field name="external_id" />
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_odoo_product_attribute_value_form" model="ir.ui.view">
+      <field name="name">odoo.product.attribute.form</field>
+      <field name="model">odoo.product.attribute</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <div class="oe_title">
+              <h1>
+                <field name="name" placeholder="Name" readonly="1" />
+              </h1>
+            </div>
+            <group>
+              <field name="backend_id" />
+              <field name="odoo_id" />
+              <field name="external_id" />
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+</odoo>

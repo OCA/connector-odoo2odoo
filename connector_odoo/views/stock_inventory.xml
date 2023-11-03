@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="view_stock_inventory_tree" model="ir.ui.view">
+      <field name="name">odoo.stock.inventory.disappeared</field>
+      <field name="model">odoo.stock.inventory.disappeared</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name" />
+          <field name="backend_id" />
+          <field name="odoo_id" />
+          <field name="external_id" />
+          <field name="backend_state" />
+          <button name="resync" type="object" string="Resync" />
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_stock_inventory_form" model="ir.ui.view">
+      <field name="name">odoo.stock.inventory.disappeared.form</field>
+      <field name="model">odoo.stock.inventory.disappeared</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <div class="oe_title">
+              <h1>
+                <field name="name" placeholder="Name" readonly="1" />
+              </h1>
+            </div>
+            <group>
+              <field name="backend_id" />
+              <field name="odoo_id" />
+              <field name="external_id" />
+              <field name="backend_state" />
+              <button name="resync" type="object" string="Resync" />
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+</odoo>

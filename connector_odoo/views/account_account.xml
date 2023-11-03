@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_account_connector_form" model="ir.ui.view">
+        <field name="name">account.account.form</field>
+        <field name="model">account.account</field>
+        <field name="inherit_id" ref="account.view_account_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//notebook/page[@name='accounting']" position="after">
+                <page name="connector" string="Connector">
+                    <group string="Odoo Bindings">
+                        <field name="bind_ids" readonly="1" nolabel="1" />
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="odoo_account_account_tree_view" model="ir.ui.view">
+        <field name="name">odoo.account.account.tree</field>
+        <field name="model">odoo.account.account</field>
+
+        <field name="arch" type="xml">
+            <tree>
+                <field name="display_name" />
+                <field name="odoo_id" />
+                <field name="backend_id" />
+                <field name="external_id" />
+                <button name="resync" type="object" string="Resync" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="odoo_account_account_form_view" model="ir.ui.view">
+        <field name="name">odoo.account.account.form</field>
+        <field name="model">odoo.account.account</field>
+
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="resync" type="object" string="Resync" />
+                </header>
+                <sheet>
+
+                    <div class="oe_title">
+
+                        <h1>
+                            <field name="name" readonly="1" />
+                        </h1>
+                        <group>
+                            <field name="odoo_id" readonly="0" />
+                            <field name="backend_id" readonly="1" />
+                            <field name="external_id" readonly="0" />
+                        </group>
+                    </div>
+                </sheet>
+
+            </form>
+        </field>
+    </record>
+
+</odoo>
