@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="view_openerp_picking_type_tree" model="ir.ui.view">
+      <field name="name">openerp.picking.type</field>
+      <field name="model">openerp.picking.type</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="warehouse_id" />
+          <field name="type" />
+          <field name="origin_location_usage" />
+          <field name="dest_location_usage" />
+          <field name="picking_type_id" />
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_openerp_picking_type_form" model="ir.ui.view">
+      <field name="name">openerp.picking.type.form</field>
+      <field name="model">openerp.picking.type</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <div class="oe_title">
+              <h1>
+                <label for="type" />
+                <field name="type" placeholder="in" />
+              </h1>
+            </div>
+            <group>
+                <field name="warehouse_id" />
+                <field name="origin_location_usage" />
+                <field name="dest_location_usage" />
+                <field name="picking_type_id" />
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+</odoo>

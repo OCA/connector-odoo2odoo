@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="odoo_purchase_order_tree_view" model="ir.ui.view">
+        <field name="name">odoo.purchase.order.tree</field>
+        <field name="model">odoo.purchase.order</field>
+
+        <field name="arch" type="xml">
+            <tree
+                decoration-danger="import_state in ('error_sync', 'error_amount')"
+                decoration-warning="import_state == 'waiting'"
+            >
+                <field name="display_name" />
+                <field name="odoo_id" />
+                <field name="backend_id" />
+                <field name="external_id" />
+                <field name="backend_amount_total" readonly="1" />
+                <field name="backend_amount_tax" readonly="1" />
+                <field name="backend_picking_count" readonly="1" />
+                <field name="import_state" />
+                <button name="resync" type="object" string="Resync" />
+            </tree>
+        </field>
+    </record>
+
+
+    <record id="odoo_purchase_order_form_view" model="ir.ui.view">
+        <field name="name">odoo.purchase.order.form</field>
+        <field name="model">odoo.purchase.order</field>
+
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="resync" type="object" string="Resync" />
+                </header>
+                <sheet>
+
+                    <div class="oe_title">
+
+                        <h1>
+                            <field name="name" readonly="1" />
+                        </h1>
+                        <group>
+                            <field name="odoo_id" readonly="1" />
+                            <field name="backend_id" readonly="1" />
+                            <field name="external_id" readonly="1" />
+                            <field name="backend_amount_total" readonly="1" />
+                            <field name="backend_amount_tax" readonly="1" />
+                            <field name="backend_picking_count" readonly="1" />
+                            <field
+                                name="import_state"
+                                decoration-danger="import_state in ('error_sync', 'error_amount')"
+                                decoration-warning="import_state == 'waiting'"
+                            />
+                        </group>
+                    </div>
+                </sheet>
+
+            </form>
+        </field>
+    </record>
+
+    <record id="purchase_order_form" model="ir.ui.view">
+        <field name="name">purchase.order.form</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page name="connector" string="Connector">
+                    <group string="Odoo Bindings">
+                        <field name="bind_ids" readonly="1" nolabel="1">
+                            <tree
+                                decoration-danger="import_state in ('error_sync', 'error_amount')"
+                                decoration-warning="import_state == 'waiting'"
+                            >
+                                <field name="backend_id" />
+                                <field name="external_id" />
+                                <field name="backend_amount_total" readonly="1" />
+                                <field name="backend_amount_tax" readonly="1" />
+                                <field name="backend_picking_count" readonly="1" />
+                                <field name="import_state" />
+                                <button name="resync" type="object" string="Resync" />
+                            </tree>
+                        </field>
+                    </group>
+                    <group string="Delayed jobs">
+                        <field
+                            name="queue_job_ids"
+                            readonly="1"
+                            nolabel="1"
+                            attrs="{'invisible': [('queue_job_ids', '=', False)]}"
+                        >
+                            <tree>
+                                <field name="uuid" />
+                                <field name="state" />
+                                <field name="date_created" />
+                                <field name="date_started" />
+                                <field name="date_done" />
+                                <field name="exc_info" />
+                            </tree>
+                        </field>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

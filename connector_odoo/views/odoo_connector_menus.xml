@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <menuitem
+        id="menu_odoo_external_objects"
+        name="External Objects"
+        parent="connector_odoo.menu_odoo_root"
+    />
+
+    <menuitem
+        id="menu_odoo_mappings"
+        name="External mappings"
+        parent="connector_odoo.menu_odoo_root"
+    />
+
+    <record id="action_odoo_uom" model="ir.actions.act_window">
+        <field name="name">Odoo UOM</field>
+        <field name="res_model">odoo.uom.uom</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_external_uom"
+        name="External UOM"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_uom"
+    />
+
+    <record id="action_odoo_attributes" model="ir.actions.act_window">
+        <field name="name">Odoo Attributes</field>
+        <field name="res_model">odoo.product.attribute</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_external_attribute"
+        name="External Attributes"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_attributes"
+    />
+
+    <record id="action_odoo_values" model="ir.actions.act_window">
+        <field name="name">Odoo Attribute Values</field>
+        <field name="res_model">odoo.product.attribute.value</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_external_values"
+        name="External Attribute Values"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_values"
+    />
+
+    <record id="action_odoo_categories" model="ir.actions.act_window">
+        <field name="name">Odoo product Categories</field>
+        <field name="res_model">odoo.product.category</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_external_categories"
+        name="External Categories"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_categories"
+    />
+
+    <record id="action_odoo_partners" model="ir.actions.act_window">
+        <field name="name">Odoo Partners</field>
+        <field name="res_model">odoo.res.partner</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_external_partners"
+        name="External Partners"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_partners"
+    />
+
+    <record id="action_odoo_partners_address_disappeared" model="ir.actions.act_window">
+        <field name="name">Odoo Partners Address (Disappeared)</field>
+        <field name="res_model">odoo.res.partner.address.disappeared</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_external_partners_address"
+        name="External Partners Address (Disapeared)"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_partners_address_disappeared"
+    />
+
+    <record id="action_odoo_users" model="ir.actions.act_window">
+        <field name="name">Odoo Users</field>
+        <field name="res_model">odoo.res.users</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_external_users"
+        name="External Users"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_users"
+    />
+
+    <record id="action_odoo_res_partner_category" model="ir.actions.act_window">
+        <field name="name">Odoo Res Partner Category</field>
+        <field name="res_model">odoo.res.partner.category</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_external_res_partner_category"
+        name="External Partner Category"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_res_partner_category"
+    />
+
+
+    <record id="action_odoo_product_templates" model="ir.actions.act_window">
+        <field name="name">Odoo Product Templates</field>
+        <field name="res_model">odoo.product.template</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_external_product_templates"
+        name="External Product Templates"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_product_templates"
+    />
+
+    <record id="action_odoo_products" model="ir.actions.act_window">
+        <field name="name">Odoo Products</field>
+        <field name="res_model">odoo.product.product</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_external_products"
+        name="External Products"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_products"
+    />
+
+    <record id="action_odoo_account_account" model="ir.actions.act_window">
+        <field name="name">Odoo Account</field>
+        <field name="res_model">odoo.account.account</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_external_account_account"
+        name="External Account"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_account_account"
+    />
+
+    <record id="action_odoo_res_currency" model="ir.actions.act_window">
+        <field name="name">Odoo Currency</field>
+        <field name="res_model">odoo.res.currency</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_external_res_currency"
+        name="External Currency"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_res_currency"
+    />
+
+    <record id="action_odoo_ir_attachment" model="ir.actions.act_window">
+        <field name="name">Odoo Attachment</field>
+        <field name="res_model">odoo.ir.attachment</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_external_ir_attachment"
+        name="External Attachment"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_ir_attachment"
+    />
+
+    <record id="action_odoo_purchase_order" model="ir.actions.act_window">
+        <field name="name">Odoo Purchase Order</field>
+        <field name="res_model">odoo.purchase.order</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_external_purchase_order"
+        name="External Purchase Order"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_purchase_order"
+    />
+
+    <record id="action_odoo_warehouse" model="ir.actions.act_window">
+        <field name="name">Odoo Warehouse</field>
+        <field name="res_model">odoo.stock.warehouse</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_external_warehouse"
+        name="External Warehouse"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_warehouse"
+    />
+
+    <record id="action_odoo_location" model="ir.actions.act_window">
+        <field name="name">Odoo Location</field>
+        <field name="res_model">odoo.stock.location</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_external_location"
+        name="External Location"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_location"
+    />
+
+    <record id="action_openerp_picking_type_mappings" model="ir.actions.act_window">
+        <field name="name">OpenERP Picking type mapping</field>
+        <field name="res_model">openerp.picking.type</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_openerp_picking_type_mappings"
+        name="OpenERP Picking type mapping"
+        parent="menu_odoo_mappings"
+        action="action_openerp_picking_type_mappings"
+    />
+
+    <record id="action_odoo_stock_picking" model="ir.actions.act_window">
+        <field name="name">Odoo Picking</field>
+        <field name="res_model">odoo.stock.picking</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_stock_picking"
+        name="External Picking"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_stock_picking"
+    />
+
+    <record id="action_odoo_stock_move" model="ir.actions.act_window">
+        <field name="name">Odoo Move</field>
+        <field name="res_model">odoo.stock.move</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_stock_move"
+        name="External Move"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_stock_move"
+    />
+
+    <record id="action_odoo_stock_inventory_disappeared" model="ir.actions.act_window">
+        <field name="name">Odoo Inventory</field>
+        <field name="res_model">odoo.stock.inventory.disappeared</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_stock_inventory_disappeared"
+        name="External Inventory"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_stock_inventory_disappeared"
+    />
+
+    <record id="action_odoo_sale_order" model="ir.actions.act_window">
+        <field name="name">Odoo Sale</field>
+        <field name="res_model">odoo.sale.order</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_odoo_sale_order"
+        name="External Sales"
+        parent="menu_odoo_external_objects"
+        action="action_odoo_sale_order"
+    />
+
+</odoo>

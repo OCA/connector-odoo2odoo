@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="product_category_form_view" model="ir.ui.view">
+      <field name="name">product.category.form</field>
+      <field name="model">product.category</field>
+      <field name="inherit_id" ref="product.product_category_form_view" />
+      <field name="arch" type="xml">
+        <xpath expr="//group[@name='first']" position="after">
+            <group string="Odoo Binding" groups="connector.group_connector_manager">
+                <field name="bind_ids" nolabel="1" />
+            </group>
+        </xpath>
+      </field>
+    </record>
+
+    <record id="product_category_search_view" model="ir.ui.view">
+      <field name="name">odoo.product.category.search</field>
+      <field name="model">odoo.product.category</field>
+      <field name="arch" type="xml">
+        <search>
+          <field name="name" />
+          <field name="odoo_id" />
+          <field name="backend_id" />
+          <field name="external_id" />
+        </search>
+      </field>
+    </record>
+
+    <record id="product_category_tree_view" model="ir.ui.view">
+      <field name="name">odoo.product.category.tree</field>
+      <field name="model">odoo.product.category</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="id" />
+          <field name="odoo_id" />
+          <field name="backend_id" />
+          <field name="external_id" />
+          <field name="sync_date" />
+          <button name="resync" type="object" string="Resync" />
+        </tree>
+      </field>
+    </record>
+
+    <record id="odoo_product_category_form_view" model="ir.ui.view">
+      <field name="name">odoo.product.category.form</field>
+      <field name="model">odoo.product.category</field>
+      <field name="arch" type="xml">
+        <form>
+          <header>
+            <button name="resync" type="object" string="Resync" />
+          </header>
+          <sheet>
+            <group>
+              <field name="odoo_id" readonly="0" />
+              <field name="id" readonly="0" />
+              <field name="backend_id" readonly="1" />
+              <field name="external_id" readonly="0" />
+              <field name="sync_date" readonly="0" />
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+</odoo>
